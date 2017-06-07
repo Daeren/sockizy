@@ -29,7 +29,7 @@ const io = (function() {
                             toString() {
                                 return utf8Slice(data, 0, data.length);
                             }
-                        }
+                        };
                     }
                 };
 
@@ -40,13 +40,13 @@ const io = (function() {
                 //---------------------]>
 
                 function utf8ToBytes(string, units) {
-                    units = units || Infinity
+                    units = units || Infinity;
 
                     const length = string.length;
 
                     let codePoint;
                     let leadSurrogate = null;
-                    let bytes = [];
+                    let bytes = new Array();
 
                     for(let i = 0; i < length; ++i) {
                         codePoint = string.charCodeAt(i);
@@ -84,7 +84,8 @@ const io = (function() {
                                     bytes.push(0xEF, 0xBF, 0xBD);
                                 }
 
-                                leadSurrogate = codePoint
+                                leadSurrogate = codePoint;
+
                                 continue;
                             }
 
@@ -137,7 +138,7 @@ const io = (function() {
                                 codePoint & 0x3F | 0x80
                             );
                         } else {
-                            throw new Error('Invalid code point')
+                            throw new Error("Invalid code point");
                         }
                     }
 
@@ -147,7 +148,7 @@ const io = (function() {
                 function utf8Slice(buf, start, end) {
                     end = Math.min(buf.length, end);
 
-                    const res = [];
+                    const res = new Array();
                     let i = start;
 
                     while(i < end) {
@@ -166,35 +167,44 @@ const io = (function() {
                                     if(firstByte < 0x80) {
                                         codePoint = firstByte;
                                     }
-                                    break
+
+                                    break;
+
                                 case 2:
                                     secondByte = buf[i + 1];
 
                                     if((secondByte & 0xC0) === 0x80) {
-                                        tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)
+                                        tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F);
+
                                         if(tempCodePoint > 0x7F) {
                                             codePoint = tempCodePoint;
-                                        };
+                                        }
                                     }
-                                    break
+
+                                    break;
+
                                 case 3:
                                     secondByte = buf[i + 1];
                                     thirdByte = buf[i + 2];
 
                                     if((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
-                                        tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)
+                                        tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F);
+
                                         if(tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
                                             codePoint = tempCodePoint;
                                         }
                                     }
-                                    break
+
+                                    break;
+
                                 case 4:
                                     secondByte = buf[i + 1];
                                     thirdByte = buf[i + 2];
                                     fourthByte = buf[i + 3];
 
                                     if((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
-                                        tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)
+                                        tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F);
+
                                         if(tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
                                             codePoint = tempCodePoint;
                                         }
@@ -223,7 +233,7 @@ const io = (function() {
 
                 function createBuffer(length) {
                     if(length > K_MAX_LENGTH) {
-                        throw new RangeError('Invalid typed array length');
+                        throw new RangeError("Invalid typed array length");
                     }
 
                     const buf = new Uint8Array(length);
@@ -265,7 +275,7 @@ const io = (function() {
                     const len = this.length;
 
                     if(len % 2 !== 0) {
-                        throw new RangeError('Buffer size must be a multiple of 16-bits');
+                        throw new RangeError("Buffer size must be a multiple of 16-bits");
                     }
 
                     for(let i = 0; i < len; i += 2) {
@@ -323,7 +333,7 @@ const io = (function() {
 
         if(!Uint8Array.prototype.slice) {
             Object.defineProperty(Uint8Array.prototype, "slice", {
-                value: Array.prototype.slice
+                "value": Array.prototype.slice
             });
         }
 
@@ -346,7 +356,7 @@ const io = (function() {
 
         function createPacket(schema) {
             if(!Array.isArray(schema)) {
-                schema = [];
+                schema = new Array();
             }
 
             //-----------------]>
@@ -632,6 +642,10 @@ const io = (function() {
             function buildTypedBuf(type, size) {
                 switch(type) {
                     case TYPE_STR:
+                        if(size && (size % Uint16Array.BYTES_PER_ELEMENT) !== 0) {
+                            throw new RangeError(`Buffer size must be a multiple of 16-bits | str:${size}`);
+                        }
+
                         return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc(size || 256), new Uint16Array(1)];
 
                     case TYPE_INT:
