@@ -23,13 +23,7 @@ const rApp      = require("./app");
 //-----------------------------------------------------
 
 function main(port, options, isCluster) {
-    if(!arguments.length) {
-        options = {
-            "host": "localhost"
-        };
-
-        port = 1337;
-    } else if(typeof(port) === "object") {
+    if(port && typeof(port) === "object") {
         isCluster = options;
         options = port;
         port = options.port;
@@ -218,7 +212,13 @@ function main(port, options, isCluster) {
 
     if(!options.port) {
         app.listen = function() {
-            options.server.listen.apply(options.server, arguments);
+            if(arguments.length) {
+                options.server.listen.apply(options.server, arguments);
+            } else {
+                options.server.listen(1337, "localhost");
+            }
+
+            return this;
         };
     }
 

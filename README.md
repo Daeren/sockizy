@@ -37,11 +37,11 @@ git clone https://github.com/Daeren/sockizy.git
 Server:
 
 ```javascript
-const rSockize = require("sockizy");
+const rSockizy = require("sockizy");
 
 //-----------------------------------------------------
 
-const io = rSockize(1337, {"maxPayload": 1024 * 16}, true);
+const io = rSockizy(1337, {"maxPayload": 1024 * 16}, true);
 
 //-----------------------------------------------------
 
@@ -95,7 +95,7 @@ const ssl = {
 
 //-----------------------------------------------------
 
-const io = rSockize(1337, {ssl, "maxPayload": 1024 * 16});
+const io = rSockizy(1337, {ssl, "maxPayload": 1024 * 16});
 ```
 
 
