@@ -66,10 +66,10 @@ Client:
 <script src="http://localhost:1337"></script>
 
 <script>
-    const socket = io("wss://db.gg:1789");
+    const socket = io("wss://localhost:1337");
 	
-	socket.on("message", console.log);
-	socket.send("cluster.cl#2easy");
+    socket.on("message", console.log);
+    socket.send("cluster.cl#2easy");
 </script>
 ```
 
