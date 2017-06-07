@@ -3,63 +3,56 @@
     <head>
         <title>Sockizy: start</title>
         <meta charset="utf-8">
-
-        <script src="http://localhost:1337"></script>
     </head>
 
     <body></body>
 
+    <script src="http://localhost:1337"></script>
     <script>
-        (function() {
-            "use strict";
+        const socket = io("ws://localhost:1337");
 
-            //-----------------------------------------------------
+        //-----------------------------------------------------
 
-            const socket = io("ws://localhost:1337");
+        socket.packets(
+            null,
+            null,
+            {
+                "chat.message": [
+                    "uid:uint32",
+                    "text:str8"
+                ]
+            }
+        );
 
-            //-----------------------------------------------------
+        //-----------------------------------------------------
 
-            socket.packets(
-                null,
-                null,
-                {
-                    "chat.message": [
-                        "uid:uint32",
-                        "text:str8"
-                    ]
-                }
-            );
+        socket.on("open", function() {
+            console.log("event: open");
 
-            //-----------------------------------------------------
+            this.emit("chat.message", [6, "Hi"]);
+        });
 
-            socket.on("open", function() {
-                console.log("event: open");
+        socket.on("message", function(data) {
+            console.log("event: message");
+        });
 
-                this.emit("chat.message", [6, "Hi"]);
-            });
+        socket.on("terminated", function(data) {
+            console.log("event: terminated");
+        });
 
-            socket.on("message", function(data) {
-                console.log("event: message");
-            });
+        socket.on("error", function(data) {
+            console.log("event: error");
+        });
 
-            socket.on("terminated", function(data) {
-                console.log("event: terminated");
-            });
+        //---------------)>
 
-            socket.on("error", function(data) {
-                console.log("event: error");
-            });
+        socket.on("chat.message", function(data) {
+            console.log("event: chat.message");
+        });
 
-            //---------------)>
-
-            socket.on("chat.message", function(data) {
-                console.log("event: chat.message");
-            });
-
-            socket.on("packet", function(name, data) {
-                console.log(`socket.packet: ${name} |---v`);
-                console.log(JSON.stringify(data, null, "  "));
-            });
-        })();
+        socket.on("packet", function(name, data) {
+            console.log(`socket.packet: ${name} |---v`);
+            console.log(JSON.stringify(data, null, "  "));
+        });
     </script>
 </html>

@@ -36,6 +36,7 @@ function main(port, options, isCluster) {
     options.port = port;
     options.path = options.path || "";
     options.ping = options.ping || {"interval": 1000};
+    options.maxPayload = options.maxPayload || 1024;
     options.noDelay = options.noDelay || true;
     options.binary = true;
     options.cluster = !!options.cluster;

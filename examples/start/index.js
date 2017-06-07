@@ -13,7 +13,7 @@ const rSockizy  = require("./../../index.js");
 
 //-----------------------------------------------------
 
-const io = rSockizy().listen(); // Default: localhost:1337
+const io = rSockizy().listen(); // default: localhost:1337
 
 //-----------------------------------------------------
 

@@ -56,7 +56,7 @@ console.log(`Worker ${process.pid} started | id: ${io.workerId}`);
 
 io.on("connection", function(socket, request) {
     socket.on("message", console.log);
-    this.send("cluster.srv#2easy");
+    socket.send("cluster.srv#2easy");
 });
 ```
 
@@ -283,6 +283,7 @@ io.on("connection", function(socket, request) {
 | numCPUs           | default: max(cpu - 1, 1)             |
 | maxSockets        | Infinity                             |
 |                   | -                                    |
+| maxPayload 		| default: 1024                        |
 | perMessageDeflate | default: false                       |
 | noDelay           | default: true                        |
 |                   | -                                    |
@@ -315,7 +316,7 @@ io.on("connection", function(socket, request) {
 | bundle()                             |                  |                                             |
 | broadcast(data[, options])           |                  | native                                      |
 |                                      | -                |                                             |
-| listen(port[, host, callback])       |                  |                                             |
+| listen([port, host, callback])       |                  | default: "localhost:1337"                   |
 | close([callback])                    |                  |                                             |
 |                                      | -                |                                             |
 | packets([unpack, pack, shared])      |                  | return this;                                |
