@@ -1,0 +1,44 @@
+{
+    "name": "sockizy",
+    "version": "0.1.0-beta.1",
+    "description": "The best choice for your games",
+
+    "homepage": "https://666.io",
+    "keywords": [
+        "websocket",
+        "games",
+        "sockizy",
+        "2easy"
+    ],
+
+    "author": {
+        "name": "Daeren",
+        "email": "x@db.gg"
+    },
+
+    "main": "./index",
+    "scripts": {
+        "test": "mocha --reporter spec"
+    },
+
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Daeren/sockizy.git"
+    },
+
+    "license": "MIT",
+    "engines": {
+        "node": "> 0.12.0"
+    },
+
+    "readme": "",
+    "readmeFilename": "readme.md",
+
+    "bugs": {
+        "url": "https://github.com/Daeren/sockizy/issues"
+    },
+
+    "dependencies": {
+        "uws": "^0"
+    }
+}
