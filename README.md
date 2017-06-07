@@ -1,3 +1,5 @@
+[![Codacy][cod_b]][cod_l]
+
 ```
 npm -g install sockizy
 git clone https://github.com/Daeren/sockizy.git
@@ -398,3 +400,5 @@ MIT
 [1]: http://666.io
 [2]: https://telegram.me/io666
 
+[cod_b]: https://img.shields.io/codacy/3307552f95d34748bf5a7b573f5815d8.svg
+[cod_l]: https://www.codacy.com/app/daeren/sockizy/dashboard

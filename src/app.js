@@ -254,7 +254,7 @@ class Socket extends SEE {
     }
 
     send(data, options) {
-        this._ws.send(data, options || this._io._msgOptions, e => {
+        this._ws.send(data, options || this._io._msgOptions, (e) => {
             if(e) {
                 this._io._emit("error", e);
             }
@@ -377,7 +377,7 @@ class Io extends SEE {
                 "ping", "pong"
             ];
 
-            if(r.some(e => e === n)) {
+            if(r.some((e) => e === n)) {
                 throw new Error(`Used a reserved name: ${n}`);
             }
         }

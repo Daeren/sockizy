@@ -138,7 +138,7 @@ function main(port, options, isCluster) {
 
                 if(optCa) {
                     if(Array.isArray(optCa)) {
-                        optCa = optCa.map(e => rFs.readFileSync(certDir + e));
+                        optCa = optCa.map((e) => rFs.readFileSync(certDir + e));
                     } else if(typeof(optCa) === "string") {
                         optCa = certDir + optCa;
                     }
