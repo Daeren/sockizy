@@ -1,1 +1,1253 @@
-var io=function(){"use strict";function e(e,r){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!r||"object"!=typeof r&&"function"!=typeof r?e:r}function r(e,r){if("function"!=typeof r&&null!==r)throw new TypeError("Super expression must either be null or a function, not "+typeof r);e.prototype=Object.create(r&&r.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),r&&(Object.setPrototypeOf?Object.setPrototypeOf(e,r):e.__proto__=r)}function t(e,r){if(!(e instanceof r))throw new TypeError("Cannot call a class as a function")}var n=function(){function e(e,r){for(var t=0;t<r.length;t++){var n=r[t];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}return function(r,t,n){return t&&e(r.prototype,t),n&&e(r,n),r}}(),i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},a=function(){function e(e,r){var t=[],n=!0,i=!1,a=void 0;try{for(var o,u=e[Symbol.iterator]();!(n=(o=u.next()).done)&&(t.push(o.value),!r||t.length!==r);n=!0);}catch(e){i=!0,a=e}finally{try{!n&&u.return&&u.return()}finally{if(i)throw a}}return t}return function(r,t){if(Array.isArray(r))return r;if(Symbol.iterator in Object(r))return e(r,t);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}(),o=function(){function e(e){function r(e,r){for(var t=Array.isArray(r),n=void 0,i=void 0,s=void 0,h=void 0,y=void 0,v=void 0,E=void 0,k=void 0,A=c,m=u,U=void 0,S=void 0;A--;){i=f[A];var T=a(i,7);switch(s=T[0],h=T[1],T[2],y=T[3],v=T[4],E=T[5],k=T[6],n=r[t?A:s],h){case g:var B=n?y.write(n):0,M=E.byteLength;v&&v.length===B||(v=i[4]=new Uint8Array(M+B)),E[0]=B,v[0]=k[0],v[1]=k[1],o&&(E.reverse(),y.swap16());for(var L=B;L--;)v[M+L]=y[L];M+=B;break;default:y[0]=n,o&&y.byteLength>1&&y.reverse()}if(U=v.length,p)for(S=0;U--;)p[m++]=v[S++];else l[A]=v,m+=U}if(p)return p[0]=e,p;var O=w&&w.length===m?w:d&&d.length===m?d:null,P=u;for(A=c,O||(O=w=new Uint8Array(m));A--;)for(var I=l[A],N=0,R=I.length;N<R;N++)O[P++]=I[N];return b[0]=m,O[0]=_[0],O[1]=_[1],O[2]=e,O}function t(e,r){if(r=r||h,!e||"object"!==(void 0===e?"undefined":i(e))||!v&&e.byteLength!==y||e.byteLength<y)return null;if(!c)return r;if(e instanceof ArrayBuffer){var t=d&&d.length===e.length?d:w&&w.length===e.length?w:null;t?(t.set(e),e=t):e=d=new Uint8Array(e)}for(var s=e.byteLength,l=void 0,p=c,b=void 0,_=void 0,E=void 0,k=void 0,A=void 0,m=void 0,U=void 0,S=u;p--;){l=f[p];var T=a(l,7);b=T[0],_=T[1],E=T[2],k=T[3],A=T[4],m=T[5],U=T[6];for(var B=0;B<E;B++){if(S>=s)return null;m?U[B]=e[S++]:A[B]=e[S++]}switch(_){case g:o&&m.reverse();var M=m[0],L=(Math.min(M,s),n.from(e.slice(S,S+M)).toString());S+=M,r[b]=L;break;default:o&&k.byteLength>1&&k.reverse(),r[b]=k[0]}}return r}Array.isArray(e)||(e=new Array);for(var s,c=e.length,f=new Array(c),l=new Array(c),h=Object.create(null),y=0,v=!1,p=null,w=null,d=null,b=new Uint16Array(1),_=new Uint8Array(b.buffer),g=1,E=2,k=4,A=8,m=0;m<c;m++){var U=(s=e[m].split(":")).shift(),S=s.shift(),T=function(e){switch(e){case"str":return g;case"int":return E;case"uint":return k;case"float":return A;default:throw new Error("Unknown type: "+e)}}(S.replace(/[\d\[\]]/g,"")),B=function(e,r){switch(e){case g:if(r&&r%Uint16Array.BYTES_PER_ELEMENT!=0)throw new RangeError("Buffer size must be a multiple of 16-bits | str:"+r);return[Uint16Array.BYTES_PER_ELEMENT,n.alloc(r||256),new Uint16Array(1)];case E:switch(r){case 8:return[Int8Array.BYTES_PER_ELEMENT,new Int8Array(1)];case 16:return[Int16Array.BYTES_PER_ELEMENT,new Int16Array(1)];case 32:return[Int32Array.BYTES_PER_ELEMENT,new Int32Array(1)];default:throw new Error("Unknown size: "+r)}case k:switch(r){case 8:return[Uint8Array.BYTES_PER_ELEMENT,new Uint8Array(1)];case 16:return[Uint16Array.BYTES_PER_ELEMENT,new Uint16Array(1)];case 32:return[Uint32Array.BYTES_PER_ELEMENT,new Uint32Array(1)];default:throw new Error("Unknown size: "+r)}case A:switch(r){case 32:return[Float32Array.BYTES_PER_ELEMENT,new Float32Array(1)];case 64:return[Float64Array.BYTES_PER_ELEMENT,new Float64Array(1)];default:throw new Error("Unknown size: "+r)}default:throw new Error("Unknown type: "+e)}}(T,parseInt(S.replace(/\D/g,""),10)||0),M=a(B,3),L=M[0],O=M[1],P=M[2],I=g&T?null:new Uint8Array(O.buffer),N=P?new Uint8Array(P.buffer):null;f[m]=[U,T,L,O,I,P,N],y+=L,!v&&g&T&&(v=!0)}return v||(p=new Uint8Array(y+u)),{pack:r,unpack:t}}function r(e,r){return r?r.set(e):r=new Uint16Array(e),r[0]}function t(e,r){return r?(r.set(e),r[0]):e[u-1]}var n="undefined"!=typeof Buffer?Buffer:function(){function e(e,r){r=r||1/0;for(var t=e.length,n=void 0,i=null,a=new Array,o=0;o<t;++o){if((n=e.charCodeAt(o))>55295&&n<57344){if(!i){if(n>56319){(r-=3)>-1&&a.push(239,191,189);continue}if(o+1===t){(r-=3)>-1&&a.push(239,191,189);continue}i=n;continue}if(n<56320){(r-=3)>-1&&a.push(239,191,189),i=n;continue}n=65536+(i-55296<<10|n-56320)}else i&&(r-=3)>-1&&a.push(239,191,189);if(i=null,n<128){if((r-=1)<0)break;a.push(n)}else if(n<2048){if((r-=2)<0)break;a.push(n>>6|192,63&n|128)}else if(n<65536){if((r-=3)<0)break;a.push(n>>12|224,n>>6&63|128,63&n|128)}else{if(!(n<1114112))throw new Error("Invalid code point");if((r-=4)<0)break;a.push(n>>18|240,n>>12&63|128,n>>6&63|128,63&n|128)}}return a}function r(e,r,t){t=Math.min(e.length,t);for(var n=new Array,i=r;i<t;){var a=e[i],o=null,u=a>239?4:a>223?3:a>191?2:1;if(i+u<=t){var s=void 0,f=void 0,l=void 0,h=void 0;switch(u){case 1:a<128&&(o=a);break;case 2:128==(192&(s=e[i+1]))&&(h=(31&a)<<6|63&s)>127&&(o=h);break;case 3:s=e[i+1],f=e[i+2],128==(192&s)&&128==(192&f)&&(h=(15&a)<<12|(63&s)<<6|63&f)>2047&&(h<55296||h>57343)&&(o=h);break;case 4:s=e[i+1],f=e[i+2],l=e[i+3],128==(192&s)&&128==(192&f)&&128==(192&l)&&(h=(15&a)<<18|(63&s)<<12|(63&f)<<6|63&l)>65535&&h<1114112&&(o=h)}}null===o?(o=65533,u=1):o>65535&&(o-=65536,n.push(o>>>10&1023|55296),o=56320|1023&o),n.push(o),i+=u}return c(n)}function t(e){if(e>l)throw new RangeError("Invalid typed array length");return new Uint8Array(e)}function n(r){return e(r).length}function i(e){var r=t(e);return r.write=a,r.swap16=o,r}function a(r,t,n){t=t||0;var i=this.length-t;return(!n||n>i)&&(n=i),u(e(r,this.length-t),this,t,n)}function o(){var e=this.length;if(e%2!=0)throw new RangeError("Buffer size must be a multiple of 16-bits");for(var r=0;r<e;r+=2)s(this,r,r+1);return this}function u(e,r,t,n){var i=void 0;for(i=0;i<n&&!(i+t>=r.length||i>=e.length);++i)r[i+t]=e[i];return i}function s(e,r,t){var n=e[r];e[r]=e[t],e[t]=n}function c(e){var r=e.length;if(r<=f)return String.fromCharCode.apply(String,e);for(var t="",n=0;n<r;)t+=String.fromCharCode.apply(String,e.slice(n,n+=f));return t}var f=4096,l=2147483647,h=function(){};return h.alloc=i,h.byteLength=n,h.from=function(t){return"string"==typeof t?e(t):{toString:function(){return r(t,0,t.length)}}},h}();Uint8Array.prototype.slice||Object.defineProperty(Uint8Array.prototype,"slice",{value:Array.prototype.slice});var o=function(){var e=new Uint32Array([305419896]);return 18===new Uint8Array(e.buffer,e.byteOffset,e.byteLength)[0]}(),u=3;return{isBigEndian:o,sysOffset:u,createPacket:e,getSize:r,getId:t}}();return function(i,u){function s(e,r){var t=r.data;if(e._emit("message",t,r),!e._emit("arraybuffer",t,r)){var n=t.byteLength;if(t&&t instanceof ArrayBuffer&&!(n<o.sysOffset))for(var i=0,u=t=new Uint8Array(t),s=1048576;i<n&&s--;){var c=h._unpackMapById[o.getId(u)],f=c?o.getSize(u):0;if(!c||!f)break;var l=a(c,2),y=l[0],v=l[1].unpack(u);n>(i+=f)&&(u=t.slice(i)),v&&(e._emit("packet",y,v),e._emit(y,v))}}}function c(e,r){h.reconnecting&&(h.reconnecting=!1,h._emit("restored")),h._emit("open")}function f(e,r){var t=r.code,n=r.reason;h._emit("close",t,n,r),r.wasClean?h._emit("disconnected",t,n,r):(h._emit("terminated",t,r),setTimeout(function(){h.reconnecting=!0,h._reconnect(),h._emit("restoring")},2e3))}function l(e,r){h._emit("error",r)}var h=new(function(u){function h(){t(this,h);var r=e(this,(h.__proto__||Object.getPrototypeOf(h)).call(this));return i&&r.connect(i),r._packMapByName=new Map,r._unpackMapById=new Array,r.reconnecting=!1,r}return r(h,u),n(h,[{key:"isSupported",value:function(){return"undefined"!=typeof WebSocket}},{key:"emit",value:function(e,r){return(r=this._pack(e,r))&&this.send(r),!!r}},{key:"send",value:function(e){try{this._ws.send(e)}catch(e){this._emit("error",e)}}},{key:"connect",value:function(e){this._ws&&this._ws.close();var r=this._ws=new WebSocket(e);this.url=e,r.binaryType="arraybuffer",r.onmessage=s.bind(this,this),r.onopen=c.bind(this,this),r.onclose=f.bind(this,this),r.onerror=l.bind(this,this)}},{key:"disconnect",value:function(e,r){this._ws.close(e,r),this._ws=null}},{key:"packets",value:function(e,r,t){function n(e,r){e&&Object.keys(e).forEach(function(t){i(t),r(t,o.createPacket(e[t]))})}function i(e){if(["restoring","restored","open","close","disconnected","terminated","packet","message","arraybuffer","error"].some(function(r){return r===e}))throw new Error("Used a reserved name: "+e)}var a=this;return n(r,function(e,r){a._unpackMapById.push([e,r])}),n(e,function(e,r){a._packMapByName.set(e,[a._packMapByName.size,r])}),t?this.packets(t,t):this}},{key:"_reconnect",value:function(){return this.connect(this.url)}},{key:"_pack",value:function(e,r){var t=this._packMapByName.get(e);if(!t)return null;var n=a(t,2),i=n[0];return n[1].pack(i,r)}}]),h}(function(){function e(){t(this,e),this._events=Object.create(null)}return n(e,[{key:"on",value:function(e,r){var t=this._events[e];return this._events[e]="function"==typeof t?[t,r]:t?this._arrayCloneWith(t,t.length,r):r,this}},{key:"off",value:function(e,r){var t=arguments.length;if(!t)return this._events=Object.create(null),this;var n=this._events[e];if("function"==typeof n)return 1!==t&&n!==r||(this._events[e]=null),this;var i=n&&n.length;return i?(1===t?1===i?n.pop():this._events[e]=new Array:1===i?n[0]===r&&n.pop():n.indexOf(r)>=0&&(this._events[e]=this._arrayCloneWithout(n,i,r)),this):this}},{key:"_emit",value:function(e){var r=this._events[e],t="function"==typeof r&&r,n=t||r&&r.length;if(!n){if("error"===e)throw arguments[1];return!1}var i=arguments.length;if(t){switch(i){case 1:t.call(this);break;case 2:t.call(this,arguments[1]);break;case 3:t.call(this,arguments[1],arguments[2]);break;case 4:t.call(this,arguments[1],arguments[2],arguments[3]);break;default:for(var a=new Array(i-1),o=1;o<i;o++)a[o-1]=arguments[o];t.apply(this,a)}return!0}switch(i){case 1:for(var u=0;u<n;u++)r[u].call(this);break;case 2:for(var s=0;s<n;s++)r[s].call(this,arguments[1]);break;case 3:for(var c=0;c<n;c++)r[c].call(this,arguments[1],arguments[2]);break;case 4:for(var f=0;f<n;f++)r[f].call(this,arguments[1],arguments[2],arguments[3]);break;default:for(var l=new Array(i-1),h=1;h<i;h++)l[h-1]=arguments[h];for(var y=0;y<n;y++)r[y].apply(this,l)}return!0}},{key:"_arrayCloneWithout",value:function(e,r,t){for(var n=new Array(--r),i=void 0;r--;)t!==(i=e[r])&&(n[r]=i);return n}},{key:"_arrayCloneWith",value:function(e,r,t){for(var n=new Array(r+1);r--;)n[r]=e[r];return n[r]=t,n}}]),e}()));return h}}();
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var io = function (module) {
+    'use strict';
+
+    //-----------------------------------------------------
+    //
+    // Author: Daeren
+    // Site: 666.io
+    //
+    //-----------------------------------------------------
+
+    "use strict";
+
+    //-----------------------------------------------------
+
+    var SEE = function () {
+        function SEE() {
+            _classCallCheck(this, SEE);
+
+            this._events = Object.create(null);
+        }
+
+        _createClass(SEE, [{
+            key: "on",
+            value: function on(name, listener) {
+                var ev = this._events[name];
+
+                if (typeof ev === "function") {
+                    this._events[name] = [ev, listener];
+                } else {
+                    this._events[name] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
+                }
+
+                return this;
+            }
+        }, {
+            key: "off",
+            value: function off(name, listener) {
+                var argsLen = arguments.length;
+
+                //--------------]>
+
+                if (!argsLen) {
+                    this._events = Object.create(null);
+                    return this;
+                }
+
+                //--------------]>
+
+                var ev = this._events[name];
+
+                if (typeof ev === "function") {
+                    if (argsLen === 1 || ev === listener) {
+                        this._events[name] = null;
+                    }
+
+                    return this;
+                }
+
+                //--------------]>
+
+                var evLen = ev && ev.length;
+
+                //--------------]>
+
+                if (!evLen) {
+                    return this;
+                }
+
+                //--------------]>
+
+                if (argsLen === 1) {
+                    if (evLen === 1) {
+                        ev.pop();
+                    } else {
+                        this._events[name] = new Array();
+                    }
+                } else if (evLen === 1) {
+                    if (ev[0] === listener) {
+                        ev.pop();
+                    }
+                } else if (ev.indexOf(listener) >= 0) {
+                    this._events[name] = this._arrayCloneWithout(ev, evLen, listener);
+                }
+
+                //--------------]>
+
+                return this;
+            }
+        }, {
+            key: "_emit",
+            value: function _emit(name) {
+                var ev = this._events[name];
+                var func = typeof ev === "function" && ev;
+
+                var evLen = func || ev && ev.length;
+
+                //--------------]>
+
+                if (!evLen) {
+                    if (name === "error") {
+                        throw arguments[1];
+                    }
+
+                    return false;
+                }
+
+                //--------------]>
+
+                var argsLen = arguments.length;
+
+                //--------------]>
+
+                if (func) {
+                    switch (argsLen) {
+                        case 1:
+                            func.call(this);break;
+                        case 2:
+                            func.call(this, arguments[1]);break;
+                        case 3:
+                            func.call(this, arguments[1], arguments[2]);break;
+                        case 4:
+                            func.call(this, arguments[1], arguments[2], arguments[3]);break;
+
+                        default:
+                            var args = new Array(argsLen - 1);
+
+                            for (var i = 1; i < argsLen; i++) {
+                                args[i - 1] = arguments[i];
+                            }
+
+                            func.apply(this, args);
+                    }
+
+                    return true;
+                }
+
+                switch (argsLen) {
+                    case 1:
+                        for (var _i = 0; _i < evLen; _i++) {
+                            ev[_i].call(this);
+                        }
+
+                        break;
+
+                    case 2:
+                        for (var _i2 = 0; _i2 < evLen; _i2++) {
+                            ev[_i2].call(this, arguments[1]);
+                        }
+
+                        break;
+
+                    case 3:
+                        for (var _i3 = 0; _i3 < evLen; _i3++) {
+                            ev[_i3].call(this, arguments[1], arguments[2]);
+                        }
+
+                        break;
+
+                    case 4:
+                        for (var _i4 = 0; _i4 < evLen; _i4++) {
+                            ev[_i4].call(this, arguments[1], arguments[2], arguments[3]);
+                        }
+
+                        break;
+
+                    default:
+                        var _args = new Array(argsLen - 1);
+
+                        for (var _i5 = 1; _i5 < argsLen; _i5++) {
+                            _args[_i5 - 1] = arguments[_i5];
+                        }
+
+                        for (var _i6 = 0; _i6 < evLen; _i6++) {
+                            ev[_i6].apply(this, _args);
+                        }
+                }
+
+                //--------------]>
+
+                return true;
+            }
+        }, {
+            key: "_arrayCloneWithout",
+            value: function _arrayCloneWithout(arr, n, listener) {
+                var copy = new Array(--n);
+
+                var t = void 0;
+
+                while (n--) {
+                    t = arr[n];
+
+                    if (listener !== t) {
+                        copy[n] = t;
+                    }
+                }
+
+                return copy;
+            }
+        }, {
+            key: "_arrayCloneWith",
+            value: function _arrayCloneWith(arr, n, listener) {
+                var copy = new Array(n + 1);
+
+                while (n--) {
+                    copy[n] = arr[n];
+                }
+
+                copy[n] = listener;
+
+                return copy;
+            }
+        }]);
+
+        return SEE;
+    }();
+
+    //-----------------------------------------------------
+
+    module.exports = SEE;
+
+    //-----------------------------------------------------
+    //
+    // Author: Daeren
+    // Site: 666.io
+    //
+    //-----------------------------------------------------
+
+    "use strict";
+
+    //-----------------------------------------------------
+
+    var packer = function () {
+        var holyBuffer = typeof Buffer !== "undefined" ? Buffer : function () {
+            var MAX_ARGUMENTS_LENGTH = 0x1000;
+            var K_MAX_LENGTH = 0x7fffffff;
+
+            var Buffer = function Buffer() {};
+
+            //---------------------]>
+
+            Buffer.alloc = alloc;
+            Buffer.byteLength = byteLength;
+            Buffer.from = function (data) {
+                if (typeof data === "string") {
+                    return utf8ToBytes(data);
+                } else {
+                    return {
+                        toString: function toString() {
+                            return utf8Slice(data, 0, data.length);
+                        }
+                    };
+                }
+            };
+
+            //---------------------]>
+
+            return Buffer;
+
+            //---------------------]>
+
+            function utf8ToBytes(string, units) {
+                units = units || Infinity;
+
+                var length = string.length;
+
+                var codePoint = void 0;
+                var leadSurrogate = null;
+                var bytes = new Array();
+
+                for (var i = 0; i < length; ++i) {
+                    codePoint = string.charCodeAt(i);
+
+                    // is surrogate component
+                    if (codePoint > 0xD7FF && codePoint < 0xE000) {
+                        // last char was a lead
+                        if (!leadSurrogate) {
+                            // no lead yet
+                            if (codePoint > 0xDBFF) {
+                                // unexpected trail
+                                if ((units -= 3) > -1) {
+                                    bytes.push(0xEF, 0xBF, 0xBD);
+                                }
+
+                                continue;
+                            } else if (i + 1 === length) {
+                                // unpaired lead
+                                if ((units -= 3) > -1) {
+                                    bytes.push(0xEF, 0xBF, 0xBD);
+                                }
+
+                                continue;
+                            }
+
+                            // valid lead
+                            leadSurrogate = codePoint;
+
+                            continue;
+                        }
+
+                        // 2 leads in a row
+                        if (codePoint < 0xDC00) {
+                            if ((units -= 3) > -1) {
+                                bytes.push(0xEF, 0xBF, 0xBD);
+                            }
+
+                            leadSurrogate = codePoint;
+
+                            continue;
+                        }
+
+                        // valid surrogate pair
+                        codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000;
+                    } else if (leadSurrogate) {
+                        // valid bmp char, but last char was a lead
+                        if ((units -= 3) > -1) {
+                            bytes.push(0xEF, 0xBF, 0xBD);
+                        }
+                    }
+
+                    leadSurrogate = null;
+
+                    // encode utf8
+                    if (codePoint < 0x80) {
+                        if ((units -= 1) < 0) {
+                            break;
+                        }
+
+                        bytes.push(codePoint);
+                    } else if (codePoint < 0x800) {
+                        if ((units -= 2) < 0) {
+                            break;
+                        }
+
+                        bytes.push(codePoint >> 0x6 | 0xC0, codePoint & 0x3F | 0x80);
+                    } else if (codePoint < 0x10000) {
+                        if ((units -= 3) < 0) {
+                            break;
+                        }
+
+                        bytes.push(codePoint >> 0xC | 0xE0, codePoint >> 0x6 & 0x3F | 0x80, codePoint & 0x3F | 0x80);
+                    } else if (codePoint < 0x110000) {
+                        if ((units -= 4) < 0) {
+                            break;
+                        }
+
+                        bytes.push(codePoint >> 0x12 | 0xF0, codePoint >> 0xC & 0x3F | 0x80, codePoint >> 0x6 & 0x3F | 0x80, codePoint & 0x3F | 0x80);
+                    } else {
+                        throw new Error("Invalid code point");
+                    }
+                }
+
+                return bytes;
+            }
+
+            function utf8Slice(buf, start, end) {
+                end = Math.min(buf.length, end);
+
+                var res = new Array();
+                var i = start;
+
+                while (i < end) {
+                    var firstByte = buf[i];
+                    var codePoint = null;
+                    var bytesPerSequence = firstByte > 0xEF ? 4 : firstByte > 0xDF ? 3 : firstByte > 0xBF ? 2 : 1;
+
+                    if (i + bytesPerSequence <= end) {
+                        var secondByte = void 0,
+                            thirdByte = void 0,
+                            fourthByte = void 0,
+                            tempCodePoint = void 0;
+
+                        switch (bytesPerSequence) {
+                            case 1:
+                                if (firstByte < 0x80) {
+                                    codePoint = firstByte;
+                                }
+
+                                break;
+
+                            case 2:
+                                secondByte = buf[i + 1];
+
+                                if ((secondByte & 0xC0) === 0x80) {
+                                    tempCodePoint = (firstByte & 0x1F) << 0x6 | secondByte & 0x3F;
+
+                                    if (tempCodePoint > 0x7F) {
+                                        codePoint = tempCodePoint;
+                                    }
+                                }
+
+                                break;
+
+                            case 3:
+                                secondByte = buf[i + 1];
+                                thirdByte = buf[i + 2];
+
+                                if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
+                                    tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | thirdByte & 0x3F;
+
+                                    if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
+                                        codePoint = tempCodePoint;
+                                    }
+                                }
+
+                                break;
+
+                            case 4:
+                                secondByte = buf[i + 1];
+                                thirdByte = buf[i + 2];
+                                fourthByte = buf[i + 3];
+
+                                if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
+                                    tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | fourthByte & 0x3F;
+
+                                    if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
+                                        codePoint = tempCodePoint;
+                                    }
+                                }
+                        }
+                    }
+
+                    if (codePoint === null) {
+                        // we did not generate a valid codePoint so insert a
+                        // replacement char (U+FFFD) and advance only 1 byte
+                        codePoint = 0xFFFD;
+                        bytesPerSequence = 1;
+                    } else if (codePoint > 0xFFFF) {
+                        // encode to utf16 (surrogate pair dance)
+                        codePoint -= 0x10000;
+                        res.push(codePoint >>> 10 & 0x3FF | 0xD800);
+                        codePoint = 0xDC00 | codePoint & 0x3FF;
+                    }
+
+                    res.push(codePoint);
+                    i += bytesPerSequence;
+                }
+
+                return decodeCodePointsArray(res);
+            }
+
+            function createBuffer(length) {
+                if (length > K_MAX_LENGTH) {
+                    throw new RangeError("Invalid typed array length");
+                }
+
+                var buf = new Uint8Array(length);
+                // buf.__proto__ = Buffer.prototype;
+
+                return buf;
+            }
+
+            function byteLength(string) {
+                return utf8ToBytes(string).length;
+            }
+
+            //--------)>
+
+            function alloc(size) {
+                var buf = createBuffer(size);
+
+                buf.write = write;
+                buf.swap16 = swap16;
+
+                return buf;
+            }
+
+            //--------)>
+
+            function write(string, offset, length) {
+                offset = offset || 0;
+
+                var remaining = this.length - offset;
+
+                if (!length || length > remaining) {
+                    length = remaining;
+                }
+
+                return blitBuffer(utf8ToBytes(string, this.length - offset), this, offset, length);
+            }
+
+            function swap16() {
+                var len = this.length;
+
+                if (len % 2 !== 0) {
+                    throw new RangeError("Buffer size must be a multiple of 16-bits");
+                }
+
+                for (var i = 0; i < len; i += 2) {
+                    swap(this, i, i + 1);
+                }
+
+                return this;
+            }
+
+            //--------)>
+
+            function blitBuffer(src, dst, offset, length) {
+                var i = void 0;
+
+                for (i = 0; i < length; ++i) {
+                    if (i + offset >= dst.length || i >= src.length) {
+                        break;
+                    }
+
+                    dst[i + offset] = src[i];
+                }
+
+                return i;
+            }
+
+            function swap(b, n, m) {
+                var i = b[n];
+                b[n] = b[m];
+                b[m] = i;
+            }
+
+            function decodeCodePointsArray(codePoints) {
+                var len = codePoints.length;
+
+                if (len <= MAX_ARGUMENTS_LENGTH) {
+                    return String.fromCharCode.apply(String, codePoints); // avoid extra slice()
+                }
+
+                // Decode in chunks to avoid "call stack size exceeded".
+                var res = "";
+                var i = 0;
+
+                while (i < len) {
+                    res += String.fromCharCode.apply(String, codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH));
+                }
+
+                return res;
+            }
+        }();
+
+        //---------)>
+
+        if (!Uint8Array.prototype.slice) {
+            Object.defineProperty(Uint8Array.prototype, "slice", {
+                "value": Array.prototype.slice
+            });
+        }
+
+        //-------------------------]>
+
+        var isBigEndian = function () {
+            var a = new Uint32Array([0x12345678]);
+            var b = new Uint8Array(a.buffer, a.byteOffset, a.byteLength);
+
+            return b[0] === 0x12;
+        }();
+
+        var sysOffset = 3;
+
+        //-------------------------]>
+
+        return { isBigEndian: isBigEndian, sysOffset: sysOffset, createPacket: createPacket, getSize: getSize, getId: getId };
+
+        //-------------------------]>
+
+        function createPacket(schema) {
+            if (!Array.isArray(schema)) {
+                schema = new Array();
+            }
+
+            //-----------------]>
+
+            var schLen = schema.length;
+
+            var fields = new Array(schLen);
+            var buffers = new Array(schLen);
+
+            var pktDataHolder = Object.create(null),
+                pktMinSize = 0,
+                pktHasStr = false,
+                pktBufStrict = null,
+                pktBufPack = null,
+                pktBufUnpack = null;
+
+            var pktSysBVMSize = new Uint16Array(1),
+                pktSysBufMSize = new Uint8Array(pktSysBVMSize.buffer);
+
+            //-----------------]>
+
+            var TYPE_STR = 1;
+            var TYPE_INT = 2;
+            var TYPE_UINT = 4;
+            var TYPE_FLOAT = 8;
+
+            //-----------------]>
+
+            for (var e, i = 0; i < schLen; i++) {
+                e = schema[i].split(":");
+
+                //---------]>
+
+                var name = e.shift();
+                var subType = e.shift();
+
+                var type = getTypeId(subType.replace(/[\d\[\]]/g, ""));
+                var size = parseInt(subType.replace(/\D/g, ""), 10) || 0;
+
+                var _buildTypedBuf = buildTypedBuf(type, size),
+                    _buildTypedBuf2 = _slicedToArray(_buildTypedBuf, 3),
+                    bytes = _buildTypedBuf2[0],
+                    bufType = _buildTypedBuf2[1],
+                    bufAType = _buildTypedBuf2[2];
+
+                var bufBytes = TYPE_STR & type ? null : new Uint8Array(bufType.buffer);
+                var bufABytes = bufAType ? new Uint8Array(bufAType.buffer) : null;
+
+                //---------]>
+
+                fields[i] = [name, type, bytes, bufType, bufBytes, bufAType, bufABytes];
+
+                pktMinSize += bytes;
+
+                if (!pktHasStr && TYPE_STR & type) {
+                    pktHasStr = true;
+                }
+            }
+
+            if (!pktHasStr) {
+                pktBufStrict = new Uint8Array(pktMinSize + sysOffset);
+            }
+
+            //-----------------]>
+
+            return { pack: pack, unpack: unpack };
+
+            //-----------------]>
+
+            function pack(id, data) {
+                var isArray = Array.isArray(data);
+
+                var input = void 0,
+                    field = void 0,
+                    name = void 0,
+                    type = void 0,
+                    bytes = void 0,
+                    bufType = void 0,
+                    bufBytes = void 0,
+                    bufAType = void 0,
+                    bufABytes = void 0;
+
+                var len = schLen;
+
+                var pktSize = sysOffset,
+                    tLen = void 0,
+                    tIdx = void 0;
+
+                //--------]>
+
+                while (len--) {
+                    field = fields[len];
+                    var _field = field;
+
+                    var _field2 = _slicedToArray(_field, 7);
+
+                    name = _field2[0];
+                    type = _field2[1];
+                    bytes = _field2[2];
+                    bufType = _field2[3];
+                    bufBytes = _field2[4];
+                    bufAType = _field2[5];
+                    bufABytes = _field2[6];
+
+
+                    input = data[isArray ? len : name];
+
+                    //------]>
+
+                    switch (type) {
+                        case TYPE_STR:
+                            {
+                                var needMem = input ? bufType.write(input) : 0;
+                                var offset = bufAType.byteLength;
+
+                                //-----]>
+
+                                if (!bufBytes || bufBytes.length !== needMem) {
+                                    bufBytes = field[4] = new Uint8Array(offset + needMem);
+                                }
+
+                                bufAType[0] = needMem;
+                                bufBytes[0] = bufABytes[0];
+                                bufBytes[1] = bufABytes[1];
+
+                                if (isBigEndian) {
+                                    bufAType.reverse();
+                                    bufType.swap16();
+                                }
+
+                                //-----]>
+
+                                var _i7 = needMem;
+
+                                while (_i7--) {
+                                    bufBytes[offset + _i7] = bufType[_i7];
+                                }
+
+                                offset += needMem;
+
+                                break;
+                            }
+
+                        default:
+                            bufType[0] = input;
+
+                            if (isBigEndian && bufType.byteLength > 1) {
+                                bufType.reverse();
+                            }
+                    }
+
+                    //------]>
+
+                    tLen = bufBytes.length;
+
+                    if (pktBufStrict) {
+                        tIdx = 0;
+
+                        while (tLen--) {
+                            pktBufStrict[pktSize++] = bufBytes[tIdx++];
+                        }
+                    } else {
+                        buffers[len] = bufBytes;
+                        pktSize += tLen;
+                    }
+                }
+
+                if (pktBufStrict) {
+                    pktBufStrict[0] = id;
+                    return pktBufStrict;
+                }
+
+                //--------]>
+
+                var result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : pktBufUnpack && pktBufUnpack.length === pktSize ? pktBufUnpack : null;
+                var resOffset = sysOffset;
+
+                len = schLen;
+
+                //--------]>
+
+                if (!result) {
+                    result = pktBufPack = new Uint8Array(pktSize);
+                }
+
+                while (len--) {
+                    for (var b = buffers[len], _i8 = 0, l = b.length; _i8 < l; _i8++) {
+                        result[resOffset++] = b[_i8];
+                    }
+                }
+
+                //--------]>
+
+                pktSysBVMSize[0] = pktSize;
+
+                result[0] = pktSysBufMSize[0];
+                result[1] = pktSysBufMSize[1];
+                result[2] = id;
+
+                //--------]>
+
+                return result;
+            }
+
+            function unpack(bin, target) {
+                target = target || pktDataHolder;
+
+                //--------]>
+
+                if (!bin || (typeof bin === "undefined" ? "undefined" : _typeof(bin)) !== "object" || !pktHasStr && bin.byteLength !== pktMinSize || bin.byteLength < pktMinSize) {
+                    return null;
+                }
+
+                if (!schLen) {
+                    return target;
+                }
+
+                if (bin instanceof ArrayBuffer) {
+                    var buf = pktBufUnpack && pktBufUnpack.length === bin.length ? pktBufUnpack : pktBufPack && pktBufPack.length === bin.length ? pktBufPack : null;
+
+                    if (buf) {
+                        buf.set(bin);
+                        bin = buf;
+                    } else {
+                        bin = pktBufUnpack = new Uint8Array(bin);
+                    }
+                }
+
+                //--------]>
+
+                var binLen = bin.byteLength;
+
+                var field = void 0,
+                    len = schLen,
+                    name = void 0,
+                    type = void 0,
+                    bytes = void 0,
+                    bufType = void 0,
+                    bufBytes = void 0,
+                    bufAType = void 0,
+                    bufABytes = void 0;
+
+                var pktOffset = sysOffset;
+
+                //--------]>
+
+                while (len--) {
+                    field = fields[len];
+
+
+                    //------]>
+
+                    var _field3 = field;
+
+                    var _field4 = _slicedToArray(_field3, 7);
+
+                    name = _field4[0];
+                    type = _field4[1];
+                    bytes = _field4[2];
+                    bufType = _field4[3];
+                    bufBytes = _field4[4];
+                    bufAType = _field4[5];
+                    bufABytes = _field4[6];
+                    for (var _i9 = 0; _i9 < bytes; _i9++) {
+                        if (pktOffset >= binLen) {
+                            return null;
+                        }
+
+                        if (bufAType) {
+                            bufABytes[_i9] = bin[pktOffset++];
+                        } else {
+                            bufBytes[_i9] = bin[pktOffset++];
+                        }
+                    }
+
+                    //------]>
+
+                    switch (type) {
+                        case TYPE_STR:
+                            if (isBigEndian) {
+                                bufAType.reverse();
+                            }
+
+                            //--------]>
+
+                            var byteLen = bufAType[0];
+                            var needMem = Math.min(byteLen, binLen);
+
+                            //--------]>
+
+                            var s = holyBuffer.from(bin.slice(pktOffset, pktOffset + byteLen)).toString();
+                            pktOffset += byteLen;
+
+                            //--------]>
+
+                            target[name] = s;
+
+                            break;
+
+                        default:
+                            if (isBigEndian && bufType.byteLength > 1) {
+                                bufType.reverse();
+                            }
+
+                            target[name] = bufType[0];
+                    }
+                }
+
+                //--------]>
+
+                return target;
+            }
+
+            //-----------------]>
+
+            function buildTypedBuf(type, size) {
+                switch (type) {
+                    case TYPE_STR:
+                        if (size && size % Uint16Array.BYTES_PER_ELEMENT !== 0) {
+                            throw new RangeError("Buffer size must be a multiple of 16-bits | str:" + size);
+                        }
+
+                        return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc(size || 256), new Uint16Array(1)];
+
+                    case TYPE_INT:
+                        switch (size) {
+                            case 8:
+                                return [Int8Array.BYTES_PER_ELEMENT, new Int8Array(1)];
+                            case 16:
+                                return [Int16Array.BYTES_PER_ELEMENT, new Int16Array(1)];
+                            case 32:
+                                return [Int32Array.BYTES_PER_ELEMENT, new Int32Array(1)];
+
+                            default:
+                                throw new Error("Unknown size: " + size);
+                        }
+
+                    case TYPE_UINT:
+                        switch (size) {
+                            case 8:
+                                return [Uint8Array.BYTES_PER_ELEMENT, new Uint8Array(1)];
+                            case 16:
+                                return [Uint16Array.BYTES_PER_ELEMENT, new Uint16Array(1)];
+                            case 32:
+                                return [Uint32Array.BYTES_PER_ELEMENT, new Uint32Array(1)];
+
+                            default:
+                                throw new Error("Unknown size: " + size);
+                        }
+
+                    case TYPE_FLOAT:
+                        switch (size) {
+                            case 32:
+                                return [Float32Array.BYTES_PER_ELEMENT, new Float32Array(1)];
+                            case 64:
+                                return [Float64Array.BYTES_PER_ELEMENT, new Float64Array(1)];
+
+                            default:
+                                throw new Error("Unknown size: " + size);
+                        }
+
+                    default:
+                        throw new Error("Unknown type: " + type);
+                }
+            }
+
+            function getTypeId(type) {
+                switch (type) {
+                    case "str":
+                        return TYPE_STR;
+
+                    case "int":
+                        return TYPE_INT;
+                    case "uint":
+                        return TYPE_UINT;
+                    case "float":
+                        return TYPE_FLOAT;
+
+                    default:
+                        throw new Error("Unknown type: " + type);
+                }
+            }
+        }
+
+        //-----------)>
+
+        function getSize(data, holder) {
+            if (holder) {
+                holder.set(data);
+            } else {
+                holder = new Uint16Array(data);
+            }
+
+            return holder[0];
+        }
+
+        function getId(data, holder) {
+            if (holder) {
+                holder.set(data);
+                return holder[0];
+            } else {
+                return data[sysOffset - 1];
+            }
+        }
+    }();
+
+    //-----------------------------------------------------
+
+    module.exports = packer;
+
+    //-----------------------------------------------------
+    //
+    // Author: Daeren
+    // Site: 666.io
+    //
+    //-----------------------------------------------------
+
+    return function (url, options) {
+        var Io = function (_SEE) {
+            _inherits(Io, _SEE);
+
+            function Io() {
+                _classCallCheck(this, Io);
+
+                var _this = _possibleConstructorReturn(this, (Io.__proto__ || Object.getPrototypeOf(Io)).call(this));
+
+                if (url) {
+                    _this.connect(url);
+                }
+
+                _this._packMapByName = new Map();
+                _this._unpackMapById = new Array();
+
+                _this.reconnecting = false;
+                return _this;
+            }
+
+            _createClass(Io, [{
+                key: "isSupported",
+                value: function isSupported() {
+                    return typeof WebSocket !== "undefined";
+                }
+            }, {
+                key: "emit",
+                value: function emit(name, data) {
+                    data = this._pack(name, data);
+
+                    if (data) {
+                        this.send(data);
+                    }
+
+                    return !!data;
+                }
+            }, {
+                key: "send",
+                value: function send(data) {
+                    try {
+                        this._ws.send(data);
+                    } catch (e) {
+                        this._emit("error", e);
+                    }
+                }
+            }, {
+                key: "connect",
+                value: function connect(url) {
+                    if (this._ws) {
+                        this._ws.close();
+                    }
+
+                    //------------]>
+
+                    var w = this._ws = new WebSocket(url);
+
+                    //------------]>
+
+                    this.url = url;
+
+                    w.binaryType = "arraybuffer";
+
+                    w.onmessage = wsOnMessage.bind(this, this);
+                    w.onopen = wsOnOpen.bind(this, this);
+                    w.onclose = wsOnClose.bind(this, this);
+                    w.onerror = wsOnError.bind(this, this);
+                }
+            }, {
+                key: "disconnect",
+                value: function disconnect(code, reason) {
+                    this._ws.close(code, reason);
+                    this._ws = null;
+                }
+            }, {
+                key: "packets",
+                value: function packets(pack, unpack, shared) {
+                    var _this2 = this;
+
+                    forEach(unpack, function (name, srz) {
+                        _this2._unpackMapById.push([name, srz]);
+                    });
+
+                    forEach(pack, function (name, srz) {
+                        _this2._packMapByName.set(name, [_this2._packMapByName.size, srz]);
+                    });
+
+                    //----------]>
+
+                    if (shared) {
+                        return this.packets(shared, shared);
+                    }
+
+                    //----------]>
+
+                    return this;
+
+                    //----------]>
+
+                    function forEach(data, callback) {
+                        if (!data) {
+                            return;
+                        }
+
+                        Object.keys(data).forEach(function (field) {
+                            testName(field);
+                            callback(field, packer.createPacket(data[field]));
+                        });
+                    }
+
+                    function testName(n) {
+                        var r = ["restoring", "restored", "open", "close", "disconnected", "terminated", "packet", "message", "arraybuffer", "error"];
+
+                        if (r.some(function (e) {
+                            return e === n;
+                        })) {
+                            throw new Error("Used a reserved name: " + n);
+                        }
+                    }
+                }
+            }, {
+                key: "_reconnect",
+                value: function _reconnect() {
+                    return this.connect(this.url);
+                }
+            }, {
+                key: "_pack",
+                value: function _pack(name, data) {
+                    var t = this._packMapByName.get(name);
+
+                    //---------]>
+
+                    if (!t) {
+                        return null;
+                    }
+
+                    //---------]>
+
+                    var _t = _slicedToArray(t, 2),
+                        id = _t[0],
+                        srz = _t[1];
+
+                    //---------]>
+
+                    return srz.pack(id, data);
+                }
+            }]);
+
+            return Io;
+        }(SEE);
+
+        //---------------]>
+
+        var app = new Io();
+
+        //---------------]>
+
+        return app;
+
+        //---------------]>
+
+        function wsOnMessage(socket, event) {
+            var data = event.data;
+
+            //-----------]>
+
+            socket._emit("message", data, event);
+
+            if (socket._emit("arraybuffer", data, event)) {
+                return;
+            }
+
+            //-----------]>
+
+            var dataByteLength = data.byteLength;
+
+            //-----------]>
+
+            if (!data || !(data instanceof ArrayBuffer) || dataByteLength < packer.sysOffset) {
+                return;
+            }
+
+            data = new Uint8Array(data);
+
+            //-----------]>
+
+            var offset = 0,
+                pkt = data;
+
+            //-----------]>
+
+            while (offset < dataByteLength) {
+                var pktSchema = app._unpackMapById[packer.getId(pkt)];
+                var pktSize = pktSchema ? packer.getSize(pkt) : 0;
+
+                //-----------]>
+
+                if (!pktSchema || !pktSize) {
+                    break;
+                }
+
+                //-----------]>
+
+                var _pktSchema = _slicedToArray(pktSchema, 2),
+                    name = _pktSchema[0],
+                    srz = _pktSchema[1];
+
+                var message = srz.unpack(pkt);
+
+                //-----------]>
+
+                offset += pktSize;
+
+                if (dataByteLength > offset) {
+                    pkt = data.slice(offset);
+                }
+
+                if (message) {
+                    socket._emit("packet", name, message);
+                    socket._emit(name, message);
+                }
+            }
+        }
+
+        function wsOnOpen(socket, event) {
+            if (app.reconnecting) {
+                app.reconnecting = false;
+                app._emit("restored");
+            }
+
+            app._emit("open");
+        }
+
+        function wsOnClose(socket, event) {
+            var code = event.code,
+                reason = event.reason;
+
+
+            app._emit("close", code, reason, event);
+
+            if (event.wasClean) {
+                app._emit("disconnected", code, reason, event);
+            } else {
+                app._emit("terminated", code, event);
+
+                setTimeout(function () {
+                    app.reconnecting = true;
+                    app._reconnect();
+
+                    app._emit("restoring");
+                }, 1000 * 2);
+            }
+        }
+
+        function wsOnError(socket, error) {
+            app._emit("error", error);
+        }
+    };
+}({});
+//# sourceMappingURL=sockizy.js.map

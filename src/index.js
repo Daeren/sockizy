@@ -78,7 +78,7 @@ function main(port, options, isCluster) {
                 "level": rZlib.Z_BEST_COMPRESSION
             };
 
-            const lib = rFs.readFileSync(__dirname + "/../public/sockizy.js");
+            const lib = rFs.readFileSync(__dirname + "/../public/sockizy.min.js");
 
             const objDeflate = {
                 "content-encoding": "deflate",

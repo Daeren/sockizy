@@ -9,7 +9,7 @@
 
 //-----------------------------------------------------
 
-const $packer = (function() {
+const packer = (function() {
     const holyBuffer = typeof(Buffer) !== "undefined" ? Buffer : (function() {
             const MAX_ARGUMENTS_LENGTH = 0x1000;
             const K_MAX_LENGTH = 0x7fffffff;
@@ -723,6 +723,4 @@ const $packer = (function() {
 
 //-----------------------------------------------------
 
-if(module && typeof(module) === "object") {
-    module.exports = $packer;
-}
+module.exports = packer;
