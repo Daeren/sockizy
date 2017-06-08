@@ -80,7 +80,7 @@ Client:
 
 ```javascript
 const ssl = {
-    "certDir":   "/www/site",
+    "dir":   "/www/site",
 
     "key":       "/3_site.xx.key",
     "cert":      "/2_site.xx.crt",
@@ -88,9 +88,7 @@ const ssl = {
         "/AddTrustExternalCARoot.crt",
         "/COMODORSAAddTrustCA.crt",
         "/COMODORSADomainValidationSecureServerCA.crt"
-    ],
-
-    "host":     "site.xx"
+    ]
 };
 
 //-----------------------------------------------------

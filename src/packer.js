@@ -425,7 +425,6 @@ const packer = (function() {
 
             //--------]>
 
-
             while(len--) {
                 field = fields[len];
                 [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
@@ -500,6 +499,8 @@ const packer = (function() {
 
             let result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : (pktBufUnpack && pktBufUnpack.length === pktSize ? pktBufUnpack : null);
             let resOffset = sysOffset;
+
+            //--------]>
 
             len = schLen;
 

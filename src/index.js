@@ -122,7 +122,7 @@ function main(port, options, isCluster) {
         if(!options.server) {
             if(options.ssl) {
                 const ssl       = options.ssl;
-                const certDir   = ssl.certDir || "";
+                const certDir   = ssl.dir || "";
 
                 const optKey  = rFs.readFileSync(certDir + ssl.key),
                       optCert = rFs.readFileSync(certDir + ssl.cert);
