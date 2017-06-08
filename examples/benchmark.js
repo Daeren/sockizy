@@ -14,6 +14,36 @@ const rPacker = require("./../src/packer");
 //-----------------------------------------------------
 
 test({
+        data:   JSON.stringify({x:1, b: "b".repeat(1)}),
+        name:   "DT | (っ◕‿◕)っ ♥ | Привет",
+        status: "X  | (っ◕‿◕)っ ♥  Да",
+        e8:     "",
+        e:      "",
+        lvl:    -300.2,
+        hp:     100.44,
+        gm:     Infinity,
+        x:      300.9,
+        y:      -300.52
+    },
+    [
+        "data:str",
+        "name:str",
+        "status:str",
+        "e8:str",
+        "e:str",
+        "e1:str",
+        "e2:int8",
+        "e3:str",
+        "lvl:int8",
+        "hp:uint16",
+        "gm:uint8",
+        "x:float32",
+        "y:float64"
+    ]);
+
+console.log("------------------")
+
+test({
         lvl:    122,
         hp:     4566,
         x:      -300.52,
@@ -42,36 +72,6 @@ test({
     },
     [
         "e2:int8",
-        "lvl:int8",
-        "hp:uint16",
-        "gm:uint8",
-        "x:float32",
-        "y:float64"
-    ]);
-
-console.log("------------------")
-
-test({
-    data:   JSON.stringify({x:1, b: "b".repeat(1)}),
-    name:   "DT | (っ◕‿◕)っ ♥ | Привет",
-    status: "X  | (っ◕‿◕)っ ♥  Да",
-    e8:     "",
-    e:      "",
-    lvl:    -300.2,
-    hp:     100.44,
-    gm:     Infinity,
-    x:      300.9,
-    y:      -300.52
-},
-    [
-        "data:str",
-        "name:str",
-        "status:str",
-        "e8:str",
-        "e:str",
-        "e1:str",
-        "e2:int8",
-        "e3:str",
         "lvl:int8",
         "hp:uint16",
         "gm:uint8",
@@ -150,7 +150,4 @@ function test(data, schema) {
     }
 
     console.timeEnd("JSON.stringify(objJsonHero)");
-
-    //-----------------]>
-
 }

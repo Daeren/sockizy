@@ -634,8 +634,10 @@ var io = function (module) {
                 }
             }
 
+            pktMinSize += sysOffset;
+
             if (!pktHasStr) {
-                pktBufStrict = new Uint8Array(pktMinSize + sysOffset);
+                pktBufStrict = new Uint8Array(pktMinSize);
             }
 
             //-----------------]>
@@ -665,6 +667,7 @@ var io = function (module) {
 
                 //--------]>
 
+
                 while (len--) {
                     field = fields[len];
                     var _field = field;
@@ -687,33 +690,34 @@ var io = function (module) {
                     switch (type) {
                         case TYPE_STR:
                             {
-                                var needMem = input ? bufType.write(input) : 0;
                                 var offset = bufAType.byteLength;
+                                var byteLen = input ? bufType.write(input, offset) : 0;
 
                                 //-----]>
 
-                                if (!bufBytes || bufBytes.length !== needMem) {
-                                    bufBytes = field[4] = new Uint8Array(offset + needMem);
-                                }
+                                bufAType[0] = byteLen;
+                                bufType[0] = bufABytes[0];
+                                bufType[1] = bufABytes[1];
 
-                                bufAType[0] = needMem;
-                                bufBytes[0] = bufABytes[0];
-                                bufBytes[1] = bufABytes[1];
+                                //-----]>
 
-                                if (isBigEndian) {
-                                    bufAType.reverse();
+                                if (byteLen && isBigEndian) {
                                     bufType.swap16();
                                 }
 
                                 //-----]>
 
-                                var _i7 = needMem;
+                                byteLen += offset;
 
-                                while (_i7--) {
-                                    bufBytes[offset + _i7] = bufType[_i7];
+                                //-----]>
+
+                                if (!bufBytes || bufBytes.length !== byteLen) {
+                                    bufBytes = field[4] = new Uint8Array(byteLen);
                                 }
 
-                                offset += needMem;
+                                while (byteLen--) {
+                                    bufBytes[byteLen] = bufType[byteLen];
+                                }
 
                                 break;
                             }
@@ -761,8 +765,8 @@ var io = function (module) {
                 }
 
                 while (len--) {
-                    for (var b = buffers[len], _i8 = 0, l = b.length; _i8 < l; _i8++) {
-                        result[resOffset++] = b[_i8];
+                    for (var b = buffers[len], _i7 = 0, l = b.length; _i7 < l; _i7++) {
+                        result[resOffset++] = b[_i7];
                     }
                 }
 
@@ -838,15 +842,15 @@ var io = function (module) {
                     bufBytes = _field4[4];
                     bufAType = _field4[5];
                     bufABytes = _field4[6];
-                    for (var _i9 = 0; _i9 < bytes; _i9++) {
+                    for (var _i8 = 0; _i8 < bytes; _i8++) {
                         if (pktOffset >= binLen) {
                             return null;
                         }
 
                         if (bufAType) {
-                            bufABytes[_i9] = bin[pktOffset++];
+                            bufABytes[_i8] = bin[pktOffset++];
                         } else {
-                            bufBytes[_i9] = bin[pktOffset++];
+                            bufBytes[_i8] = bin[pktOffset++];
                         }
                     }
 
@@ -854,25 +858,32 @@ var io = function (module) {
 
                     switch (type) {
                         case TYPE_STR:
-                            if (isBigEndian) {
-                                bufAType.reverse();
+                            {
+                                if (isBigEndian) {
+                                    bufAType.reverse();
+                                }
+
+                                //--------]>
+
+                                var byteLen = bufAType[0];
+                                var needMem = Math.min(byteLen, binLen);
+
+                                //--------]>
+
+                                bufType = holyBuffer.from(bin.slice(pktOffset, pktOffset + needMem));
+
+                                if (isBigEndian) {
+                                    bufType.swap16();
+                                }
+
+                                pktOffset += needMem;
+
+                                //--------]>
+
+                                target[name] = bufType.toString();
+
+                                break;
                             }
-
-                            //--------]>
-
-                            var byteLen = bufAType[0];
-                            var needMem = Math.min(byteLen, binLen);
-
-                            //--------]>
-
-                            var s = holyBuffer.from(bin.slice(pktOffset, pktOffset + byteLen)).toString();
-                            pktOffset += byteLen;
-
-                            //--------]>
-
-                            target[name] = s;
-
-                            break;
 
                         default:
                             if (isBigEndian && bufType.byteLength > 1) {
