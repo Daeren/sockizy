@@ -471,9 +471,7 @@ var io = function (module) {
 
             function alloc(size) {
                 var buf = createBuffer(size);
-
                 buf.write = write;
-                buf.swap16 = swap16;
 
                 return buf;
             }
@@ -490,20 +488,6 @@ var io = function (module) {
                 }
 
                 return blitBuffer(utf8ToBytes(string, this.length - offset), this, offset, length);
-            }
-
-            function swap16() {
-                var len = this.length;
-
-                if (len % 2 !== 0) {
-                    throw new RangeError("Buffer size must be a multiple of 16-bits");
-                }
-
-                for (var i = 0; i < len; i += 2) {
-                    swap(this, i, i + 1);
-                }
-
-                return this;
             }
 
             //--------)>
@@ -696,16 +680,14 @@ var io = function (module) {
                                 //-----]>
 
                                 bufAType[0] = byteLen;
-                                bufType[0] = bufABytes[0];
-                                bufType[1] = bufABytes[1];
 
-                                //-----]>
-
-                                if (byteLen && isBigEndian) {
-                                    bufType.swap16();
+                                if (isBigEndian) {
+                                    bufType[0] = bufABytes[1];
+                                    bufType[1] = bufABytes[0];
+                                } else {
+                                    bufType[0] = bufABytes[0];
+                                    bufType[1] = bufABytes[1];
                                 }
-
-                                //-----]>
 
                                 byteLen += offset;
 
@@ -871,11 +853,6 @@ var io = function (module) {
                                 //--------]>
 
                                 bufType = holyBuffer.from(bin.slice(pktOffset, pktOffset + needMem));
-
-                                if (isBigEndian) {
-                                    bufType.swap16();
-                                }
-
                                 pktOffset += needMem;
 
                                 //--------]>
