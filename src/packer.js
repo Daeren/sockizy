@@ -23,7 +23,8 @@ const packer = (function() {
             Buffer.from = function(data) {
                 if(typeof(data) === "string") {
                     return utf8ToBytes(data);
-                } else {
+                }
+                else {
                     return {
                         toString() {
                             return utf8Slice(data, 0, data.length);
@@ -62,7 +63,8 @@ const packer = (function() {
                                 }
 
                                 continue;
-                            } else if(i + 1 === length) {
+                            }
+                            else if(i + 1 === length) {
                                 // unpaired lead
                                 if((units -= 3) > -1) {
                                     bytes.push(0xEF, 0xBF, 0xBD);
@@ -90,7 +92,8 @@ const packer = (function() {
 
                         // valid surrogate pair
                         codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000;
-                    } else if(leadSurrogate) {
+                    }
+                    else if(leadSurrogate) {
                         // valid bmp char, but last char was a lead
                         if((units -= 3) > -1) {
                             bytes.push(0xEF, 0xBF, 0xBD);
@@ -106,7 +109,8 @@ const packer = (function() {
                         }
 
                         bytes.push(codePoint);
-                    } else if(codePoint < 0x800) {
+                    }
+                    else if(codePoint < 0x800) {
                         if((units -= 2) < 0) {
                             break;
                         }
@@ -115,7 +119,8 @@ const packer = (function() {
                             codePoint >> 0x6 | 0xC0,
                             codePoint & 0x3F | 0x80
                         );
-                    } else if(codePoint < 0x10000) {
+                    }
+                    else if(codePoint < 0x10000) {
                         if((units -= 3) < 0) {
                             break;
                         }
@@ -125,7 +130,8 @@ const packer = (function() {
                             codePoint >> 0x6 & 0x3F | 0x80,
                             codePoint & 0x3F | 0x80
                         );
-                    } else if(codePoint < 0x110000) {
+                    }
+                    else if(codePoint < 0x110000) {
                         if((units -= 4) < 0) {
                             break;
                         }
@@ -136,7 +142,8 @@ const packer = (function() {
                             codePoint >> 0x6 & 0x3F | 0x80,
                             codePoint & 0x3F | 0x80
                         );
-                    } else {
+                    }
+                    else {
                         throw new Error("Invalid code point");
                     }
                 }
@@ -216,7 +223,8 @@ const packer = (function() {
                         // replacement char (U+FFFD) and advance only 1 byte
                         codePoint = 0xFFFD;
                         bytesPerSequence = 1;
-                    } else if(codePoint > 0xFFFF) {
+                    }
+                    else if(codePoint > 0xFFFF) {
                         // encode to utf16 (surrogate pair dance)
                         codePoint -= 0x10000;
                         res.push(codePoint >>> 10 & 0x3FF | 0xD800);
@@ -441,7 +449,8 @@ const packer = (function() {
                         if(isBigEndian) {
                             bufType[0] = bufABytes[1];
                             bufType[1] = bufABytes[0];
-                        } else {
+                        }
+                        else {
                             bufType[0] = bufABytes[0];
                             bufType[1] = bufABytes[1];
                         }
@@ -480,7 +489,8 @@ const packer = (function() {
                     while(tLen--) {
                         pktBufStrict[pktSize++] = bufBytes[tIdx++];
                     }
-                } else {
+                }
+                else {
                     buffers[fieldIdx] = bufBytes;
                     pktSize += tLen;
                 }

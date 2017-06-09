@@ -21,7 +21,8 @@ const SEE = (function() {
 
             if(typeof(ev) === "function") {
                 this._events[name] = [ev, listener];
-            } else {
+            }
+            else {
                 this._events[name] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
             }
 
@@ -65,14 +66,17 @@ const SEE = (function() {
             if(argsLen === 1) {
                 if(evLen === 1) {
                     ev.pop();
-                } else {
+                }
+                else {
                     this._events[name] = new Array();
                 }
-            } else if(evLen === 1) {
+            }
+            else if(evLen === 1) {
                 if(ev[0] === listener) {
                     ev.pop();
                 }
-            } else if(ev.indexOf(listener) >= 0) {
+            }
+            else if(ev.indexOf(listener) >= 0) {
                 this._events[name] = this._arrayCloneWithout(ev, evLen, listener);
             }
 
@@ -93,8 +97,9 @@ const SEE = (function() {
 
                     if(error instanceof Error) {
                         throw error;
-                    } else {
-                        let e = new Error('Unhandled "error" event. (' + error + ')');
+                    }
+                    else {
+                        let e = new Error("Unhandled \"error\" event. (" + error + ")");
                         e.context = error;
 
                         throw e;
@@ -171,7 +176,8 @@ const SEE = (function() {
     function emitNone(handler, isFn, self) {
         if(isFn) {
             handler.call(self);
-        } else {
+        }
+        else {
             for(let i = 0, len = handler.length; i < len; ++i) {
                 handler[i].call(self);
             }
@@ -180,7 +186,8 @@ const SEE = (function() {
     function emitOne(handler, isFn, self, arg1) {
         if(isFn) {
             handler.call(self, arg1);
-        } else {
+        }
+        else {
             for(let i = 0, len = handler.length; i < len; ++i) {
                 handler[i].call(self, arg1);
             }
@@ -189,7 +196,8 @@ const SEE = (function() {
     function emitTwo(handler, isFn, self, arg1, arg2) {
         if(isFn) {
             handler.call(self, arg1, arg2);
-        } else {
+        }
+        else {
             for(let i = 0, len = handler.length; i < len; ++i) {
                 handler[i].call(self, arg1, arg2);
             }
@@ -198,7 +206,8 @@ const SEE = (function() {
     function emitThree(handler, isFn, self, arg1, arg2, arg3) {
         if(isFn) {
             handler.call(self, arg1, arg2, arg3);
-        } else {
+        }
+        else {
             for(let i = 0, len = handler.length; i < len; ++i) {
                 handler[i].call(self, arg1, arg2, arg3);
             }
@@ -207,13 +216,13 @@ const SEE = (function() {
     function emitMany(handler, isFn, self, args) {
         if(isFn) {
             handler.apply(self, args);
-        } else {
+        }
+        else {
             for(let i = 0, len = handler.length; i < len; ++i) {
                 handler[i].apply(self, args);
             }
         }
     }
-
 })();
 
 //-----------------------------------------------------

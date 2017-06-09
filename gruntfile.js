@@ -10,13 +10,13 @@
 //-----------------------------------------------------
 
 module.exports = function(grunt) {
-    require("load-grunt-tasks")(grunt)
+    require("load-grunt-tasks")(grunt);
     require("time-grunt")(grunt);
 
     grunt.initConfig({
         concat: {
             dist: {
-                src: ["src/see.js","src/packer.js", "scripts/clientApp.js"],
+                src: ["src/see.js","src/packer.js", "src/toString.js", "scripts/clientApp.js"],
                 dest: "public/sockizyES6_tmp.js",
             }
         },

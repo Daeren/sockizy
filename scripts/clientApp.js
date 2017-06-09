@@ -37,7 +37,7 @@ return function(url, options) {
         }
 
         text(data) {
-            this.send(data);
+            this.send(toString(data));
         }
 
         send(data) {
@@ -115,7 +115,7 @@ return function(url, options) {
                     "packet", "message", "arraybuffer", "error"
                 ];
 
-                if(r.some(e => e === n)) {
+                if(r.some((e) => e === n)) {
                     throw new Error(`Used a reserved name: ${n}`);
                 }
             }
@@ -165,7 +165,8 @@ return function(url, options) {
         if(typeof(data) === "string") {
             socket._emit("text", data, event);
             return;
-        } else if(socket._emit("arraybuffer", data, event)) {
+        }
+        else if(socket._emit("arraybuffer", data, event)) {
             return;
         }
 
@@ -251,4 +252,4 @@ return function(url, options) {
     function wsOnError(socket, error) {
         app._emit("error", error);
     }
-}
+};

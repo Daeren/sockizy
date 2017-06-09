@@ -17,7 +17,7 @@ const rEE       = require("events");
 //-----------------------------------------------------
 
 testEE(rEE);
-console.log("------------------")
+console.log("------------------");
 testEE(rSee, true);
 
 //-----------------------------]>
@@ -50,7 +50,7 @@ testPacker({
         "y:float64"
     ]);
 
-console.log("------------------")
+console.log("------------------");
 
 testPacker({
         lvl:    122,
@@ -65,7 +65,7 @@ testPacker({
         "y:float64"
     ]);
 
-console.log("------------------")
+console.log("------------------");
 
 testPacker({
         data:   JSON.stringify({x:1, b: "b".repeat(1)}),

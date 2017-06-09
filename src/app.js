@@ -9,9 +9,9 @@
 
 //-----------------------------------------------------
 
-const SEE = require("./SEE");
-
-const rPacker = require("./packer");
+const SEE       = require("./SEE"),
+      rPacker   = require("./packer"),
+      rToString = require("./toString");
 
 //-----------------------------------------------------
 
@@ -30,7 +30,8 @@ class Socket extends SEE {
         if(data) {
             if(isBroadcast) {
                 this._io.broadcast(data);
-            } else {
+            }
+            else {
                 this.send(data);
             }
         }
@@ -57,7 +58,8 @@ class Socket extends SEE {
             if(bytes) {
                 if(isBroadcast) {
                     io.broadcast(this._buffer);
-                } else {
+                }
+            else {
                     self.send(this._buffer);
                 }
             }
@@ -68,9 +70,10 @@ class Socket extends SEE {
 
     text(data, isBroadcast) {
         if(isBroadcast) {
-            this._io.broadcast(data, null);
-        } else {
-            this.send(data, null);
+            this._io.text(data);
+        }
+            else {
+            this.send(rToString(data), null);
         }
     }
 
@@ -146,7 +149,7 @@ class Io extends SEE {
     }
 
     text(data) {
-        this.broadcast(data, null);
+        this.broadcast(rToString(data), null);
     }
 
     broadcast(data, options = this._msgOptions) {
@@ -233,7 +236,8 @@ class Io extends SEE {
                     t.set(pkt, offset);
 
                     this._buffer = t;
-                } else {
+                }
+            else {
                     this._buffer = new Uint8Array(pkt.byteLength);
                     this._buffer.set(pkt);
                 }
@@ -294,7 +298,8 @@ function main(app, options) {
             if(typeof(data) === "string") {
                 socket._emit("text", data);
                 return;
-            } else if(socket._emit("arraybuffer", data)) {
+            }
+            else if(socket._emit("arraybuffer", data)) {
                 return;
             }
 
@@ -336,7 +341,8 @@ function main(app, options) {
 
             if(code === 1000) {
                 socket._emit("disconnected", code, reason);
-            } else {
+            }
+            else {
                 socket._emit("terminated", code);
             }
         });

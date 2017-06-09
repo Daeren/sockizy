@@ -115,7 +115,7 @@ var io = function (module) {
                             if (error instanceof Error) {
                                 throw error;
                             } else {
-                                var e = new Error('Unhandled "error" event. (' + error + ')');
+                                var e = new Error("Unhandled \"error\" event. (" + error + ")");
                                 e.context = error;
 
                                 throw e;
@@ -977,6 +977,46 @@ var io = function (module) {
     //
     //-----------------------------------------------------
 
+    "use strict";
+
+    //-----------------------------------------------------
+
+    var toString = function () {
+        return function (data) {
+            if (data === null) {
+                data = "";
+            } else {
+                switch (typeof data === "undefined" ? "undefined" : _typeof(data)) {
+                    case "string":
+                        break;
+
+                    case "undefined":
+                        data = "";break;
+                    case "number":
+                        data = isNaN(data) ? "" : data + "";break;
+                    case "symbol":
+                        data = data.toString();break;
+
+                    default:
+                        data = JSON.stringify(data);
+                }
+            }
+
+            return data;
+        };
+    }();
+
+    //-----------------------------------------------------
+
+    module.exports = toString;
+
+    //-----------------------------------------------------
+    //
+    // Author: Daeren
+    // Site: 666.io
+    //
+    //-----------------------------------------------------
+
     return function (url, options) {
         var Io = function (_SEE) {
             _inherits(Io, _SEE);
@@ -1016,7 +1056,7 @@ var io = function (module) {
             }, {
                 key: "text",
                 value: function text(data) {
-                    this.send(data);
+                    this.send(toString(data));
                 }
             }, {
                 key: "send",

@@ -35,10 +35,14 @@ function main(port, options, isCluster) {
 
     options.port = port;
     options.path = options.path || "";
+
     options.ping = options.ping || {"interval": 1000};
+    options.clientJs = typeof(options.clientJs) === "undefined" ? true : !!options.clientJs;
+
     options.maxPayload = options.maxPayload || 1024;
-    options.noDelay = options.noDelay || true;
+    options.noDelay = typeof(options.noDelay) === "undefined" ? true : !!options.noDelay;
     options.binary = true;
+
     options.cluster = !!options.cluster;
     options.verifyClient = (function verifyClient(info, callback) {
         const func = verifyClient.func;
@@ -48,10 +52,12 @@ function main(port, options, isCluster) {
 
             if(argsLen <= 1) {
                 callback(!!func(info));
-            } else {
+            }
+            else {
                 func(info, callback);
             }
-        } else {
+        }
+        else {
             callback(true);
         }
     });
@@ -73,8 +79,17 @@ function main(port, options, isCluster) {
     rHttps.globalAgent.maxSockets = options.maxSockets || Infinity;
 
     if(!isMaster) {
+
         const sendClientLib = (function() {
-            const options = {
+            if(!options.clientJs) {
+                return function(request, response) {
+                    response.end();
+                }
+            }
+
+            //--------------------]>
+
+            const zlibOptions = {
                 "level": rZlib.Z_BEST_COMPRESSION
             };
 
@@ -93,8 +108,8 @@ function main(port, options, isCluster) {
             const reDeflate = /\bdeflate\b/;
             const reGzip = /\bgzip\b/;
 
-            const libDeflate = rZlib.deflateSync(lib, options);
-            const libGzip = rZlib.gzipSync(lib, options);
+            const libDeflate = rZlib.deflateSync(lib, zlibOptions);
+            const libGzip = rZlib.gzipSync(lib, zlibOptions);
 
             //--------------------]>
 
@@ -105,13 +120,16 @@ function main(port, options, isCluster) {
                     if(acceptEncoding.match(reGzip)) {
                         response.writeHead(200, objGzip);
                         response.end(libGzip);
-                    } else if(acceptEncoding.match(reDeflate)) {
+                    }
+                    else if(acceptEncoding.match(reDeflate)) {
                         response.writeHead(200, objDeflate);
                         response.end(libDeflate);
-                    } else {
+                    }
+                    else {
                         response.end(lib);
                     }
-                } else {
+                }
+                else {
                     response.end(lib);
                 }
             };
@@ -134,7 +152,8 @@ function main(port, options, isCluster) {
                 if(optCa) {
                     if(Array.isArray(optCa)) {
                         optCa = optCa.map((e) => rFs.readFileSync(certDir + e));
-                    } else if(typeof(optCa) === "string") {
+                    }
+                    else if(typeof(optCa) === "string") {
                         optCa = certDir + optCa;
                     }
                 }
@@ -151,7 +170,8 @@ function main(port, options, isCluster) {
                     "requestCert":          true,
                     "rejectUnauthorized":   false
                 }, sendClientLib);
-            } else {
+            }
+            else {
                 options.server = rHttp.createServer(sendClientLib);
             }
         }
@@ -177,7 +197,8 @@ function main(port, options, isCluster) {
 
             workers.push(worker);
         }
-    } else {
+    }
+    else {
         if(isCluster) {
             wss.__broadcast = wss.broadcast;
             wss.broadcast = function(data, params) {
@@ -215,7 +236,8 @@ function main(port, options, isCluster) {
         app.listen = function() {
             if(arguments.length) {
                 options.server.listen.apply(options.server, arguments);
-            } else {
+            }
+            else {
                 options.server.listen(1337, "localhost");
             }
 

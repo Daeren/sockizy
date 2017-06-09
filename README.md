@@ -286,6 +286,7 @@ io.on("connection", function(socket, request) {
 | noDelay           | default: true                        |
 |                   | -                                    |
 | ping              | default: {"interval": 1000}          |
+| clientJs          | default: true                        |
 
 
 ##### Bundle: app.bundle(), socket.bundle([isBroadcast])
