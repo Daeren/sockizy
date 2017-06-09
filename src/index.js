@@ -36,7 +36,7 @@ function main(port, options, isCluster) {
     options.port = port;
     options.path = options.path || "";
 
-    options.ping = options.ping || {"interval": 1000};
+    options.ping = typeof(options.ping) === "undefined" ? {"interval": 1000} : options.ping;
     options.clientJs = typeof(options.clientJs) === "undefined" ? true : !!options.clientJs;
 
     options.maxPayload = options.maxPayload || 1024;
@@ -213,8 +213,8 @@ function main(port, options, isCluster) {
         }
     }
 
-    if(wss) {
-        wss.startAutoPing(options.ping.interval, options.ping.message);
+    if(wss && options.ping && options.ping.interval > 0) {
+        wss.startAutoPing(Math.max(options.ping.interval, parseInt(1000 / 30)), options.ping.message);
     }
 
     //-------------]>
