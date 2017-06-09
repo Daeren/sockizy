@@ -336,6 +336,8 @@ io.on("connection", function(socket, request) {
 | disconnect([code, reason])           |                  |                                             |
 | terminate()                          |                  |                                             |
 |                                      | -                |                                             |
+| ping([message])                      |                  |                                             |
+|                                      | -                |                                             |
 | on(name, listener)                   |                  | return this;                                |
 | off([name, listener])                |                  | return this;                                |
 |                                      | **socket.events**|                                             |

@@ -93,6 +93,11 @@ class Socket extends SEE {
     terminate() {
         this._ws.terminate();
     }
+
+
+    ping(message) {
+        this._ws.ping(message);
+    }
 }
 
 class Io extends SEE {

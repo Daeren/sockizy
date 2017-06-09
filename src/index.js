@@ -84,7 +84,7 @@ function main(port, options, isCluster) {
             if(!options.clientJs) {
                 return function(request, response) {
                     response.end();
-                }
+                };
             }
 
             //--------------------]>
