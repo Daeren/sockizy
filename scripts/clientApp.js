@@ -36,6 +36,10 @@ return function(url, options) {
             return !!data;
         }
 
+        text(data) {
+            this.send(data);
+        }
+
         send(data) {
             try {
                 this._ws.send(data);
@@ -158,23 +162,20 @@ return function(url, options) {
 
         socket._emit("message", data, event);
 
-        if(socket._emit("arraybuffer", data, event)) {
+        if(typeof(data) === "string") {
+            socket._emit("text", data, event);
+            return;
+        } else if(socket._emit("arraybuffer", data, event)) {
             return;
         }
 
         //-----------]>
-
-        const dataByteLength = data.byteLength;
-
-        //-----------]>
-
-        if(!data || !(data instanceof ArrayBuffer) || dataByteLength < packer.sysOffset) {
-            return;
-        }
 
         data = new Uint8Array(data);
 
         //-----------]>
+
+        const dataByteLength = data.byteLength;
 
         let offset  = 0,
             pkt     = data;
@@ -183,31 +184,35 @@ return function(url, options) {
 
         while(offset < dataByteLength) {
             const pktSchema = app._unpackMapById[packer.getId(pkt)];
-            const pktSize   = pktSchema ? packer.getSize(pkt) : 0;
 
             //-----------]>
 
-            if(!pktSchema || !pktSize) {
+            if(!pktSchema) {
                 break;
             }
 
             //-----------]>
 
             const [name, srz] = pktSchema;
-            const message = srz.unpack(pkt);
+
+            const message = srz.unpack(pkt, offset, dataByteLength, function(size) {
+                offset += size;
+            });
 
             //-----------]>
 
-            offset += pktSize;
+            if(!message) {
+                break;
+            }
 
             if(dataByteLength > offset) {
                 pkt = data.slice(offset);
             }
 
-            if(message) {
-                socket._emit("packet", name, message);
-                socket._emit(name, message);
-            }
+            //-----------]>
+
+            socket._emit("packet", name, message);
+            socket._emit(name, message);
         }
     }
 

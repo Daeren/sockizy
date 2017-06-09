@@ -329,11 +329,11 @@ const packer = (function() {
         return b[0] === 0x12;
     })();
 
-    const sysOffset = 3;
+    const sysOffset = 1;
 
     //-------------------------]>
 
-    return {isBigEndian, sysOffset, createPacket, getSize, getId};
+    return {isBigEndian, createPacket, getId};
 
     //-------------------------]>
 
@@ -354,11 +354,7 @@ const packer = (function() {
             pktHasStr       = false,
 
             pktBufStrict    = null,
-            pktBufPack      = null,
-            pktBufUnpack    = null;
-
-        let pktSysBVMSize   = new Uint16Array(1),
-            pktSysBufMSize  = new Uint8Array(pktSysBVMSize.buffer);
+            pktBufPack      = null;
 
         //-----------------]>
 
@@ -418,18 +414,18 @@ const packer = (function() {
             let input, field,
                 name, type, bytes, bufType, bufBytes, bufAType, bufABytes;
 
-            let len     = schLen;
+            let fieldIdx = schLen;
 
             let pktSize = sysOffset,
                 tLen, tIdx;
 
             //--------]>
 
-            while(len--) {
-                field = fields[len];
+            while(fieldIdx--) {
+                field = fields[fieldIdx];
                 [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
 
-                input = data[isArray ? len : name];
+                input = data[isArray ? fieldIdx : name];
 
                 //------]>
 
@@ -465,12 +461,13 @@ const packer = (function() {
                         break;
                     }
 
-                    default:
+                    default: {
                         bufType[0] = input;
 
                         if(isBigEndian && bufType.byteLength > 1) {
                             bufType.reverse();
                         }
+                    }
                 }
 
                 //------]>
@@ -483,9 +480,8 @@ const packer = (function() {
                     while(tLen--) {
                         pktBufStrict[pktSize++] = bufBytes[tIdx++];
                     }
-                }
-                else {
-                    buffers[len] = bufBytes;
+                } else {
+                    buffers[fieldIdx] = bufBytes;
                     pktSize += tLen;
                 }
             }
@@ -497,12 +493,12 @@ const packer = (function() {
 
             //--------]>
 
-            let result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : (pktBufUnpack && pktBufUnpack.length === pktSize ? pktBufUnpack : null);
+            let result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : null;
             let resOffset = sysOffset;
 
             //--------]>
 
-            len = schLen;
+            fieldIdx = schLen;
 
             //--------]>
 
@@ -510,26 +506,22 @@ const packer = (function() {
                 result = pktBufPack = new Uint8Array(pktSize);
             }
 
-            while(len--) {
-                for(let b = buffers[len], i = 0, l = b.length; i < l; i++) {
+            while(fieldIdx--) {
+                for(let b = buffers[fieldIdx], i = 0, l = b.length; i < l; i++) {
                     result[resOffset++] = b[i];
                 }
             }
 
             //--------]>
 
-            pktSysBVMSize[0] = pktSize;
-
-            result[0] = pktSysBufMSize[0];
-            result[1] = pktSysBufMSize[1];
-            result[2] = id;
+            result[0] = id;
 
             //--------]>
 
             return result;
         }
 
-        function unpack(bin, target) {
+        function unpack(bin, offset, length, cbEndInfo, target) {
             target = target || pktDataHolder;
 
             //--------]>
@@ -542,38 +534,27 @@ const packer = (function() {
                 return target;
             }
 
-            if(bin instanceof ArrayBuffer) {
-                const buf = pktBufUnpack && pktBufUnpack.length === bin.length ? pktBufUnpack : (pktBufPack && pktBufPack.length === bin.length ? pktBufPack : null);
-
-                if(buf) {
-                    buf.set(bin);
-                    bin = buf;
-                }
-                else {
-                    bin = pktBufUnpack = new Uint8Array(bin);
-                }
-            }
-
             //--------]>
-
-            const binLen = bin.byteLength;
 
             let field,
-                len = schLen,
+                fieldIdx = schLen,
+
                 name, type, bytes, bufType, bufBytes, bufAType, bufABytes;
 
-            let pktOffset = sysOffset;
+            let pktOffset           = offset + sysOffset;
+
+            const pktOffsetStart    = pktOffset;
 
             //--------]>
 
-            while(len--) {
-                field = fields[len];
+            while(fieldIdx--) {
+                field = fields[fieldIdx];
                 [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
 
                 //------]>
 
                 for(let i = 0; i < bytes; i++) {
-                    if(pktOffset >= binLen) {
+                    if(pktOffset >= length) {
                         return null;
                     }
 
@@ -596,7 +577,7 @@ const packer = (function() {
                         //--------]>
 
                         const byteLen = bufAType[0];
-                        const needMem = Math.min(byteLen, binLen);
+                        const needMem = Math.min(byteLen, length);
 
                         //--------]>
 
@@ -610,13 +591,18 @@ const packer = (function() {
                         break;
                     }
 
-                    default:
+                    default: {
                         if(isBigEndian && bufType.byteLength > 1) {
                             bufType.reverse();
                         }
 
                         target[name] = bufType[0];
+                    }
                 }
+            }
+
+            if(cbEndInfo) {
+                cbEndInfo(pktOffset - pktOffsetStart);
             }
 
             //--------]>
@@ -687,25 +673,8 @@ const packer = (function() {
 
     //-----------)>
 
-    function getSize(data, holder) {
-        if(holder) {
-            holder.set(data);
-        }
-        else {
-            holder = new Uint16Array(data);
-        }
-
-        return holder[0];
-    }
-
-    function getId(data, holder) {
-        if(holder) {
-            holder.set(data);
-            return holder[0];
-        }
-        else {
-            return data[sysOffset - 1];
-        }
+    function getId(data) {
+        return data[0];
     }
 })();
 

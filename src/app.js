@@ -66,8 +66,16 @@ class Socket extends SEE {
         }
     }
 
-    send(data, options) {
-        this._ws.send(data, options || this._io._msgOptions, (e) => {
+    text(data, isBroadcast) {
+        if(isBroadcast) {
+            this._io.broadcast(data, null);
+        } else {
+            this.send(data, null);
+        }
+    }
+
+    send(data, options = this._io._msgOptions) {
+        this._ws.send(data, options, (e) => {
             if(e) {
                 this._io._emit("error", e);
             }
@@ -137,10 +145,14 @@ class Io extends SEE {
         }
     }
 
-
-    broadcast(data, options) {
-        this.wss.broadcast(data, options || this._msgOptions);
+    text(data) {
+        this.broadcast(data, null);
     }
+
+    broadcast(data, options = this._msgOptions) {
+        this.wss.broadcast(data, options);
+    }
+
 
     close(callback) {
         if(this._isNtSrv) {
@@ -268,7 +280,7 @@ function main(app, options) {
     app.wss.on("connection", function(ws) {
         const socket = new Socket(io, ws);
 
-        let tBufMId;
+        let tBufData;
 
         //-----------------]>
 
@@ -279,46 +291,44 @@ function main(app, options) {
         ws.on("message", function(data) {
             socket._emit("message", data);
 
-            if(socket._emit("arraybuffer", data)) {
+            if(typeof(data) === "string") {
+                socket._emit("text", data);
+                return;
+            } else if(socket._emit("arraybuffer", data)) {
                 return;
             }
+
             //-----------]>
 
             const dataByteLength = data.byteLength;
 
             //-----------]>
 
-            if(!data || !(data instanceof ArrayBuffer) || dataByteLength < rPacker.sysOffset) {
-                return;
-            }
-
-            if(!tBufMId || tBufMId.buffer.byteLength !== dataByteLength) {
-                tBufMId = new Uint8Array(data, rPacker.sysOffset - 1, 1);
+            if(!tBufData || tBufData.buffer.byteLength !== dataByteLength) {
+                tBufData = new Uint8Array(data);
             }
 
             //-----------]>
 
-            const pktSchema = io._unpackMapById[rPacker.getId(data, tBufMId)];
+            const pktSchema = io._unpackMapById[rPacker.getId(tBufData)];
 
             //-----------]>
 
-            if(!pktSchema) {
-                ws.terminate();
-                return;
+            if(pktSchema) {
+                const [name, srz] = pktSchema;
+                data = srz.unpack(tBufData, 0, dataByteLength);
+
+                if(data) {
+                    io._emit("packet", name, data, socket);
+                    socket._emit(name, data);
+
+                    return;
+                }
             }
 
             //-----------]>
 
-            const [name, srz] = pktSchema;
-
-            //-----------]>
-
-            data = srz.unpack(data);
-
-            if(data) {
-                io._emit("packet", name, data, socket);
-                socket._emit(name, data);
-            }
+            ws.terminate();
         });
 
         ws.on("close", function(code, reason) {

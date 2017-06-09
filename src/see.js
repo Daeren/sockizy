@@ -9,194 +9,212 @@
 
 //-----------------------------------------------------
 
-class SEE {
-    constructor() {
-        this._events = Object.create(null);
-    }
-
-
-    on(name, listener) {
-        const ev = this._events[name];
-
-        if(typeof(ev) === "function") {
-            this._events[name] = [ev, listener];
-        } else {
-            this._events[name] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
+const SEE = (function() {
+    class EE {
+        constructor() {
+            this._events = {};
         }
 
-        return this;
-    }
 
-    off(name, listener) {
-        const argsLen = arguments.length;
+        on(name, listener) {
+            const ev = this._events[name];
 
-        //--------------]>
-
-        if(!argsLen) {
-            this._events = Object.create(null);
-            return this;
-        }
-
-        //--------------]>
-
-        const ev = this._events[name];
-
-        if(typeof(ev) === "function") {
-            if(argsLen === 1 || ev === listener) {
-                this._events[name] = null;
-            }
-
-            return this;
-        }
-
-        //--------------]>
-
-        const evLen = ev && ev.length;
-
-        //--------------]>
-
-        if(!evLen) {
-            return this;
-        }
-
-        //--------------]>
-
-        if(argsLen === 1) {
-            if(evLen === 1) {
-                ev.pop();
+            if(typeof(ev) === "function") {
+                this._events[name] = [ev, listener];
             } else {
-                this._events[name] = new Array();
+                this._events[name] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
             }
-        } else if(evLen === 1) {
-            if(ev[0] === listener) {
-                ev.pop();
-            }
-        } else if(ev.indexOf(listener) >= 0) {
-            this._events[name] = this._arrayCloneWithout(ev, evLen, listener);
+
+            return this;
         }
 
-        //--------------]>
+        off(name, listener) {
+            const argsLen = arguments.length;
 
-        return this;
-    }
+            //--------------]>
 
-
-    _emit(name) {
-        const ev    = this._events[name];
-        const func  = typeof(ev) === "function" && ev;
-
-        const evLen = func || ev && ev.length;
-
-        //--------------]>
-
-        if(!evLen) {
-            if(name === "error") {
-                throw arguments[1];
+            if(!argsLen) {
+                this._events = {};
+                return this;
             }
 
-            return false;
+            //--------------]>
+
+            const ev = this._events[name];
+
+            if(typeof(ev) === "function") {
+                if(argsLen === 1 || ev === listener) {
+                    this._events[name] = null;
+                }
+
+                return this;
+            }
+
+            //--------------]>
+
+            const evLen = ev && ev.length;
+
+            //--------------]>
+
+            if(!evLen) {
+                return this;
+            }
+
+            //--------------]>
+
+            if(argsLen === 1) {
+                if(evLen === 1) {
+                    ev.pop();
+                } else {
+                    this._events[name] = new Array();
+                }
+            } else if(evLen === 1) {
+                if(ev[0] === listener) {
+                    ev.pop();
+                }
+            } else if(ev.indexOf(listener) >= 0) {
+                this._events[name] = this._arrayCloneWithout(ev, evLen, listener);
+            }
+
+            //--------------]>
+
+            return this;
         }
 
-        //--------------]>
 
-        const argsLen = arguments.length;
+        _emit(name) {
+            const events = this._events[name];
 
-        //--------------]>
+            //--------------]>
 
-        if(func) {
+            if(!events) {
+                if(name === "error") {
+                    let error = arguments[1];
+
+                    if(error instanceof Error) {
+                        throw error;
+                    } else {
+                        let e = new Error('Unhandled "error" event. (' + error + ')');
+                        e.context = error;
+
+                        throw e;
+                    }
+                }
+
+                return false;
+            }
+
+            //--------------]>
+
+            const isFn = typeof(events) === "function";
+            const argsLen = arguments.length;
+
+            //--------------]>
+
             switch(argsLen) {
-                case 1: func.call(this); break;
-                case 2: func.call(this, arguments[1]); break;
-                case 3: func.call(this, arguments[1], arguments[2]); break;
-                case 4: func.call(this, arguments[1], arguments[2], arguments[3]); break;
+                case 1: emitNone(events, isFn, this); break;
+                case 2: emitOne(events, isFn, this, arguments[1]); break;
+                case 3: emitTwo(events, isFn, this, arguments[1], arguments[2]); break;
+                case 4: emitThree(events, isFn, this, arguments[1], arguments[2], arguments[3]); break;
 
-                default:
+                default: {
                     const args = new Array(argsLen - 1);
 
                     for(let i = 1; i < argsLen; i++) {
                         args[i - 1] = arguments[i];
                     }
 
-                    func.apply(this, args);
+                    emitMany(events, isFn, this, args);
+                }
             }
+
+            //--------------]>
 
             return true;
         }
 
-        switch(argsLen) {
-            case 1:
-                for(let i = 0; i < evLen; i++) {
-                    ev[i].call(this);
+        _arrayCloneWithout(arr, n, listener) {
+            const copy = new Array(--n);
+
+            let t;
+
+            while(n--) {
+                t = arr[n];
+
+                if(listener !== t) {
+                    copy[n] = t;
                 }
+            }
 
-                break;
-
-            case 2:
-                for(let i = 0; i < evLen; i++) {
-                    ev[i].call(this, arguments[1]);
-                }
-
-                break;
-
-            case 3:
-                for(let i = 0; i < evLen; i++) {
-                    ev[i].call(this, arguments[1], arguments[2]);
-                }
-
-                break;
-
-            case 4:
-                for(let i = 0; i < evLen; i++) {
-                    ev[i].call(this, arguments[1], arguments[2], arguments[3]);
-                }
-
-                break;
-
-            default:
-                const args = new Array(argsLen - 1);
-
-                for(let i = 1; i < argsLen; i++) {
-                    args[i - 1] = arguments[i];
-                }
-
-                for(let i = 0; i < evLen; i++) {
-                    ev[i].apply(this, args);
-                }
+            return copy;
         }
 
-        //--------------]>
+        _arrayCloneWith(arr, n, listener) {
+            const copy = new Array(n + 1);
 
-        return true;
+            while(n--) {
+                copy[n] = arr[n];
+            }
+
+            copy[n] = listener;
+
+            return copy;
+        }
     }
 
-    _arrayCloneWithout(arr, n, listener) {
-        const copy = new Array(--n);
+    //-----------------------]>
 
-        let t;
+    return EE;
 
-        while(n--) {
-            t = arr[n];
+    //-----------------------]>
 
-            if(listener !== t) {
-                copy[n] = t;
+    function emitNone(handler, isFn, self) {
+        if(isFn) {
+            handler.call(self);
+        } else {
+            for(let i = 0, len = handler.length; i < len; ++i) {
+                handler[i].call(self);
             }
         }
-
-        return copy;
     }
-
-    _arrayCloneWith(arr, n, listener) {
-        const copy = new Array(n + 1);
-
-        while(n--) {
-            copy[n] = arr[n];
+    function emitOne(handler, isFn, self, arg1) {
+        if(isFn) {
+            handler.call(self, arg1);
+        } else {
+            for(let i = 0, len = handler.length; i < len; ++i) {
+                handler[i].call(self, arg1);
+            }
         }
-
-        copy[n] = listener;
-
-        return copy;
     }
-}
+    function emitTwo(handler, isFn, self, arg1, arg2) {
+        if(isFn) {
+            handler.call(self, arg1, arg2);
+        } else {
+            for(let i = 0, len = handler.length; i < len; ++i) {
+                handler[i].call(self, arg1, arg2);
+            }
+        }
+    }
+    function emitThree(handler, isFn, self, arg1, arg2, arg3) {
+        if(isFn) {
+            handler.call(self, arg1, arg2, arg3);
+        } else {
+            for(let i = 0, len = handler.length; i < len; ++i) {
+                handler[i].call(self, arg1, arg2, arg3);
+            }
+        }
+    }
+    function emitMany(handler, isFn, self, args) {
+        if(isFn) {
+            handler.apply(self, args);
+        } else {
+            for(let i = 0, len = handler.length; i < len; ++i) {
+                handler[i].apply(self, args);
+            }
+        }
+    }
+
+})();
 
 //-----------------------------------------------------
 

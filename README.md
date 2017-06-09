@@ -80,7 +80,7 @@ Client:
 
 ```javascript
 const ssl = {
-    "dir":   "/www/site",
+    "dir":       "/www/site",
 
     "key":       "/3_site.xx.key",
     "cert":      "/2_site.xx.crt",
@@ -312,6 +312,7 @@ io.on("connection", function(socket, request) {
 |                                      | **app.method**   |                                             |
 | emit(name, data)                     |                  | data: hashTable or array; returns: bool     |
 | bundle()                             |                  |                                             |
+| text(data)                           |                  |                                             |
 | broadcast(data[, options])           |                  | native                                      |
 |                                      | -                |                                             |
 | listen([port, host, callback])       |                  | default: "localhost:1337"                   |
@@ -342,6 +343,7 @@ io.on("connection", function(socket, request) {
 | terminated (code)                    |                  |                                             |
 |                                      | -                |                                             |
 | message (data)                       |                  |                                             |
+| text (data)                          |                  |                                             |
 | arraybuffer (data)                   |                  | intercepts and blocks unpacking of packets  |
 |                                      | -                |                                             |
 | ping (message)                       |                  |                                             |
@@ -362,6 +364,7 @@ io.on("connection", function(socket, request) {
 | isSupported()                        |                  |                                             |
 |                                      | -                |                                             |
 | emit(name, data)                     |                  | data: hashTable or array; returns: bool     |
+| text(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |
 |                                      | -                |                                             |
 | connect(url)                         |                  |                                             |
@@ -382,6 +385,7 @@ io.on("connection", function(socket, request) {
 |                                      | -                |                                             |
 | packet (name, data)                  |                  |                                             |
 | message (data, event)                |                  |                                             |
+| text (data, event)                   |                  |                                             |
 | arraybuffer (data, event)            |                  | intercepts and blocks unpacking of packets  |
 | error (data)                         |                  |                                             |
 

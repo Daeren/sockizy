@@ -27,205 +27,223 @@ var io = function (module) {
     //-----------------------------------------------------
 
     var SEE = function () {
-        function SEE() {
-            _classCallCheck(this, SEE);
+        var EE = function () {
+            function EE() {
+                _classCallCheck(this, EE);
 
-            this._events = Object.create(null);
-        }
-
-        _createClass(SEE, [{
-            key: "on",
-            value: function on(name, listener) {
-                var ev = this._events[name];
-
-                if (typeof ev === "function") {
-                    this._events[name] = [ev, listener];
-                } else {
-                    this._events[name] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
-                }
-
-                return this;
+                this._events = {};
             }
-        }, {
-            key: "off",
-            value: function off(name, listener) {
-                var argsLen = arguments.length;
 
-                //--------------]>
+            _createClass(EE, [{
+                key: "on",
+                value: function on(name, listener) {
+                    var ev = this._events[name];
 
-                if (!argsLen) {
-                    this._events = Object.create(null);
-                    return this;
-                }
-
-                //--------------]>
-
-                var ev = this._events[name];
-
-                if (typeof ev === "function") {
-                    if (argsLen === 1 || ev === listener) {
-                        this._events[name] = null;
-                    }
-
-                    return this;
-                }
-
-                //--------------]>
-
-                var evLen = ev && ev.length;
-
-                //--------------]>
-
-                if (!evLen) {
-                    return this;
-                }
-
-                //--------------]>
-
-                if (argsLen === 1) {
-                    if (evLen === 1) {
-                        ev.pop();
+                    if (typeof ev === "function") {
+                        this._events[name] = [ev, listener];
                     } else {
-                        this._events[name] = new Array();
+                        this._events[name] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
                     }
-                } else if (evLen === 1) {
-                    if (ev[0] === listener) {
-                        ev.pop();
-                    }
-                } else if (ev.indexOf(listener) >= 0) {
-                    this._events[name] = this._arrayCloneWithout(ev, evLen, listener);
+
+                    return this;
                 }
+            }, {
+                key: "off",
+                value: function off(name, listener) {
+                    var argsLen = arguments.length;
 
-                //--------------]>
+                    //--------------]>
 
-                return this;
-            }
-        }, {
-            key: "_emit",
-            value: function _emit(name) {
-                var ev = this._events[name];
-                var func = typeof ev === "function" && ev;
-
-                var evLen = func || ev && ev.length;
-
-                //--------------]>
-
-                if (!evLen) {
-                    if (name === "error") {
-                        throw arguments[1];
+                    if (!argsLen) {
+                        this._events = {};
+                        return this;
                     }
 
-                    return false;
+                    //--------------]>
+
+                    var ev = this._events[name];
+
+                    if (typeof ev === "function") {
+                        if (argsLen === 1 || ev === listener) {
+                            this._events[name] = null;
+                        }
+
+                        return this;
+                    }
+
+                    //--------------]>
+
+                    var evLen = ev && ev.length;
+
+                    //--------------]>
+
+                    if (!evLen) {
+                        return this;
+                    }
+
+                    //--------------]>
+
+                    if (argsLen === 1) {
+                        if (evLen === 1) {
+                            ev.pop();
+                        } else {
+                            this._events[name] = new Array();
+                        }
+                    } else if (evLen === 1) {
+                        if (ev[0] === listener) {
+                            ev.pop();
+                        }
+                    } else if (ev.indexOf(listener) >= 0) {
+                        this._events[name] = this._arrayCloneWithout(ev, evLen, listener);
+                    }
+
+                    //--------------]>
+
+                    return this;
                 }
+            }, {
+                key: "_emit",
+                value: function _emit(name) {
+                    var events = this._events[name];
 
-                //--------------]>
+                    //--------------]>
 
-                var argsLen = arguments.length;
+                    if (!events) {
+                        if (name === "error") {
+                            var error = arguments[1];
 
-                //--------------]>
+                            if (error instanceof Error) {
+                                throw error;
+                            } else {
+                                var e = new Error('Unhandled "error" event. (' + error + ')');
+                                e.context = error;
 
-                if (func) {
+                                throw e;
+                            }
+                        }
+
+                        return false;
+                    }
+
+                    //--------------]>
+
+                    var isFn = typeof events === "function";
+                    var argsLen = arguments.length;
+
+                    //--------------]>
+
                     switch (argsLen) {
                         case 1:
-                            func.call(this);break;
+                            emitNone(events, isFn, this);break;
                         case 2:
-                            func.call(this, arguments[1]);break;
+                            emitOne(events, isFn, this, arguments[1]);break;
                         case 3:
-                            func.call(this, arguments[1], arguments[2]);break;
+                            emitTwo(events, isFn, this, arguments[1], arguments[2]);break;
                         case 4:
-                            func.call(this, arguments[1], arguments[2], arguments[3]);break;
+                            emitThree(events, isFn, this, arguments[1], arguments[2], arguments[3]);break;
 
                         default:
-                            var args = new Array(argsLen - 1);
+                            {
+                                var args = new Array(argsLen - 1);
 
-                            for (var i = 1; i < argsLen; i++) {
-                                args[i - 1] = arguments[i];
+                                for (var i = 1; i < argsLen; i++) {
+                                    args[i - 1] = arguments[i];
+                                }
+
+                                emitMany(events, isFn, this, args);
                             }
-
-                            func.apply(this, args);
                     }
+
+                    //--------------]>
 
                     return true;
                 }
+            }, {
+                key: "_arrayCloneWithout",
+                value: function _arrayCloneWithout(arr, n, listener) {
+                    var copy = new Array(--n);
 
-                switch (argsLen) {
-                    case 1:
-                        for (var _i = 0; _i < evLen; _i++) {
-                            ev[_i].call(this);
+                    var t = void 0;
+
+                    while (n--) {
+                        t = arr[n];
+
+                        if (listener !== t) {
+                            copy[n] = t;
                         }
-
-                        break;
-
-                    case 2:
-                        for (var _i2 = 0; _i2 < evLen; _i2++) {
-                            ev[_i2].call(this, arguments[1]);
-                        }
-
-                        break;
-
-                    case 3:
-                        for (var _i3 = 0; _i3 < evLen; _i3++) {
-                            ev[_i3].call(this, arguments[1], arguments[2]);
-                        }
-
-                        break;
-
-                    case 4:
-                        for (var _i4 = 0; _i4 < evLen; _i4++) {
-                            ev[_i4].call(this, arguments[1], arguments[2], arguments[3]);
-                        }
-
-                        break;
-
-                    default:
-                        var _args = new Array(argsLen - 1);
-
-                        for (var _i5 = 1; _i5 < argsLen; _i5++) {
-                            _args[_i5 - 1] = arguments[_i5];
-                        }
-
-                        for (var _i6 = 0; _i6 < evLen; _i6++) {
-                            ev[_i6].apply(this, _args);
-                        }
-                }
-
-                //--------------]>
-
-                return true;
-            }
-        }, {
-            key: "_arrayCloneWithout",
-            value: function _arrayCloneWithout(arr, n, listener) {
-                var copy = new Array(--n);
-
-                var t = void 0;
-
-                while (n--) {
-                    t = arr[n];
-
-                    if (listener !== t) {
-                        copy[n] = t;
                     }
+
+                    return copy;
                 }
+            }, {
+                key: "_arrayCloneWith",
+                value: function _arrayCloneWith(arr, n, listener) {
+                    var copy = new Array(n + 1);
 
-                return copy;
-            }
-        }, {
-            key: "_arrayCloneWith",
-            value: function _arrayCloneWith(arr, n, listener) {
-                var copy = new Array(n + 1);
+                    while (n--) {
+                        copy[n] = arr[n];
+                    }
 
-                while (n--) {
-                    copy[n] = arr[n];
+                    copy[n] = listener;
+
+                    return copy;
                 }
+            }]);
 
-                copy[n] = listener;
+            return EE;
+        }();
 
-                return copy;
+        //-----------------------]>
+
+        return EE;
+
+        //-----------------------]>
+
+        function emitNone(handler, isFn, self) {
+            if (isFn) {
+                handler.call(self);
+            } else {
+                for (var i = 0, len = handler.length; i < len; ++i) {
+                    handler[i].call(self);
+                }
             }
-        }]);
-
-        return SEE;
+        }
+        function emitOne(handler, isFn, self, arg1) {
+            if (isFn) {
+                handler.call(self, arg1);
+            } else {
+                for (var i = 0, len = handler.length; i < len; ++i) {
+                    handler[i].call(self, arg1);
+                }
+            }
+        }
+        function emitTwo(handler, isFn, self, arg1, arg2) {
+            if (isFn) {
+                handler.call(self, arg1, arg2);
+            } else {
+                for (var i = 0, len = handler.length; i < len; ++i) {
+                    handler[i].call(self, arg1, arg2);
+                }
+            }
+        }
+        function emitThree(handler, isFn, self, arg1, arg2, arg3) {
+            if (isFn) {
+                handler.call(self, arg1, arg2, arg3);
+            } else {
+                for (var i = 0, len = handler.length; i < len; ++i) {
+                    handler[i].call(self, arg1, arg2, arg3);
+                }
+            }
+        }
+        function emitMany(handler, isFn, self, args) {
+            if (isFn) {
+                handler.apply(self, args);
+            } else {
+                for (var i = 0, len = handler.length; i < len; ++i) {
+                    handler[i].apply(self, args);
+                }
+            }
+        }
     }();
 
     //-----------------------------------------------------
@@ -548,11 +566,11 @@ var io = function (module) {
             return b[0] === 0x12;
         }();
 
-        var sysOffset = 3;
+        var sysOffset = 1;
 
         //-------------------------]>
 
-        return { isBigEndian: isBigEndian, sysOffset: sysOffset, createPacket: createPacket, getSize: getSize, getId: getId };
+        return { isBigEndian: isBigEndian, createPacket: createPacket, getId: getId };
 
         //-------------------------]>
 
@@ -572,11 +590,7 @@ var io = function (module) {
                 pktMinSize = 0,
                 pktHasStr = false,
                 pktBufStrict = null,
-                pktBufPack = null,
-                pktBufUnpack = null;
-
-            var pktSysBVMSize = new Uint16Array(1),
-                pktSysBufMSize = new Uint8Array(pktSysBVMSize.buffer);
+                pktBufPack = null;
 
             //-----------------]>
 
@@ -643,7 +657,7 @@ var io = function (module) {
                     bufAType = void 0,
                     bufABytes = void 0;
 
-                var len = schLen;
+                var fieldIdx = schLen;
 
                 var pktSize = sysOffset,
                     tLen = void 0,
@@ -651,9 +665,8 @@ var io = function (module) {
 
                 //--------]>
 
-
-                while (len--) {
-                    field = fields[len];
+                while (fieldIdx--) {
+                    field = fields[fieldIdx];
                     var _field = field;
 
                     var _field2 = _slicedToArray(_field, 7);
@@ -667,7 +680,7 @@ var io = function (module) {
                     bufABytes = _field2[6];
 
 
-                    input = data[isArray ? len : name];
+                    input = data[isArray ? fieldIdx : name];
 
                     //------]>
 
@@ -705,10 +718,12 @@ var io = function (module) {
                             }
 
                         default:
-                            bufType[0] = input;
+                            {
+                                bufType[0] = input;
 
-                            if (isBigEndian && bufType.byteLength > 1) {
-                                bufType.reverse();
+                                if (isBigEndian && bufType.byteLength > 1) {
+                                    bufType.reverse();
+                                }
                             }
                     }
 
@@ -723,7 +738,7 @@ var io = function (module) {
                             pktBufStrict[pktSize++] = bufBytes[tIdx++];
                         }
                     } else {
-                        buffers[len] = bufBytes;
+                        buffers[fieldIdx] = bufBytes;
                         pktSize += tLen;
                     }
                 }
@@ -735,10 +750,12 @@ var io = function (module) {
 
                 //--------]>
 
-                var result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : pktBufUnpack && pktBufUnpack.length === pktSize ? pktBufUnpack : null;
+                var result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : null;
                 var resOffset = sysOffset;
 
-                len = schLen;
+                //--------]>
+
+                fieldIdx = schLen;
 
                 //--------]>
 
@@ -746,26 +763,22 @@ var io = function (module) {
                     result = pktBufPack = new Uint8Array(pktSize);
                 }
 
-                while (len--) {
-                    for (var b = buffers[len], _i7 = 0, l = b.length; _i7 < l; _i7++) {
-                        result[resOffset++] = b[_i7];
+                while (fieldIdx--) {
+                    for (var b = buffers[fieldIdx], _i = 0, l = b.length; _i < l; _i++) {
+                        result[resOffset++] = b[_i];
                     }
                 }
 
                 //--------]>
 
-                pktSysBVMSize[0] = pktSize;
-
-                result[0] = pktSysBufMSize[0];
-                result[1] = pktSysBufMSize[1];
-                result[2] = id;
+                result[0] = id;
 
                 //--------]>
 
                 return result;
             }
 
-            function unpack(bin, target) {
+            function unpack(bin, offset, length, cbEndInfo, target) {
                 target = target || pktDataHolder;
 
                 //--------]>
@@ -778,23 +791,10 @@ var io = function (module) {
                     return target;
                 }
 
-                if (bin instanceof ArrayBuffer) {
-                    var buf = pktBufUnpack && pktBufUnpack.length === bin.length ? pktBufUnpack : pktBufPack && pktBufPack.length === bin.length ? pktBufPack : null;
-
-                    if (buf) {
-                        buf.set(bin);
-                        bin = buf;
-                    } else {
-                        bin = pktBufUnpack = new Uint8Array(bin);
-                    }
-                }
-
                 //--------]>
 
-                var binLen = bin.byteLength;
-
                 var field = void 0,
-                    len = schLen,
+                    fieldIdx = schLen,
                     name = void 0,
                     type = void 0,
                     bytes = void 0,
@@ -803,12 +803,14 @@ var io = function (module) {
                     bufAType = void 0,
                     bufABytes = void 0;
 
-                var pktOffset = sysOffset;
+                var pktOffset = offset + sysOffset;
+
+                var pktOffsetStart = pktOffset;
 
                 //--------]>
 
-                while (len--) {
-                    field = fields[len];
+                while (fieldIdx--) {
+                    field = fields[fieldIdx];
 
 
                     //------]>
@@ -824,15 +826,15 @@ var io = function (module) {
                     bufBytes = _field4[4];
                     bufAType = _field4[5];
                     bufABytes = _field4[6];
-                    for (var _i8 = 0; _i8 < bytes; _i8++) {
-                        if (pktOffset >= binLen) {
+                    for (var _i2 = 0; _i2 < bytes; _i2++) {
+                        if (pktOffset >= length) {
                             return null;
                         }
 
                         if (bufAType) {
-                            bufABytes[_i8] = bin[pktOffset++];
+                            bufABytes[_i2] = bin[pktOffset++];
                         } else {
-                            bufBytes[_i8] = bin[pktOffset++];
+                            bufBytes[_i2] = bin[pktOffset++];
                         }
                     }
 
@@ -848,7 +850,7 @@ var io = function (module) {
                                 //--------]>
 
                                 var byteLen = bufAType[0];
-                                var needMem = Math.min(byteLen, binLen);
+                                var needMem = Math.min(byteLen, length);
 
                                 //--------]>
 
@@ -863,12 +865,18 @@ var io = function (module) {
                             }
 
                         default:
-                            if (isBigEndian && bufType.byteLength > 1) {
-                                bufType.reverse();
-                            }
+                            {
+                                if (isBigEndian && bufType.byteLength > 1) {
+                                    bufType.reverse();
+                                }
 
-                            target[name] = bufType[0];
+                                target[name] = bufType[0];
+                            }
                     }
+                }
+
+                if (cbEndInfo) {
+                    cbEndInfo(pktOffset - pktOffsetStart);
                 }
 
                 //--------]>
@@ -949,23 +957,8 @@ var io = function (module) {
 
         //-----------)>
 
-        function getSize(data, holder) {
-            if (holder) {
-                holder.set(data);
-            } else {
-                holder = new Uint16Array(data);
-            }
-
-            return holder[0];
-        }
-
-        function getId(data, holder) {
-            if (holder) {
-                holder.set(data);
-                return holder[0];
-            } else {
-                return data[sysOffset - 1];
-            }
+        function getId(data) {
+            return data[0];
         }
     }();
 
@@ -1015,6 +1008,11 @@ var io = function (module) {
                     }
 
                     return !!data;
+                }
+            }, {
+                key: "text",
+                value: function text(data) {
+                    this.send(data);
                 }
             }, {
                 key: "send",
@@ -1147,23 +1145,20 @@ var io = function (module) {
 
             socket._emit("message", data, event);
 
-            if (socket._emit("arraybuffer", data, event)) {
+            if (typeof data === "string") {
+                socket._emit("text", data, event);
+                return;
+            } else if (socket._emit("arraybuffer", data, event)) {
                 return;
             }
 
             //-----------]>
-
-            var dataByteLength = data.byteLength;
-
-            //-----------]>
-
-            if (!data || !(data instanceof ArrayBuffer) || dataByteLength < packer.sysOffset) {
-                return;
-            }
 
             data = new Uint8Array(data);
 
             //-----------]>
+
+            var dataByteLength = data.byteLength;
 
             var offset = 0,
                 pkt = data;
@@ -1172,11 +1167,10 @@ var io = function (module) {
 
             while (offset < dataByteLength) {
                 var pktSchema = app._unpackMapById[packer.getId(pkt)];
-                var pktSize = pktSchema ? packer.getSize(pkt) : 0;
 
                 //-----------]>
 
-                if (!pktSchema || !pktSize) {
+                if (!pktSchema) {
                     break;
                 }
 
@@ -1186,20 +1180,24 @@ var io = function (module) {
                     name = _pktSchema[0],
                     srz = _pktSchema[1];
 
-                var message = srz.unpack(pkt);
+                var message = srz.unpack(pkt, offset, dataByteLength, function (size) {
+                    offset += size;
+                });
 
                 //-----------]>
 
-                offset += pktSize;
+                if (!message) {
+                    break;
+                }
 
                 if (dataByteLength > offset) {
                     pkt = data.slice(offset);
                 }
 
-                if (message) {
-                    socket._emit("packet", name, message);
-                    socket._emit(name, message);
-                }
+                //-----------]>
+
+                socket._emit("packet", name, message);
+                socket._emit(name, message);
             }
         }
 

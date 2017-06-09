@@ -15,6 +15,8 @@
     },
     "main": "./index",
     "scripts": {
+        "build": "npm test && grunt",
+        "benchmark": "node scripts/benchmark",
         "test": "mocha --reporter spec"
     },
     "repository": {
@@ -34,7 +36,6 @@
         "uws": "^0"
     },
     "devDependencies": {
-        "uws": "^0",
         "babel-cli": "^6.18.0",
         "babel-plugin-static-fs": "^1.1.0",
         "babel-plugin-version-inline": "^1.0.0",
@@ -42,6 +43,7 @@
         "babel-preset-es2016": "^6.24.1",
         "babel-preset-es2017": "^6.24.1",
         "babelify": "^7.3.0",
+        "chai": "^4.0.2",
         "del": "^2.2.0",
         "electron": "^1.4.15",
         "eslint": "^3.5.0",
@@ -59,9 +61,11 @@
         "load-grunt-tasks": "^3.5.2",
         "minimist": "^1.2.0",
         "mkdirp": "^0.5.1",
+        "mocha": "^3.4.2",
         "parallelshell": "^2.0.0",
         "pixify": "^1.7.0",
         "rimraf": "^2.5.3",
+        "uws": "^0",
         "watch": "^0.19.1"
     }
 }

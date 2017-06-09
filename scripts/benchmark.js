@@ -9,11 +9,20 @@
 
 //-----------------------------------------------------
 
-const rPacker = require("./../src/packer");
+const rSee      = require("./../src/see"),
+      rPacker   = require("./../src/packer");
+
+const rEE       = require("events");
 
 //-----------------------------------------------------
 
-test({
+testEE(rEE);
+console.log("------------------")
+testEE(rSee, true);
+
+//-----------------------------]>
+
+testPacker({
         data:   JSON.stringify({x:1, b: "b".repeat(1)}),
         name:   "DT | (っ◕‿◕)っ ♥ | Привет",
         status: "X  | (っ◕‿◕)っ ♥  Да",
@@ -43,7 +52,7 @@ test({
 
 console.log("------------------")
 
-test({
+testPacker({
         lvl:    122,
         hp:     4566,
         x:      -300.52,
@@ -58,7 +67,7 @@ test({
 
 console.log("------------------")
 
-test({
+testPacker({
         data:   JSON.stringify({x:1, b: "b".repeat(1)}),
         name:   "DT | (っ◕‿◕)っ ♥ | Привет",
         status: "X  | (っ◕‿◕)っ ♥  Да",
@@ -81,7 +90,97 @@ test({
 
 //-----------------------------------------------------
 
-function test(data, schema) {
+function testEE(p, custom) {
+    let l, t;
+
+    class MyEmitter extends p {}
+
+    const ee = new MyEmitter();
+
+    //-----------------]>
+
+    ee.on("data", function(data) {
+        data + 1;
+    });
+
+    ee.on("data2", function(data) {
+    });
+
+    //-----------------]>
+
+    l = 1000 * 1000 * 1;
+
+    console.time("on() x 1");
+
+    while(l--) {
+        if(custom) {
+            ee._emit("data");
+        } else {
+            ee.emit("data");
+        }
+    }
+
+    console.timeEnd("on() x 1");
+
+    //-----------------]>
+
+    l = 1000 * 1000 * 1;
+
+    console.time("on() x 1 + [data] x 1");
+
+    while(l--) {
+        if(custom) {
+            ee._emit("data", 1);
+        } else {
+            ee.emit("data", 1);
+        }
+    }
+
+    console.timeEnd("on() x 1 + [data] x 1");
+
+    //-----------------]>
+
+    ee.on("data", function(data) {
+        data + 1;
+    });
+
+    ee.on("data2", function(data) {
+    });
+
+    //-----------------]>
+
+    l = 1000 * 1000 * 1;
+
+    console.time("on() x 2");
+
+    while(l--) {
+        if(custom) {
+            ee._emit("data");
+        } else {
+            ee.emit("data");
+        }
+    }
+
+    console.timeEnd("on() x 2");
+
+    //-----------------]>
+
+    l = 1000 * 1000 * 1;
+
+    console.time("on() x 2 + [data] x 1");
+
+    while(l--) {
+        if(custom) {
+            ee._emit("data", 1);
+        } else {
+            ee.emit("data", 1);
+        }
+    }
+
+    console.timeEnd("on() x 2 + [data] x 1");
+}
+
+function testPacker(data, schema) {
     const objJsonHero = data;
     const strJsonHero = JSON.stringify(objJsonHero);
     const bufJsonHero = Buffer.from(JSON.stringify(objJsonHero));
@@ -91,6 +190,8 @@ function test(data, schema) {
 
     let l, t;
 
+    const pktHeroLen = packPktHero.byteLength;
+
     //-----------------]>
 
     l = 1000 * 1000 * 1;
@@ -98,7 +199,7 @@ function test(data, schema) {
     console.time("pktHero.unpack(packPktHero)");
 
     while(l--) {
-        t = pktHero.unpack(packPktHero);
+        t = pktHero.unpack(packPktHero, 0, pktHeroLen);
     }
 
     console.timeEnd("pktHero.unpack(packPktHero)");
