@@ -788,6 +788,10 @@ var io = function (module) {
                 }
 
                 if (!schLen) {
+                    if (cbEndInfo) {
+                        cbEndInfo(sysOffset);
+                    }
+
                     return target;
                 }
 
@@ -876,7 +880,7 @@ var io = function (module) {
                 }
 
                 if (cbEndInfo) {
-                    cbEndInfo(pktOffset - pktOffsetStart);
+                    cbEndInfo(sysOffset + pktOffset - pktOffsetStart);
                 }
 
                 //--------]>
@@ -1180,9 +1184,7 @@ var io = function (module) {
                     name = _pktSchema[0],
                     srz = _pktSchema[1];
 
-                var message = srz.unpack(pkt, offset, dataByteLength, function (size) {
-                    offset += size;
-                });
+                var message = srz.unpack(pkt, offset, dataByteLength, moveOffset);
 
                 //-----------]>
 
@@ -1198,6 +1200,12 @@ var io = function (module) {
 
                 socket._emit("packet", name, message);
                 socket._emit(name, message);
+            }
+
+            //-----------]>
+
+            function moveOffset(size) {
+                offset += size;
             }
         }
 

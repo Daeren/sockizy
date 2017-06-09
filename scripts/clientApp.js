@@ -194,10 +194,7 @@ return function(url, options) {
             //-----------]>
 
             const [name, srz] = pktSchema;
-
-            const message = srz.unpack(pkt, offset, dataByteLength, function(size) {
-                offset += size;
-            });
+            const message = srz.unpack(pkt, offset, dataByteLength, moveOffset);
 
             //-----------]>
 
@@ -213,6 +210,12 @@ return function(url, options) {
 
             socket._emit("packet", name, message);
             socket._emit(name, message);
+        }
+
+        //-----------]>
+
+        function moveOffset(size) {
+            offset += size;
         }
     }
 

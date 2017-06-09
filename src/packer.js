@@ -531,6 +531,10 @@ const packer = (function() {
             }
 
             if(!schLen) {
+                if(cbEndInfo) {
+                    cbEndInfo(sysOffset);
+                }
+
                 return target;
             }
 
@@ -602,7 +606,7 @@ const packer = (function() {
             }
 
             if(cbEndInfo) {
-                cbEndInfo(pktOffset - pktOffsetStart);
+                cbEndInfo(sysOffset + pktOffset - pktOffsetStart);
             }
 
             //--------]>
