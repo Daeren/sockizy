@@ -629,10 +629,6 @@ const packer = (function() {
         function buildTypedBuf(type, size) {
             switch(type) {
                 case TYPE_STR:
-                    if(size && (size % Uint16Array.BYTES_PER_ELEMENT) !== 0) {
-                        throw new RangeError(`Buffer size must be a multiple of 16-bits | str:${size}`);
-                    }
-
                     return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc(size || 256), new Uint16Array(1)];
 
                 case TYPE_INT:
@@ -673,7 +669,7 @@ const packer = (function() {
 
         function getTypeId(type) {
             switch(type) {
-                case "c":
+                case "s":
                 case "str":
                     return TYPE_STR;
 
