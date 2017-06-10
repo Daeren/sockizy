@@ -139,8 +139,15 @@ function main(port, options, isCluster) {
 
         if(!options.server) {
             if(options.ssl) {
-                const ssl       = options.ssl;
-                const certDir   = ssl.dir || "";
+                const ssl = Object.assign({
+                    "honorCipherOrder":     true,
+                    "requestCert":          true,
+                    "rejectUnauthorized":   false
+                }, options.ssl);
+
+                //---------]>
+
+                const certDir = ssl.dir || "";
 
                 const optKey  = rFs.readFileSync(certDir + ssl.key),
                       optCert = rFs.readFileSync(certDir + ssl.cert);
@@ -158,18 +165,13 @@ function main(port, options, isCluster) {
                     }
                 }
 
+                ssl.key = optKey;
+                ssl.cert = optCert;
+                ssl.ca = optCa;
+
                 //---------]>
 
-                options.server = rHttps.createServer({
-                    "key":                  optKey,
-                    "cert":                 optCert,
-                    "ca":                   optCa,
-
-                    "honorCipherOrder":     true,
-
-                    "requestCert":          true,
-                    "rejectUnauthorized":   false
-                }, sendClientLib);
+                options.server = rHttps.createServer(ssl, sendClientLib);
             }
             else {
                 options.server = rHttp.createServer(sendClientLib);
