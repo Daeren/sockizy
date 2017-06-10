@@ -125,7 +125,7 @@ const SEE = (function() {
                 default: {
                     const args = new Array(argsLen - 1);
 
-                    for(let i = 1; i < argsLen; i++) {
+                    for(let i = 1; i < argsLen; ++i) {
                         args[i - 1] = arguments[i];
                     }
 

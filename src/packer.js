@@ -373,7 +373,7 @@ const packer = (function() {
 
         //-----------------]>
 
-        for(let e, i = 0; i < schLen; i++) {
+        for(let e, i = 0; i < schLen; ++i) {
             e = schema[i].split(":");
 
             //---------]>
@@ -517,7 +517,7 @@ const packer = (function() {
             }
 
             while(fieldIdx--) {
-                for(let b = buffers[fieldIdx], i = 0, l = b.length; i < l; i++) {
+                for(let b = buffers[fieldIdx], i = 0, l = b.length; i < l; ++i) {
                     result[resOffset++] = b[i];
                 }
             }
@@ -567,7 +567,7 @@ const packer = (function() {
 
                 //------]>
 
-                for(let i = 0; i < bytes; i++) {
+                for(let i = 0; i < bytes; ++i) {
                     if(pktOffset >= length) {
                         return null;
                     }

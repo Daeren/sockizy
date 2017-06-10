@@ -108,6 +108,24 @@ let gSrzDataWithoutStrings;
 let gPackDataWithStrings;
 let gPackDataWithoutStrings;
 
+let gUnpackDataWithStrings;
+let gUnpackDataWithoutStrings;
+
+//-----------------------------------------------------
+
+function testUnpackData(d1, d2) {
+    for(let k in d1) {
+        let t1 = d2[k];
+        let t2 = d1[k];
+
+        if(typeof(t1) === "number") {
+            expect(t2).to.be.closeTo(t1, 0.001);
+        } else {
+            expect(t2).to.equal(t1);
+        }
+    }
+}
+
 //-----------------------------------------------------
 
 describe("Packer", function() {
@@ -129,10 +147,20 @@ describe("Packer", function() {
         gSrzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
     });
 
+
     it("Common: pack", function() {
         gPackDataWithStrings = gSrzDataWithStrings.pack(gMid, gDataWithStrings);
         gPackDataWithoutStrings = gSrzDataWithoutStrings.pack(gMid, gDataWithoutStrings);
     });
+
+    it("Common: unpack", function() {
+        gUnpackDataWithStrings = gSrzDataWithStrings.unpack(gPackDataWithStrings, 0, gPackDataWithStrings.length);
+        gUnpackDataWithoutStrings = gSrzDataWithoutStrings.unpack(gPackDataWithoutStrings, 0, gPackDataWithoutStrings.length);
+
+        testUnpackData(gUnpackDataWithStrings, gExpDataWithStrings);
+        testUnpackData(gUnpackDataWithoutStrings, gExpDataWithoutStrings);
+    });
+
 
     it("Common: getId | WithStrings", function() {
         expect(rPacker.getId(gPackDataWithStrings)).to.be.a("number").and.equal(gMid);

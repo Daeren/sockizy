@@ -146,7 +146,7 @@ var io = function (module) {
                             {
                                 var args = new Array(argsLen - 1);
 
-                                for (var i = 1; i < argsLen; i++) {
+                                for (var i = 1; i < argsLen; ++i) {
                                     args[i - 1] = arguments[i];
                                 }
 
@@ -601,7 +601,7 @@ var io = function (module) {
 
             //-----------------]>
 
-            for (var e, i = 0; i < schLen; i++) {
+            for (var e, i = 0; i < schLen; ++i) {
                 e = schema[i].split(":");
 
                 //---------]>
@@ -764,7 +764,7 @@ var io = function (module) {
                 }
 
                 while (fieldIdx--) {
-                    for (var b = buffers[fieldIdx], _i = 0, l = b.length; _i < l; _i++) {
+                    for (var b = buffers[fieldIdx], _i = 0, l = b.length; _i < l; ++_i) {
                         result[resOffset++] = b[_i];
                     }
                 }
@@ -830,7 +830,7 @@ var io = function (module) {
                     bufBytes = _field4[4];
                     bufAType = _field4[5];
                     bufABytes = _field4[6];
-                    for (var _i2 = 0; _i2 < bytes; _i2++) {
+                    for (var _i2 = 0; _i2 < bytes; ++_i2) {
                         if (pktOffset >= length) {
                             return null;
                         }
@@ -893,10 +893,6 @@ var io = function (module) {
             function buildTypedBuf(type, size) {
                 switch (type) {
                     case TYPE_STR:
-                        if (size && size % Uint16Array.BYTES_PER_ELEMENT !== 0) {
-                            throw new RangeError("Buffer size must be a multiple of 16-bits | str:" + size);
-                        }
-
                         return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc(size || 256), new Uint16Array(1)];
 
                     case TYPE_INT:
@@ -943,13 +939,19 @@ var io = function (module) {
 
             function getTypeId(type) {
                 switch (type) {
+                    case "s":
                     case "str":
                         return TYPE_STR;
 
+                    case "i":
                     case "int":
                         return TYPE_INT;
+
+                    case "u":
                     case "uint":
                         return TYPE_UINT;
+
+                    case "f":
                     case "float":
                         return TYPE_FLOAT;
 
