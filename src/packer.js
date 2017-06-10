@@ -673,11 +673,21 @@ const packer = (function() {
 
         function getTypeId(type) {
             switch(type) {
-                case "str": return TYPE_STR;
+                case "c":
+                case "str":
+                    return TYPE_STR;
 
-                case "int": return TYPE_INT;
-                case "uint": return TYPE_UINT;
-                case "float": return TYPE_FLOAT;
+                case "i":
+                case "int":
+                    return TYPE_INT;
+
+                case "u":
+                case "uint":
+                    return TYPE_UINT;
+
+                case "f":
+                case "float":
+                    return TYPE_FLOAT;
 
                 default:
                     throw new Error(`Unknown type: ${type}`);

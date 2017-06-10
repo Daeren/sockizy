@@ -113,7 +113,6 @@ const io = rSockizy(1337, {ssl, "maxPayload": 1024 * 16});
 // Async
 
 io.verifyClient(function(info, callback) {
-    setTimeout(callback, 1000 * 2, true);
 });
 
 // Sync
@@ -257,13 +256,13 @@ io.on("connection", function(socket, request) {
 
 ##### Packet type
 
-| Name              | Note                                 |
-|-------------------|--------------------------------------|
-|                   | -                                    |
-| str<Size (byte)>  | default: max 256                     |
-| int<Size (bit)>   | size: 8, 16, 32                      |
-| uint<Size (bit)>  | size: 8, 16, 32                      |
-| float<Size (bit)> | size: 32, 64                         |
+| Name              | Alias   | Note                       |
+|-------------------|---------|----------------------------|
+|                   | -       |                            |
+| str<size (byte)>  | c<size> | default: max 256           |
+| int<size (bit)>   | i<size> | size: 8, 16, 32            |
+| uint<size (bit)>  | u<size> | size: 8, 16, 32            |
+| float<size (bit)> | f<size> | size: 32, 64               |
 
 
 ##### Server options
