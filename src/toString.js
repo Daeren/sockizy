@@ -12,22 +12,18 @@
 const toString = (function() {
     return function(data) {
         if(data === null) {
-            data = "";
-        }
-        else {
-            switch(typeof(data)) {
-                case "string": break;
-
-                case "undefined": data = ""; break;
-                case "number": data = isNaN(data) ? "" : (data + ""); break;
-                case "symbol": data = data.toString(); break;
-
-                default:
-                    data = JSON.stringify(data);
-            }
+            return "";
         }
 
-        return data;
+        switch(typeof(data)) {
+            case "string":      return data;
+
+            case "undefined":   return "";
+            case "number":      return isNaN(data) ? "" : (data + "");
+            case "symbol":      return data.toString();
+
+            default:            return JSON.stringify(data);
+        }
     };
 })();
 

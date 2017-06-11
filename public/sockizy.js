@@ -272,16 +272,18 @@ var io = function (module) {
 
             Buffer.alloc = alloc;
             Buffer.byteLength = byteLength;
-            Buffer.from = function (data) {
-                if (typeof data === "string") {
-                    return utf8ToBytes(data);
-                } else {
-                    return {
-                        toString: function toString() {
-                            return utf8Slice(data, 0, data.length);
-                        }
-                    };
+
+            Buffer.prototype = Object.create(null);
+            Buffer.prototype.write = write;
+            Buffer.prototype.toString = function (encoding, start, end) {
+                start = start || 0;
+                end = end || this.length;
+
+                if (end === 0) {
+                    return "";
                 }
+
+                return utf8Slice(this, start, end);
             };
 
             //---------------------]>
@@ -476,7 +478,10 @@ var io = function (module) {
                 }
 
                 var buf = new Uint8Array(length);
+
                 // buf.__proto__ = Buffer.prototype;
+                buf.write = Buffer.prototype.write;
+                buf.toString = Buffer.prototype.toString;
 
                 return buf;
             }
@@ -488,16 +493,14 @@ var io = function (module) {
             //--------)>
 
             function alloc(size) {
-                var buf = createBuffer(size);
-                buf.write = write;
-
-                return buf;
+                return createBuffer(size);
             }
 
             //--------)>
 
             function write(string, offset, length) {
                 offset = offset || 0;
+                length = length || this.length;
 
                 var remaining = this.length - offset;
 
@@ -842,10 +845,13 @@ var io = function (module) {
                                 if (!byteLen || byteLen >= length) {
                                     target[name] = "";
                                 } else {
-                                    bufType = holyBuffer.from(bin.slice(pktOffset, pktOffset + byteLen));
-                                    pktOffset += byteLen;
+                                    var needMem = Math.min(bufType.length, byteLen);
 
-                                    target[name] = bufType.toString();
+                                    for (var _i3 = 0; _i3 < needMem; ++_i3) {
+                                        bufType[_i3] = bin[pktOffset++];
+                                    }
+
+                                    target[name] = bufType.toString("utf8", 0, needMem);
                                 }
 
                                 break;
@@ -969,25 +975,23 @@ var io = function (module) {
     var toString = function () {
         return function (data) {
             if (data === null) {
-                data = "";
-            } else {
-                switch (typeof data === "undefined" ? "undefined" : _typeof(data)) {
-                    case "string":
-                        break;
-
-                    case "undefined":
-                        data = "";break;
-                    case "number":
-                        data = isNaN(data) ? "" : data + "";break;
-                    case "symbol":
-                        data = data.toString();break;
-
-                    default:
-                        data = JSON.stringify(data);
-                }
+                return "";
             }
 
-            return data;
+            switch (typeof data === "undefined" ? "undefined" : _typeof(data)) {
+                case "string":
+                    return data;
+
+                case "undefined":
+                    return "";
+                case "number":
+                    return isNaN(data) ? "" : data + "";
+                case "symbol":
+                    return data.toString();
+
+                default:
+                    return JSON.stringify(data);
+            }
         };
     }();
 

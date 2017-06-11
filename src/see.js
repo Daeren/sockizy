@@ -93,13 +93,13 @@ const SEE = (function() {
 
             if(!events) {
                 if(name === "error") {
-                    let error = arguments[1];
+                    const error = arguments[1];
 
                     if(error instanceof Error) {
                         throw error;
                     }
                     else {
-                        let e = new Error("Unhandled \"error\" event. (" + error + ")");
+                        const e = new Error(`Unhandled "error" event. (${error})`);
                         e.context = error;
 
                         throw e;

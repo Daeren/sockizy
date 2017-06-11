@@ -20,18 +20,19 @@ const packer = (function() {
 
             Buffer.alloc = alloc;
             Buffer.byteLength = byteLength;
-            Buffer.from = function(data) {
-                if(typeof(data) === "string") {
-                    return utf8ToBytes(data);
+
+            Buffer.prototype = Object.create(null);
+            Buffer.prototype.write = write;
+            Buffer.prototype.toString = function(encoding, start, end) {
+                start = start || 0;
+                end = end || this.length;
+
+                if(end === 0) {
+                    return "";
                 }
-                else {
-                    return {
-                        toString() {
-                            return utf8Slice(data, 0, data.length);
-                        }
-                    };
-                }
-            };
+
+                return utf8Slice(this, start, end);
+            }
 
             //---------------------]>
 
@@ -244,7 +245,10 @@ const packer = (function() {
                 }
 
                 const buf = new Uint8Array(length);
+
                 // buf.__proto__ = Buffer.prototype;
+                buf.write = Buffer.prototype.write;
+                buf.toString = Buffer.prototype.toString;
 
                 return buf;
             }
@@ -256,16 +260,14 @@ const packer = (function() {
             //--------)>
 
             function alloc(size) {
-                const buf = createBuffer(size);
-                buf.write = write;
-
-                return buf;
+                return createBuffer(size);
             }
 
             //--------)>
 
             function write(string, offset, length) {
                 offset = offset || 0;
+                length = length || this.length;
 
                 const remaining = this.length - offset;
 
@@ -591,10 +593,13 @@ const packer = (function() {
                             target[name] = "";
                         }
                         else {
-                            bufType = holyBuffer.from(bin.slice(pktOffset, pktOffset + byteLen));
-                            pktOffset += byteLen;
+                            const needMem = Math.min(bufType.length, byteLen);
 
-                            target[name] = bufType.toString();
+                            for(let i = 0; i < needMem; ++i) {
+                                bufType[i] = bin[pktOffset++];
+                            }
+
+                            target[name] = bufType.toString("utf8", 0, needMem);
                         }
 
                         break;
