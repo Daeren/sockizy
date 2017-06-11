@@ -359,6 +359,8 @@ const packer = (function() {
         const fields        = new Array(schLen);
         const buffers       = new Array(schLen);
 
+        const zeroUI16      = new Uint8Array(2);
+
         let pktDataHolder   = Object.create(null),
             pktMinSize      = 0,
             pktHasStr       = false,
@@ -437,6 +439,13 @@ const packer = (function() {
 
                 switch(type) {
                     case TYPE_STR: {
+                        if(!input) {
+                            bufBytes = zeroUI16;
+                            break;
+                        }
+
+                        //-----]>
+
                         let offset = bufAType.byteLength;
                         let byteLen = input ? bufType.write(input, offset) : 0;
 

@@ -589,6 +589,8 @@ var io = function (module) {
             var fields = new Array(schLen);
             var buffers = new Array(schLen);
 
+            var zeroUI16 = new Uint8Array(2);
+
             var pktDataHolder = Object.create(null),
                 pktMinSize = 0,
                 pktHasStr = false,
@@ -675,6 +677,13 @@ var io = function (module) {
                     switch (_type) {
                         case TYPE_STR:
                             {
+                                if (!input) {
+                                    _bufBytes = zeroUI16;
+                                    break;
+                                }
+
+                                //-----]>
+
                                 var offset = bufAType.byteLength;
                                 var byteLen = input ? bufType.write(input, offset) : 0;
 
