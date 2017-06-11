@@ -677,38 +677,32 @@ var io = function (module) {
                     switch (_type) {
                         case TYPE_STR:
                             {
-                                if (!input) {
-                                    _bufBytes = zeroUI16;
-                                    break;
-                                }
+                                if (input) {
+                                    var offset = bufAType.byteLength;
+                                    var byteLen = input ? bufType.write(input, offset) : 0;
 
-                                //-----]>
+                                    //-----]>
 
-                                var offset = bufAType.byteLength;
-                                var byteLen = input ? bufType.write(input, offset) : 0;
+                                    bufAType[0] = byteLen;
 
-                                //-----]>
+                                    if (isBigEndian) {
+                                        bufType[0] = _bufABytes[1];
+                                        bufType[1] = _bufABytes[0];
+                                    } else {
+                                        bufType[0] = _bufABytes[0];
+                                        bufType[1] = _bufABytes[1];
+                                    }
 
-                                bufAType[0] = byteLen;
+                                    //-----]>
 
-                                if (isBigEndian) {
-                                    bufType[0] = _bufABytes[1];
-                                    bufType[1] = _bufABytes[0];
+                                    byteLen += offset;
+
+                                    _bufBytes = bufType;
+                                    bufType._blen = byteLen;
+
+                                    bytes = byteLen;
                                 } else {
-                                    bufType[0] = _bufABytes[0];
-                                    bufType[1] = _bufABytes[1];
-                                }
-
-                                byteLen += offset;
-
-                                //-----]>
-
-                                if (!_bufBytes || _bufBytes.length !== byteLen) {
-                                    _bufBytes = field[4] = new Uint8Array(byteLen);
-                                }
-
-                                while (byteLen--) {
-                                    _bufBytes[byteLen] = bufType[byteLen];
+                                    _bufBytes = zeroUI16;
                                 }
 
                                 break;
@@ -726,19 +720,15 @@ var io = function (module) {
 
                     //------]>
 
-                    var bts = _bufBytes.length;
-
-                    //------]>
-
                     if (pktBufStrict) {
                         tIdx = 0;
 
-                        while (bts--) {
+                        while (bytes--) {
                             pktBufStrict[pktSize++] = _bufBytes[tIdx++];
                         }
                     } else {
                         buffers[fieldIdx] = _bufBytes;
-                        pktSize += bts;
+                        pktSize += bytes;
                     }
                 }
 
@@ -757,7 +747,7 @@ var io = function (module) {
                     //--------]>
 
                     while (fieldIdx--) {
-                        for (var b = buffers[fieldIdx], _i = 0, l = b.length; _i < l; ++_i) {
+                        for (var b = buffers[fieldIdx], _i = 0, l = b._blen || b.length; _i < l; ++_i) {
                             result[tIdx++] = b[_i];
                         }
                     }

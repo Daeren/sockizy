@@ -439,39 +439,34 @@ const packer = (function() {
 
                 switch(type) {
                     case TYPE_STR: {
-                        if(!input) {
-                            bufBytes = zeroUI16;
-                            break;
-                        }
+                        if(input) {
+                            let offset = bufAType.byteLength;
+                            let byteLen = input ? bufType.write(input, offset) : 0;
 
-                        //-----]>
+                            //-----]>
 
-                        let offset = bufAType.byteLength;
-                        let byteLen = input ? bufType.write(input, offset) : 0;
+                            bufAType[0] = byteLen;
 
-                        //-----]>
+                            if(isBigEndian) {
+                                bufType[0] = bufABytes[1];
+                                bufType[1] = bufABytes[0];
+                            }
+                            else {
+                                bufType[0] = bufABytes[0];
+                                bufType[1] = bufABytes[1];
+                            }
 
-                        bufAType[0] = byteLen;
+                            //-----]>
 
-                        if(isBigEndian) {
-                            bufType[0] = bufABytes[1];
-                            bufType[1] = bufABytes[0];
+                            byteLen += offset;
+
+                            bufBytes = bufType;
+                            bufType._blen = byteLen;
+
+                            bytes = byteLen;
                         }
                         else {
-                            bufType[0] = bufABytes[0];
-                            bufType[1] = bufABytes[1];
-                        }
-
-                        byteLen += offset;
-
-                        //-----]>
-
-                        if(!bufBytes || bufBytes.length !== byteLen) {
-                            bufBytes = field[4] = new Uint8Array(byteLen);
-                        }
-
-                        while(byteLen--) {
-                            bufBytes[byteLen] = bufType[byteLen];
+                            bufBytes = zeroUI16;
                         }
 
                         break;
@@ -488,20 +483,16 @@ const packer = (function() {
 
                 //------]>
 
-                let bts = bufBytes.length;
-
-                //------]>
-
                 if(pktBufStrict) {
                     tIdx = 0;
 
-                    while(bts--) {
+                    while(bytes--) {
                         pktBufStrict[pktSize++] = bufBytes[tIdx++];
                     }
                 }
                 else {
                     buffers[fieldIdx] = bufBytes;
-                    pktSize += bts;
+                    pktSize += bytes;
                 }
             }
 
@@ -520,7 +511,7 @@ const packer = (function() {
                 //--------]>
 
                 while(fieldIdx--) {
-                    for(let b = buffers[fieldIdx], i = 0, l = b.length; i < l; ++i) {
+                    for(let b = buffers[fieldIdx], i = 0, l = (b._blen || b.length); i < l; ++i) {
                         result[tIdx++] = b[i];
                     }
                 }
