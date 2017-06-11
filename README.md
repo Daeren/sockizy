@@ -66,7 +66,7 @@ Client:
 <script src="http://localhost:1337"></script>
 
 <script>
-    const socket = io("wss://localhost:1337");
+    const socket = io("ws://localhost:1337");
 	
     socket.on("message", console.log);
     socket.send("cluster.cl#2easy");

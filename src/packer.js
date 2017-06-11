@@ -417,23 +417,19 @@ const packer = (function() {
         //-----------------]>
 
         function pack(id, data) {
-            const isArray = Array.isArray(data);
+            const isArray   = Array.isArray(data);
 
-            let input, field,
-                name, type, bytes, bufType, bufBytes, bufAType, bufABytes;
-
-            let fieldIdx = schLen;
-
-            let pktSize = sysOffset,
-                tLen, tIdx;
+            let tIdx,
+                fieldIdx    = schLen,
+                pktSize     = sysOffset;
 
             //--------]>
 
             while(fieldIdx--) {
-                field = fields[fieldIdx];
-                [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
+                let field = fields[fieldIdx];
+                let [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
 
-                input = data[isArray ? fieldIdx : name];
+                let input = data[isArray ? fieldIdx : name];
 
                 //------]>
 
@@ -474,51 +470,48 @@ const packer = (function() {
                         bufType[0] = input;
 
                         if(isBigEndian && bufType.byteLength > 1) {
-                            bufType.reverse();
+                            bufBytes.reverse();
                         }
                     }
                 }
 
                 //------]>
 
-                tLen = bufBytes.length;
+                let bts = bufBytes.length;
+
+                //------]>
 
                 if(pktBufStrict) {
                     tIdx = 0;
 
-                    while(tLen--) {
+                    while(bts--) {
                         pktBufStrict[pktSize++] = bufBytes[tIdx++];
                     }
                 }
                 else {
                     buffers[fieldIdx] = bufBytes;
-                    pktSize += tLen;
+                    pktSize += bts;
                 }
             }
 
-            if(pktBufStrict) {
-                pktBufStrict[0] = id;
-                return pktBufStrict;
-            }
-
             //--------]>
 
-            let result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : null;
-            let resOffset = sysOffset;
-
-            //--------]>
-
-            fieldIdx = schLen;
+            let result = pktBufStrict;
 
             //--------]>
 
             if(!result) {
-                result = pktBufPack = new Uint8Array(pktSize);
-            }
+                result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : (pktBufPack = new Uint8Array(pktSize));
 
-            while(fieldIdx--) {
-                for(let b = buffers[fieldIdx], i = 0, l = b.length; i < l; ++i) {
-                    result[resOffset++] = b[i];
+                fieldIdx = schLen;
+                tIdx = sysOffset;
+
+                //--------]>
+
+                while(fieldIdx--) {
+                    for(let b = buffers[fieldIdx], i = 0, l = b.length; i < l; ++i) {
+                        result[tIdx++] = b[i];
+                    }
                 }
             }
 
@@ -585,29 +578,31 @@ const packer = (function() {
                 switch(type) {
                     case TYPE_STR: {
                         if(isBigEndian) {
-                            bufAType.reverse();
+                            bufABytes.reverse();
                         }
 
                         //--------]>
 
                         const byteLen = bufAType[0];
-                        const needMem = Math.min(byteLen, length);
 
                         //--------]>
 
-                        bufType = holyBuffer.from(bin.slice(pktOffset, pktOffset + needMem));
-                        pktOffset += needMem;
+                        if(!byteLen || byteLen >= length) {
+                            target[name] = "";
+                        }
+                        else {
+                            bufType = holyBuffer.from(bin.slice(pktOffset, pktOffset + byteLen));
+                            pktOffset += byteLen;
 
-                        //--------]>
-
-                        target[name] = bufType.toString();
+                            target[name] = bufType.toString();
+                        }
 
                         break;
                     }
 
                     default: {
                         if(isBigEndian && bufType.byteLength > 1) {
-                            bufType.reverse();
+                            bufBytes.reverse();
                         }
 
                         target[name] = bufType[0];
