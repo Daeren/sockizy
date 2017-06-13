@@ -63,10 +63,10 @@ io.on("connection", function(socket, request) {
 Client:
 
 ```javascript
-<script src="http://localhost:1337"></script>
+<script src="//localhost:1337"></script>
 
 <script>
-    const socket = io("ws://localhost:1337");
+    const socket = io("localhost:1337");
 	
     socket.on("message", console.log);
     socket.send("cluster.cl#2easy");
@@ -356,6 +356,16 @@ io.on("connection", function(socket, request) {
 
 <a name="refAPIClient"></a>
 
+##### Client options
+
+| Name                      | Note                                 |
+|---------------------------|--------------------------------------|
+|                           | -                                    |
+| secure                    |                                      |
+| reconnectionDelay         | default: 1 sec (minimum)             |
+| reconnectionAttempts      | default: Infinity                    |
+
+
 ##### Client: app([url, options])
 
 | Name                                 |                  | Note                                        |
@@ -370,7 +380,7 @@ io.on("connection", function(socket, request) {
 | text(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |
 |                                      | -                |                                             |
-| connect(url)                         |                  |                                             |
+| connect(url[, isSecure])             |                  |                                             |
 | disconnect(code, reason)             |                  |                                             |
 |                                      | -                |                                             |
 | packets([pack, unpack, shared])      |                  | return this;                                |
@@ -378,8 +388,9 @@ io.on("connection", function(socket, request) {
 | on(name, listener)                   |                  | return this;                                |
 | off([name, listener])                |                  | return this;                                |
 |                                      | **app.events**   |                                             |
-| restoring ()                         |                  |                                             |
-| restored ()                          |                  |                                             |
+| restoring (attempts)                 |                  |                                             |
+| restored (attempts)                  |                  |                                             |
+| unrestored (attempts)                |                  |                                             |
 |                                      | -                |                                             |
 | open ()                              |                  |                                             |
 | close (code, reason, event)          |                  |                                             |

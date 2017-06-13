@@ -5,19 +5,27 @@
 //
 //-----------------------------------------------------
 
-return function(url, options) {
+return function(url, options = {}) {
     class Io extends SEE {
         constructor() {
             super();
 
-            if(url) {
-                this.connect(url);
-            }
+            //-------------]>
+
+            this._reconnectionDelay = 1000 * Math.max(1, options.reconnectionDelay || 0);
+            this._reconnectionAttempts = options.reconnectionAttempts || Infinity;
+            this._reconnectionAttemptsCount = 0;
 
             this._packMapByName = new Map();
             this._unpackMapById = new Array();
 
+            //-------------]>
+
             this.reconnecting = false;
+
+            if(url) {
+                this.connect(url, options.secure);
+            }
         }
 
 
@@ -49,14 +57,22 @@ return function(url, options) {
         }
 
 
-        connect(url) {
+        connect(url, isSecure) {
             if(this._ws) {
                 this._ws.close();
             }
 
+            isSecure = !!(typeof(isSecure) === "undefined" ? document.location.protocol.match(/^https/i) : isSecure);
+
             //------------]>
 
-            const w = this._ws = new WebSocket(url);
+            const w =
+                this._ws = new WebSocket(
+                    url
+                        .replace(/^http/i, "ws")
+                        .replace(/^(?!ws[s]?)[:/]*(.*)/i, `ws://$1`)
+                        .replace(/^(ws)s?/i, `$1${isSecure ? "s" : ""}`)
+                );
 
             //------------]>
 
@@ -68,11 +84,19 @@ return function(url, options) {
             w.onopen = wsOnOpen.bind(this, this);
             w.onclose = wsOnClose.bind(this, this);
             w.onerror = wsOnError.bind(this, this);
+
+            //------------]>
+
+            return this;
         }
 
         disconnect(code, reason) {
             this._ws.close(code, reason);
             this._ws = null;
+
+            //------------]>
+
+            return this;
         }
 
 
@@ -147,11 +171,7 @@ return function(url, options) {
 
     //---------------]>
 
-    const app = new Io();
-
-    //---------------]>
-
-    return app;
+    return new Io();
 
     //---------------]>
 
@@ -184,7 +204,7 @@ return function(url, options) {
         //-----------]>
 
         while(offset < dataByteLength) {
-            const pktSchema = app._unpackMapById[packer.getId(pkt)];
+            const pktSchema = this._unpackMapById[packer.getId(pkt)];
 
             //-----------]>
 
@@ -221,35 +241,57 @@ return function(url, options) {
     }
 
     function wsOnOpen(socket, event) {
-        if(app.reconnecting) {
-            app.reconnecting = false;
-            app._emit("restored");
+        const rcAttemptsCount = this._reconnectionAttemptsCount;
+
+        //--------]>
+
+        this._reconnectionAttemptsCount = 0;
+
+        if(this.reconnecting) {
+            this.reconnecting = false;
+
+            this._emit("restored", rcAttemptsCount);
         }
 
-        app._emit("open");
+        this._emit("open");
     }
 
     function wsOnClose(socket, event) {
         const {code, reason} = event;
 
-        app._emit("close", code, reason, event);
+        this._emit("close", code, reason, event);
 
         if(event.wasClean) {
-            app._emit("disconnected", code, reason, event);
+            this._emit("disconnected", code, reason, event);
         }
         else {
-            app._emit("terminated", code, event);
+            const rcAttemptsCount = this._reconnectionAttemptsCount;
 
-            setTimeout(function() {
-                app.reconnecting = true;
-                app._reconnect();
+            //--------]>
 
-                app._emit("restoring");
-            }, 1000 * 2);
+            this._emit("terminated", code, event);
+
+            //--------]>
+
+            if(rcAttemptsCount < this._reconnectionAttempts) {
+                this._reconnectionAttemptsCount++;
+
+                setTimeout(() => {
+                    this.reconnecting = true;
+                    this._reconnect();
+
+                    this._emit("restoring", rcAttemptsCount);
+                }, this._reconnectionDelay);
+            }
+            else {
+                this.reconnecting = false;
+
+                this._emit("unrestored", rcAttemptsCount);
+            }
         }
     }
 
     function wsOnError(socket, error) {
-        app._emit("error", error);
+        this._emit("error", error);
     }
 };

@@ -79,7 +79,6 @@ function main(port, options, isCluster) {
     rHttps.globalAgent.maxSockets = options.maxSockets || Infinity;
 
     if(!isMaster) {
-
         const sendClientLib = (function() {
             if(!options.clientJs) {
                 return function(request, response) {

@@ -32,7 +32,7 @@ const packer = (function() {
                 }
 
                 return utf8Slice(this, start, end);
-            }
+            };
 
             //---------------------]>
 
