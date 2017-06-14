@@ -577,7 +577,7 @@ var io = function (module) {
 
         //-------------------------]>
 
-        function createPacket(schema) {
+        function createPacket(schema, useHolderArray, holderNew) {
             if (!Array.isArray(schema)) {
                 schema = new Array();
             }
@@ -591,7 +591,7 @@ var io = function (module) {
 
             var zeroUI16 = new Uint8Array(2);
 
-            var pktDataHolder = Object.create(null),
+            var pktDataHolder = useHolderArray ? new Array() : Object.create(null),
                 pktMinSize = 0,
                 pktHasStr = false,
                 pktBufStrict = null,
@@ -763,7 +763,7 @@ var io = function (module) {
             }
 
             function unpack(bin, offset, length, cbEndInfo, target) {
-                target = target || pktDataHolder;
+                target = target || (holderNew ? useHolderArray ? [] : {} : pktDataHolder);
 
                 //--------]>
 
@@ -814,6 +814,10 @@ var io = function (module) {
                     bufBytes = _field3[4];
                     bufAType = _field3[5];
                     bufABytes = _field3[6];
+                    if (useHolderArray) {
+                        name = fieldIdx;
+                    }
+
                     for (var _i2 = 0; _i2 < bytes; ++_i2) {
                         if (pktOffset >= length) {
                             return null;
@@ -1067,16 +1071,28 @@ var io = function (module) {
                 }
             }, {
                 key: "connect",
-                value: function connect(url, isSecure) {
+                value: function connect(url, secure) {
                     if (this._ws) {
                         this._ws.close();
                     }
 
-                    isSecure = !!(typeof isSecure === "undefined" ? document.location.protocol.match(/^https/i) : isSecure);
+                    //------------]>
+
+                    var tWsUrlParse = url.trim().split(/(^wss?:\/\/)/i);
+
+                    var wsUrl = tWsUrlParse.pop().replace(/^[:\/\/]*/, "");
+                    var wsProtocol = tWsUrlParse.pop().trim();
+                    var wsSecProtocol = !!(wsProtocol && wsProtocol.match(/^wss:\/\//i));
 
                     //------------]>
 
-                    var w = this._ws = new WebSocket(url.replace(/^http/i, "ws").replace(/^(?!ws[s]?)[:/]*(.*)/i, "ws://$1").replace(/^(ws)s?/i, "$1" + (isSecure ? "s" : "")));
+                    if (typeof secure === "undefined") {
+                        secure = wsProtocol ? wsSecProtocol : !!document.location.protocol.match(/^https/i);
+                    }
+
+                    //------------]>
+
+                    var w = this._ws = new WebSocket((secure ? "wss" : "ws") + "://" + wsUrl);
 
                     //------------]>
 
@@ -1134,13 +1150,27 @@ var io = function (module) {
                         }
 
                         Object.keys(data).forEach(function (field) {
-                            testName(field);
-                            callback(field, packer.createPacket(data[field]));
+                            var t = field.split(/\(([\[\{]?)(\@?)([\}\]]?)\)$/);
+
+                            var name = void 0,
+                                useHolderArray = void 0,
+                                holderNew = void 0;
+
+                            //-------]>
+
+                            name = t.shift().trim();
+                            useHolderArray = t.shift() === "[";
+                            holderNew = t.shift() === "@";
+
+                            //-------]>
+
+                            testName(name);
+                            callback(name, packer.createPacket(data[field], useHolderArray, holderNew));
                         });
                     }
 
                     function testName(n) {
-                        var r = ["restoring", "restored", "open", "close", "disconnected", "terminated", "packet", "message", "arraybuffer", "error"];
+                        var r = ["restoring", "restored", "open", "close", "disconnected", "terminated", "packet", "message", "arraybuffer", "error", "ping", "pong"];
 
                         if (r.some(function (e) {
                             return e === n;

@@ -230,23 +230,32 @@ io.packets(
     null,
     null,
     {
-        "test.some.message": [
+        "ev.on.arg.asArray.copy ([])": [
+            "text:str"
+        ],
+        "ev.on.arg.asArray.new ([@])": [
+            "text:str"
+        ],
+		
+        "ev.on.arg.asHashTable.copy.default": [
+            "text:str"
+        ],
+        "ev.on.arg.asHashTable.new ({@})": [
             "text:str"
         ]
     }
 );
 
 io.on("connection", function(socket, request) {
-    socket.on("test.some.message", function(data) {
-        const isBroadcast = true;
-        const bd = this.bundle(isBroadcast);
+    socket.on("ev.on.arg.asHashTable.new", function(data) {
+        const bd = this.bundle(true);
 
-        for(let i = 0; i < 10; i++) { 
-            bd.write("test.some.message", {text: `Helword: ${i}`});
+        for(let i = 0; i < 10; ++i) { 
+            bd.write("ev.on.arg.asArray.copy", {text: `Helword: ${i}`});
         }
 
-        bd.write("test.some.message");
-        bd.end("chat.message", ["Helword: end"]);
+        bd.write("ev.on.arg.asArray.copy");
+        bd.end("ev.on.arg.asArray.copy", ["Helword: end"]);
     });
 });
 ```
@@ -380,7 +389,7 @@ io.on("connection", function(socket, request) {
 | text(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |
 |                                      | -                |                                             |
-| connect(url[, isSecure])             |                  |                                             |
+| connect(url[, secure])               |                  |                                             |
 | disconnect(code, reason)             |                  |                                             |
 |                                      | -                |                                             |
 | packets([pack, unpack, shared])      |                  | return this;                                |

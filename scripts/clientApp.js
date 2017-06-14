@@ -57,22 +57,30 @@ return function(url, options = {}) {
         }
 
 
-        connect(url, isSecure) {
+        connect(url, secure) {
             if(this._ws) {
                 this._ws.close();
             }
 
-            isSecure = !!(typeof(isSecure) === "undefined" ? document.location.protocol.match(/^https/i) : isSecure);
+            //------------]>
+
+            const tWsUrlParse = url.trim().split(/(^wss?:\/\/)/i);
+
+            const wsUrl = tWsUrlParse.pop().replace(/^[:\/\/]*/, "");
+            const wsProtocol = tWsUrlParse.pop().trim();
+            const wsSecProtocol = !!(wsProtocol && wsProtocol.match(/^wss:\/\//i));
+
+            //------------]>
+
+            if(typeof(secure) === "undefined") {
+                secure = wsProtocol ? wsSecProtocol : !!document.location.protocol.match(/^https/i);
+            }
 
             //------------]>
 
             const w =
-                this._ws = new WebSocket(
-                    url
-                        .replace(/^http/i, "ws")
-                        .replace(/^(?!ws[s]?)[:/]*(.*)/i, `ws://$1`)
-                        .replace(/^(ws)s?/i, `$1${isSecure ? "s" : ""}`)
-                );
+                this._ws =
+                    new WebSocket((secure ? "wss" : "ws") + "://" + wsUrl);
 
             //------------]>
 
@@ -127,8 +135,22 @@ return function(url, options = {}) {
                 }
 
                 Object.keys(data).forEach(function(field) {
-                    testName(field);
-                    callback(field, packer.createPacket(data[field]));
+                    const t = field.split(/\(([\[\{]?)(\@?)([\}\]]?)\)$/);
+
+                    let name,
+                        useHolderArray,
+                        holderNew;
+
+                    //-------]>
+
+                    name = t.shift().trim();
+                    useHolderArray = t.shift() === "[";
+                    holderNew = t.shift() === "@";
+
+                    //-------]>
+
+                    testName(name);
+                    callback(name, packer.createPacket(data[field], useHolderArray, holderNew));
                 });
             }
 
@@ -136,7 +158,8 @@ return function(url, options = {}) {
                 let r = [
                     "restoring", "restored",
                     "open", "close", "disconnected", "terminated",
-                    "packet", "message", "arraybuffer", "error"
+                    "packet", "message", "arraybuffer", "error",
+                    "ping", "pong"
                 ];
 
                 if(r.some((e) => e === n)) {

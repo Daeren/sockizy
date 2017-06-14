@@ -198,15 +198,30 @@ class Io extends SEE {
             }
 
             Object.keys(data).forEach(function(field) {
-                testName(field);
-                callback(field, rPacker.createPacket(data[field]));
+                const t = field.split(/\(([\[\{]?)(\@?)([\}\]]?)\)$/);
+
+                let name,
+                    useHolderArray,
+                    holderNew;
+
+                //-------]>
+
+                name = t.shift().trim();
+                useHolderArray = t.shift() === "[";
+                holderNew = t.shift() === "@";
+
+                //-------]>
+
+                testName(name);
+                callback(name, rPacker.createPacket(data[field], useHolderArray, holderNew));
             });
         }
 
         function testName(n) {
             let r = [
-                "close", "disconnected", "terminated",
-                "message", "arraybuffer", "error",
+                "restoring", "restored",
+                "open", "close", "disconnected", "terminated",
+                "packet", "message", "arraybuffer", "error",
                 "ping", "pong"
             ];
 

@@ -347,7 +347,7 @@ const packer = (function() {
 
     //-------------------------]>
 
-    function createPacket(schema) {
+    function createPacket(schema, useHolderArray, holderNew) {
         if(!Array.isArray(schema)) {
             schema = new Array();
         }
@@ -361,7 +361,7 @@ const packer = (function() {
 
         const zeroUI16      = new Uint8Array(2);
 
-        let pktDataHolder   = Object.create(null),
+        let pktDataHolder   = useHolderArray ? new Array() : Object.create(null),
             pktMinSize      = 0,
             pktHasStr       = false,
 
@@ -527,7 +527,7 @@ const packer = (function() {
         }
 
         function unpack(bin, offset, length, cbEndInfo, target) {
-            target = target || pktDataHolder;
+            target = target || (holderNew ? (useHolderArray ? [] : {}) : pktDataHolder);
 
             //--------]>
 
@@ -561,6 +561,10 @@ const packer = (function() {
                 [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
 
                 //------]>
+
+                if(useHolderArray) {
+                    name = fieldIdx;
+                }
 
                 for(let i = 0; i < bytes; ++i) {
                     if(pktOffset >= length) {

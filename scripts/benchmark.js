@@ -186,7 +186,7 @@ function testPacker(data, schema) {
     const strJsonHero = JSON.stringify(objJsonHero);
     const bufJsonHero = Buffer.from(JSON.stringify(objJsonHero));
 
-    const pktHero = rPacker.createPacket(schema);
+    const pktHero = rPacker.createPacket(schema, false);
     const packPktHero = pktHero.pack(0, objJsonHero);
 
     let l, t;
