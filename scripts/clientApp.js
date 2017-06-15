@@ -56,7 +56,7 @@ return function(url, options = {}) {
 
 
         isSupported() {
-            return typeof(WebSocket) !== "undefined";
+            return typeof(WSocket) !== "undefined";
         }
 
 

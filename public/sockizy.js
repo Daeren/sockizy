@@ -1069,7 +1069,7 @@ var io = function (module) {
             _createClass(Io, [{
                 key: "isSupported",
                 value: function isSupported() {
-                    return typeof WebSocket !== "undefined";
+                    return typeof WSocket !== "undefined";
                 }
             }, {
                 key: "emit",
