@@ -1106,7 +1106,9 @@ var io = function (module) {
 
                     //------------]>
 
-                    var w = this._ws = new WebSocket((secure ? "wss" : "ws") + "://" + wsUrl);
+                    var WSocket = window.MozWebSocket || window.WebSocket;
+
+                    var w = this._ws = new WSocket((secure ? "wss" : "ws") + "://" + wsUrl);
 
                     //------------]>
 

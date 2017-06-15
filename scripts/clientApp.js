@@ -91,9 +91,11 @@ return function(url, options = {}) {
 
             //------------]>
 
+            const WSocket = window.MozWebSocket || window.WebSocket;
+
             const w =
                 this._ws =
-                    new WebSocket((secure ? "wss" : "ws") + "://" + wsUrl);
+                    new WSocket((secure ? "wss" : "ws") + "://" + wsUrl);
 
             //------------]>
 
