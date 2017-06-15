@@ -6,11 +6,15 @@
 //-----------------------------------------------------
 
 return function(url, options = {}) {
+    const WSocket = window.WebSocket || window.MozWebSocket;
+
+    //---------------]>
+
     class Io extends SEE {
         constructor() {
             super();
 
-            //-------------]>
+            //-------]>
 
             this._reconnectionDelay = 1000 * Math.max(1, options.reconnectionDelay || 0);
             this._reconnectionAttempts = options.reconnectionAttempts || Infinity;
@@ -19,9 +23,18 @@ return function(url, options = {}) {
             this._packMapByName = new Map();
             this._unpackMapById = new Array();
 
-            //-------------]>
+            //-------]>
 
             this.reconnecting = false;
+
+            //-------]>
+
+            this.CONNECTING     = WSocket.CONNECTING;
+            this.OPEN           = WSocket.OPEN;
+            this.CLOSING        = WSocket.CLOSING;
+            this.CLOSED         = WSocket.CLOSED;
+
+            //-------]>
 
             if(url) {
                 this.connect(url, options.secure);
@@ -90,8 +103,6 @@ return function(url, options = {}) {
             }
 
             //------------]>
-
-            const WSocket = window.MozWebSocket || window.WebSocket;
 
             const w =
                 this._ws =

@@ -33,6 +33,11 @@ class Socket extends SEE {
         this.remotePort = _s.remotePort;
         this.remoteAddress = _s.remoteAddress;
         this.remoteFamily = _s.remoteFamily;
+
+        //-------]>
+
+        this.OPEN   = ws.OPEN;
+        this.CLOSED = ws.CLOSED;
     }
 
 

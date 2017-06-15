@@ -1026,13 +1026,17 @@ var io = function (module) {
     return function (url) {
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
+        var WSocket = window.WebSocket || window.MozWebSocket;
+
+        //---------------]>
+
         var Io = function (_SEE) {
             _inherits(Io, _SEE);
 
             function Io() {
                 _classCallCheck(this, Io);
 
-                //-------------]>
+                //-------]>
 
                 var _this = _possibleConstructorReturn(this, (Io.__proto__ || Object.getPrototypeOf(Io)).call(this));
 
@@ -1043,9 +1047,18 @@ var io = function (module) {
                 _this._packMapByName = new Map();
                 _this._unpackMapById = new Array();
 
-                //-------------]>
+                //-------]>
 
                 _this.reconnecting = false;
+
+                //-------]>
+
+                _this.CONNECTING = WSocket.CONNECTING;
+                _this.OPEN = WSocket.OPEN;
+                _this.CLOSING = WSocket.CLOSING;
+                _this.CLOSED = WSocket.CLOSED;
+
+                //-------]>
 
                 if (url) {
                     _this.connect(url, options.secure);
@@ -1105,8 +1118,6 @@ var io = function (module) {
                     }
 
                     //------------]>
-
-                    var WSocket = window.MozWebSocket || window.WebSocket;
 
                     var w = this._ws = new WSocket((secure ? "wss" : "ws") + "://" + wsUrl);
 
