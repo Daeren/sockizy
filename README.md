@@ -26,6 +26,7 @@ git clone https://github.com/Daeren/sockizy.git
 * [Verify](#refVerifyClient)
 * [Packets](#refPackets)
 * [Bundle](#refBundle)
+* [Raw data](#refRawData)
 * [Server API](#refAPIServer)
 * [Client API](#refAPIClient)
 
@@ -262,6 +263,30 @@ io.on("connection", function(socket, request) {
 
 
 
+<a name="refRawData"></a>
+#### Raw data (only Server)
+
+```javascript
+io.packets(
+    null,
+    null,
+    {
+        "myBroadcast": [
+            "text:str"
+        ]
+    }
+);
+
+io.on("connection", function(socket, request) {
+    socket.on("myBroadcast", function(data, raw) { // raw - zCopy, be careful
+        io.broadcast(raw); // without repacking
+		// socket.emit("myBroadcast", data);
+    });
+});
+```
+
+
+
 <a name="refAPIServer"></a>
 
 ##### Packet type
@@ -360,6 +385,8 @@ io.on("connection", function(socket, request) {
 |                                      | -                |                                             |
 | ping (message)                       |                  |                                             |
 | pong (message)                       |                  |                                             |
+|                                      | -                |                                             |
+| <myEvent> (data, rawBufZCopy)        |                  |                                             |
 
 
 
@@ -406,11 +433,13 @@ io.on("connection", function(socket, request) {
 | disconnected (code, reason, event)   |                  |                                             |
 | terminated (code, event)             |                  |                                             |
 |                                      | -                |                                             |
-| packet (name, data)                  |                  |                                             |
 | message (data, event)                |                  |                                             |
 | text (data, event)                   |                  |                                             |
 | arraybuffer (data, event)            |                  | intercepts and blocks unpacking of packets  |
+| packet (name, data)                  |                  |                                             |
 | error (data)                         |                  |                                             |
+|                                      | -                |                                             |
+| <myEvent> (data)                     |                  |                                             |
 
 
 

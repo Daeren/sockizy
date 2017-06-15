@@ -656,25 +656,39 @@ var io = function (module) {
                     fieldIdx = schLen,
                     pktSize = sysOffset;
 
+                var field = void 0;
+                var name = void 0,
+                    type = void 0,
+                    bytes = void 0,
+                    bufType = void 0,
+                    bufBytes = void 0,
+                    bufAType = void 0,
+                    bufABytes = void 0;
+
+                var input = void 0;
+
                 //--------]>
 
                 while (fieldIdx--) {
-                    var field = fields[fieldIdx];
+                    field = fields[fieldIdx];
+                    var _field = field;
 
-                    var _field = _slicedToArray(field, 7),
-                        _name = _field[0],
-                        _type = _field[1],
-                        bytes = _field[2],
-                        bufType = _field[3],
-                        _bufBytes = _field[4],
-                        bufAType = _field[5],
-                        _bufABytes = _field[6];
+                    var _field2 = _slicedToArray(_field, 7);
 
-                    var input = data[isArray ? fieldIdx : _name];
+                    name = _field2[0];
+                    type = _field2[1];
+                    bytes = _field2[2];
+                    bufType = _field2[3];
+                    bufBytes = _field2[4];
+                    bufAType = _field2[5];
+                    bufABytes = _field2[6];
+
+
+                    input = data[isArray ? fieldIdx : name];
 
                     //------]>
 
-                    switch (_type) {
+                    switch (type) {
                         case TYPE_STR:
                             {
                                 if (input) {
@@ -686,23 +700,23 @@ var io = function (module) {
                                     bufAType[0] = byteLen;
 
                                     if (isBigEndian) {
-                                        bufType[0] = _bufABytes[1];
-                                        bufType[1] = _bufABytes[0];
+                                        bufType[0] = bufABytes[1];
+                                        bufType[1] = bufABytes[0];
                                     } else {
-                                        bufType[0] = _bufABytes[0];
-                                        bufType[1] = _bufABytes[1];
+                                        bufType[0] = bufABytes[0];
+                                        bufType[1] = bufABytes[1];
                                     }
 
                                     //-----]>
 
                                     byteLen += offset;
 
-                                    _bufBytes = bufType;
+                                    bufBytes = bufType;
                                     bufType._blen = byteLen;
 
                                     bytes = byteLen;
                                 } else {
-                                    _bufBytes = zeroUI16;
+                                    bufBytes = zeroUI16;
                                 }
 
                                 break;
@@ -713,7 +727,7 @@ var io = function (module) {
                                 bufType[0] = input;
 
                                 if (isBigEndian && bufType.byteLength > 1) {
-                                    _bufBytes.reverse();
+                                    bufBytes.reverse();
                                 }
                             }
                     }
@@ -724,10 +738,10 @@ var io = function (module) {
                         tIdx = 0;
 
                         while (bytes--) {
-                            pktBufStrict[pktSize++] = _bufBytes[tIdx++];
+                            pktBufStrict[pktSize++] = bufBytes[tIdx++];
                         }
                     } else {
-                        buffers[fieldIdx] = _bufBytes;
+                        buffers[fieldIdx] = bufBytes;
                         pktSize += bytes;
                     }
                 }
@@ -803,17 +817,17 @@ var io = function (module) {
 
                     //------]>
 
-                    var _field2 = field;
+                    var _field3 = field;
 
-                    var _field3 = _slicedToArray(_field2, 7);
+                    var _field4 = _slicedToArray(_field3, 7);
 
-                    name = _field3[0];
-                    type = _field3[1];
-                    bytes = _field3[2];
-                    bufType = _field3[3];
-                    bufBytes = _field3[4];
-                    bufAType = _field3[5];
-                    bufABytes = _field3[6];
+                    name = _field4[0];
+                    type = _field4[1];
+                    bytes = _field4[2];
+                    bufType = _field4[3];
+                    bufBytes = _field4[4];
+                    bufAType = _field4[5];
+                    bufABytes = _field4[6];
                     if (useHolderArray) {
                         name = fieldIdx;
                     }

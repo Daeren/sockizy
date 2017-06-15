@@ -427,13 +427,18 @@ const packer = (function() {
                 fieldIdx    = schLen,
                 pktSize     = sysOffset;
 
+            let field;
+            let name, type, bytes, bufType, bufBytes, bufAType, bufABytes;
+
+            let input;
+
             //--------]>
 
             while(fieldIdx--) {
-                let field = fields[fieldIdx];
-                let [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
+                field = fields[fieldIdx];
+                [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
 
-                let input = data[isArray ? fieldIdx : name];
+                input = data[isArray ? fieldIdx : name];
 
                 //------]>
 

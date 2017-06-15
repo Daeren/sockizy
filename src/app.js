@@ -80,7 +80,7 @@ class Socket extends SEE {
     send(data, options = this._io._msgOptions) {
         this._ws.send(data, options, (e) => {
             if(e) {
-                this._io._emit("error", e);
+                this._io._emit("error", e, this);
             }
         });
     }
@@ -345,7 +345,7 @@ function main(app, options) {
 
                 if(data) {
                     io._emit("packet", name, data, socket);
-                    socket._emit(name, data);
+                    socket._emit(name, data, tBufData);
 
                     return;
                 }
