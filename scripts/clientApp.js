@@ -29,6 +29,19 @@ return function(url, options = {}) {
         }
 
 
+        get bufferedAmount() {
+            return this._ws.bufferedAmount;
+        }
+
+        get readyState() {
+            return this._ws.readyState;
+        }
+
+        get url() {
+            return this._ws.url;
+        }
+
+
         isSupported() {
             return typeof(WebSocket) !== "undefined";
         }
@@ -83,8 +96,6 @@ return function(url, options = {}) {
                     new WebSocket((secure ? "wss" : "ws") + "://" + wsUrl);
 
             //------------]>
-
-            this.url = url;
 
             w.binaryType = "arraybuffer";
 

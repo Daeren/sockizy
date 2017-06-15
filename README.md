@@ -26,7 +26,6 @@ git clone https://github.com/Daeren/sockizy.git
 * [Verify](#refVerifyClient)
 * [Packets](#refPackets)
 * [Bundle](#refBundle)
-* [Raw data](#refRawData)
 * [Server API](#refAPIServer)
 * [Client API](#refAPIClient)
 
@@ -263,30 +262,6 @@ io.on("connection", function(socket, request) {
 
 
 
-<a name="refRawData"></a>
-#### Raw data (only Server)
-
-```javascript
-io.packets(
-    null,
-    null,
-    {
-        "myBroadcast": [
-            "text:str"
-        ]
-    }
-);
-
-io.on("connection", function(socket, request) {
-    socket.on("myBroadcast", function(data, raw) { // raw - zCopy, be careful
-        io.broadcast(raw); // without repacking
-		// socket.emit("myBroadcast", data);
-    });
-});
-```
-
-
-
 <a name="refAPIServer"></a>
 
 ##### Packet type
@@ -334,59 +309,65 @@ io.on("connection", function(socket, request) {
 
 ##### Server: app([port, options, isCluster])
 
-| Name                                 |                  | Note                                        |
-|--------------------------------------|------------------|---------------------------------------------|
-|                                      | **app.property** |                                             |
-| cluster                              |                  |                                             |
-| isMaster                             |                  |                                             |
-|                                      | -                |                                             |
-| workers                              |                  |                                             |
-| workerId                             |                  |                                             |
-|                                      | -                |                                             |
-| wss                                  |                  | uws                                         |
-|                                      | **app.method**   |                                             |
-| emit(name, data)                     |                  | data: hashTable or array; returns: bool     |
-| bundle()                             |                  |                                             |
-| text(data)                           |                  |                                             |
-| broadcast(data[, options])           |                  | native                                      |
-|                                      | -                |                                             |
-| listen([port, host, callback])       |                  | default: "localhost:1337"                   |
-| close([callback])                    |                  |                                             |
-|                                      | -                |                                             |
-| packets([unpack, pack, shared])      |                  | return this;                                |
-| verifyClient(func(info[, callback])) |                  | return this;                                |
-|                                      | -                |                                             |
-| on(name, listener)                   |                  | return this;                                |
-| off([name, listener])                |                  | return this;                                |
-|                                      | **app.events**   |                                             |
-| connection (socket)                  |                  |                                             |
-| packet (name, data, socket)          |                  |                                             |
-| error (data, socket)                 |                  |                                             |
-|                                      | **socket.method**|                                             |
-| emit(name, data[, isBroadcast])      |                  | data: hashTable or array; returns: bool     |
-| bundle([isBroadcast])                |                  |                                             |
-| send(data[, options])                |                  | native                                      |
-|                                      | -                |                                             |
-| disconnect([code, reason])           |                  |                                             |
-| terminate()                          |                  |                                             |
-|                                      | -                |                                             |
-| ping([message])                      |                  |                                             |
-|                                      | -                |                                             |
-| on(name, listener)                   |                  | return this;                                |
-| off([name, listener])                |                  | return this;                                |
-|                                      | **socket.events**|                                             |
-| close (code, reason)                 |                  |                                             |
-| disconnected (code, reason)          |                  |                                             |
-| terminated (code)                    |                  |                                             |
-|                                      | -                |                                             |
-| message (data)                       |                  |                                             |
-| text (data)                          |                  |                                             |
-| arraybuffer (data)                   |                  | intercepts and blocks unpacking of packets  |
-|                                      | -                |                                             |
-| ping (message)                       |                  |                                             |
-| pong (message)                       |                  |                                             |
-|                                      | -                |                                             |
-| <myEvent> (data, rawBufZCopy)        |                  |                                             |
+| Name                                 |                     | Note                                        |
+|--------------------------------------|---------------------|---------------------------------------------|
+|                                      | **app.property**    |                                             |
+| cluster                              |                     |                                             |
+| isMaster                             |                     |                                             |
+|                                      | -                   |                                             |
+| workers                              |                     |                                             |
+| workerId                             |                     |                                             |
+|                                      | -                   |                                             |
+| wss                                  |                     | uws                                         |
+|                                      | **app.method**      |                                             |
+| emit(name, data)                     |                     | data: hashTable or array; returns: bool     |
+| bundle()                             |                     |                                             |
+| text(data)                           |                     |                                             |
+| broadcast(data[, options])           |                     | native                                      |
+|                                      | -                   |                                             |
+| listen([port, host, callback])       |                     | default: "localhost:1337"                   |
+| close([callback])                    |                     |                                             |
+|                                      | -                   |                                             |
+| packets([unpack, pack, shared])      |                     | return this;                                |
+| verifyClient(func(info[, callback])) |                     | return this;                                |
+|                                      | -                   |                                             |
+| on(name, listener)                   |                     | return this;                                |
+| off([name, listener])                |                     | return this;                                |
+|                                      | **app.events**      |                                             |
+| connection (socket)                  |                     |                                             |
+| packet (name, data, socket)          |                     |                                             |
+| error (data, socket)                 |                     |                                             |
+|                                      | **socket.property** |                                             |
+| readyState                           |                     | number (read only)                          |
+|                                      | -                   |                                             |
+| remotePort                           |                     | (read only)                                 |
+| remoteAddress                        |                     | (read only)                                 |
+| remoteFamily                         |                     | (read only)                                 |
+|                                      | **socket.method**   |                                             |
+| emit(name, data[, isBroadcast])      |                     | data: hashTable or array; returns: bool     |
+| bundle([isBroadcast])                |                     |                                             |
+| send(data[, options])                |                     | native                                      |
+|                                      | -                   |                                             |
+| disconnect([code, reason])           |                     |                                             |
+| terminate()                          |                     |                                             |
+|                                      | -                   |                                             |
+| ping([message])                      |                     |                                             |
+|                                      | -                   |                                             |
+| on(name, listener)                   |                     | return this;                                |
+| off([name, listener])                |                     | return this;                                |
+|                                      | **socket.events**   |                                             |
+| close (code, reason)                 |                     |                                             |
+| disconnected (code, reason)          |                     |                                             |
+| terminated (code)                    |                     |                                             |
+|                                      | -                   |                                             |
+| message (data)                       |                     |                                             |
+| text (data)                          |                     |                                             |
+| arraybuffer (data)                   |                     | intercepts and blocks unpacking of packets  |
+|                                      | -                   |                                             |
+| ping (message)                       |                     |                                             |
+| pong (message)                       |                     |                                             |
+|                                      | -                   |                                             |
+| <myEvent> (data)                     |                     |                                             |
 
 
 
@@ -409,6 +390,8 @@ io.on("connection", function(socket, request) {
 |                                      | **app.property** |                                             |
 | url                                  |                  | string (read only)                          |
 | reconnecting                         |                  | bool (read only)                            |
+| bufferedAmount                       |                  | number (read only)                          |
+| readyState                           |                  | number (read only)                          |
 |                                      | **app.method**   |                                             |
 | isSupported()                        |                  |                                             |
 |                                      | -                |                                             |

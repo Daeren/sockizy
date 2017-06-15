@@ -1110,8 +1110,6 @@ var io = function (module) {
 
                     //------------]>
 
-                    this.url = url;
-
                     w.binaryType = "arraybuffer";
 
                     w.onmessage = wsOnMessage.bind(this, this);
@@ -1218,6 +1216,21 @@ var io = function (module) {
                     //---------]>
 
                     return srz.pack(id, data);
+                }
+            }, {
+                key: "bufferedAmount",
+                get: function get() {
+                    return this._ws.bufferedAmount;
+                }
+            }, {
+                key: "readyState",
+                get: function get() {
+                    return this._ws.readyState;
+                }
+            }, {
+                key: "url",
+                get: function get() {
+                    return this._ws.url;
                 }
             }]);
 

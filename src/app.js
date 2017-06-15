@@ -19,8 +19,25 @@ class Socket extends SEE {
     constructor(io, ws) {
         super();
 
+        //-------]>
+
         this._io = io;
         this._ws = ws;
+
+        //-------]>
+
+        const _s = ws._socket;
+
+        //-------]>
+
+        this.remotePort = _s.remotePort;
+        this.remoteAddress = _s.remoteAddress;
+        this.remoteFamily = _s.remoteFamily;
+    }
+
+
+    get readyState() {
+        return this._ws.readyState;
     }
 
 
@@ -345,7 +362,7 @@ function main(app, options) {
 
                 if(data) {
                     io._emit("packet", name, data, socket);
-                    socket._emit(name, data, tBufData);
+                    socket._emit(name, data);
 
                     return;
                 }
