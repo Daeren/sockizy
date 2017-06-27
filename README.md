@@ -110,8 +110,6 @@ if(io.isMaster) {
 }
 
 io.packets(
-    null,
-    null,
     {
         "common.signIn": [
             "login:str24",
@@ -126,34 +124,42 @@ io.on("connection", function(socket, request) {
     });
 
     socket.on("common.signIn", async function(data) {
-        if(this.user) {
+        if(this.user || this.userAuthPrc) {
             return;
         }
 
-        this.user = await auth(data.login, data.password);
+        this.userAuthPrc = true;
 
-        if(this.user) {
-            this.session.set(this.user.id, function(error, num) {
-                this.size(function(error, num) {
-                    const data = "USER.OK | " + this.uid + " | " + num;
-                    this.emit(data /*, targetUid*/);
-                });
-            });
-
-            /*
-            this.session.uid;
-
-            this.session.delete(function() { // cur socket
-            });
-            
-            this.session.clear(function() { // all sockets
-            });
-            */
+        try {
+            this.user = await auth(data.login, data.password);
+        } catch(e) {
+            return;
+        } finally {
+            this.userAuthPrc = false;
         }
+        
+        if(!this.user) {
+            return;
+        }
+
+        this.session.set(this.user.id, function(error, num) {
+            this.size(function(error, num) {
+                const data = "USER.OK | " + this.uid + " | " + num;
+                this.emit(data /*, targetUid*/);
+            });
+        });
+
+        /*
+        this.session.uid;
+        this.session.delete(function() { // cur socket
+        });
+        this.session.clear(function() { // all sockets
+        });
+        */
     });
 
     function auth(login, password) {
-        if(login !== "dt" || password !== "13" && password !== "6") {
+        if(login !== "D" || password !== "13" && password !== "6") {
             return Promise.resolve(null);
         }
 

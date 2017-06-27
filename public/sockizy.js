@@ -692,12 +692,12 @@ var io = function (module) {
                         case TYPE_STR:
                             {
                                 if (input) {
-                                    var offset = bufAType.byteLength;
-                                    var byteLen = input ? bufType.write(input, offset) : 0;
+                                    bytes += bufAType[0] = bufType.write(input, bytes);
+
+                                    bufBytes = bufType;
+                                    bufType._blen = bytes;
 
                                     //-----]>
-
-                                    bufAType[0] = byteLen;
 
                                     if (isBigEndian) {
                                         bufType[0] = bufABytes[1];
@@ -706,15 +706,6 @@ var io = function (module) {
                                         bufType[0] = bufABytes[0];
                                         bufType[1] = bufABytes[1];
                                     }
-
-                                    //-----]>
-
-                                    byteLen += offset;
-
-                                    bufBytes = bufType;
-                                    bufType._blen = byteLen;
-
-                                    bytes = byteLen;
                                 } else {
                                     bufBytes = zeroUI16;
                                 }
@@ -862,7 +853,7 @@ var io = function (module) {
                                 if (!byteLen || byteLen >= length) {
                                     target[name] = "";
                                 } else {
-                                    var needMem = Math.min(bufType.length, byteLen);
+                                    var needMem = Math.min(bufType.length - bytes, length, byteLen);
 
                                     for (var _i3 = 0; _i3 < needMem; ++_i3) {
                                         bufType[_i3] = bin[pktOffset++];
@@ -899,7 +890,7 @@ var io = function (module) {
             function buildTypedBuf(type, size) {
                 switch (type) {
                     case TYPE_STR:
-                        return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc(size || 256), new Uint16Array(1)];
+                        return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 256) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
 
                     case TYPE_INT:
                         switch (size) {

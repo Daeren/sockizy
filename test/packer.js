@@ -102,14 +102,14 @@ const gMid = 136;
 
 //------)>
 
-let gSrzDataWithStrings;
-let gSrzDataWithoutStrings;
+let srzDataWithStrings;
+let srzDataWithoutStrings;
 
-let gPackDataWithStrings;
-let gPackDataWithoutStrings;
+let packDataWithStrings;
+let packDataWithoutStrings;
 
-let gUnpackDataWithStrings;
-let gUnpackDataWithoutStrings;
+let unpackDataWithStrings;
+let unpackDataWithoutStrings;
 
 //-----------------------------------------------------
 
@@ -121,7 +121,7 @@ function testUnpackData(d1, d2) {
         if(typeof(t1) === "number") {
             expect(t2).to.be.closeTo(t1, 0.001);
         } else {
-            expect(t2).to.equal(t1);
+            expect(t2).should.equal(t1);
         }
     }
 }
@@ -143,31 +143,77 @@ describe("Packer", function() {
     //-----------------]>
 
     it("Common: createPacket", function() {
-        gSrzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
-        gSrzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
+        srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
+        srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
     });
 
 
     it("Common: pack", function() {
-        gPackDataWithStrings = gSrzDataWithStrings.pack(gMid, gDataWithStrings);
-        gPackDataWithoutStrings = gSrzDataWithoutStrings.pack(gMid, gDataWithoutStrings);
+        srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
+        srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
+
+        packDataWithStrings = srzDataWithStrings.pack(gMid, gDataWithStrings);
+        packDataWithoutStrings = srzDataWithoutStrings.pack(gMid, gDataWithoutStrings);
     });
 
     it("Common: unpack", function() {
-        gUnpackDataWithStrings = gSrzDataWithStrings.unpack(gPackDataWithStrings, 0, gPackDataWithStrings.length);
-        gUnpackDataWithoutStrings = gSrzDataWithoutStrings.unpack(gPackDataWithoutStrings, 0, gPackDataWithoutStrings.length);
+        srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
+        srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
 
-        testUnpackData(gUnpackDataWithStrings, gExpDataWithStrings);
-        testUnpackData(gUnpackDataWithoutStrings, gExpDataWithoutStrings);
+        packDataWithStrings = srzDataWithStrings.pack(gMid, gDataWithStrings);
+        packDataWithoutStrings = srzDataWithoutStrings.pack(gMid, gDataWithoutStrings);
+
+        unpackDataWithStrings = srzDataWithStrings.unpack(packDataWithStrings, 0, packDataWithStrings.length);
+        unpackDataWithoutStrings = srzDataWithoutStrings.unpack(packDataWithoutStrings, 0, packDataWithoutStrings.length);
+
+        testUnpackData(unpackDataWithStrings, gExpDataWithStrings);
+        testUnpackData(unpackDataWithoutStrings, gExpDataWithoutStrings);
+    });
+
+    it("Common: unpack | StrCut & StrLen & SchOrder", function() {
+        const schema = rPacker.createPacket([
+            "msg:str4",
+            "num:int8"
+        ]);
+
+        const schemaOverflow = rPacker.createPacket([
+            "msg:str10",
+            "num:int8"
+        ]);
+
+        const dataLong = {
+            "msg": "1234567890",
+            "num": 13
+        };
+
+        const dataShort = {
+            "msg": "1234",
+            "num": 13
+        };
+
+        const packet = schema.pack(0, dataLong);
+        const packetOverflow = schemaOverflow.pack(0, dataLong);
+
+        const data = schema.unpack(packet, 0, packet.length);
+        const dataOverflow = schema.unpack(packetOverflow, 0, packetOverflow.length);
+
+        testUnpackData(data, dataShort);
+        testUnpackData(dataOverflow, dataShort);
     });
 
 
     it("Common: getId | WithStrings", function() {
-        expect(rPacker.getId(gPackDataWithStrings)).to.be.a("number").and.equal(gMid);
+        srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
+        packDataWithStrings = srzDataWithStrings.pack(gMid, gDataWithStrings);
+
+        expect(rPacker.getId(packDataWithStrings)).should.equal(gMid);
     });
 
     it("Common: getId | WithoutStrings", function() {
-        expect(rPacker.getId(gPackDataWithoutStrings)).to.be.a("number").and.equal(gMid);
+        srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
+        packDataWithoutStrings = srzDataWithoutStrings.pack(gMid, gDataWithoutStrings);
+
+        expect(rPacker.getId(packDataWithoutStrings)).should.equal(gMid);
     });
 
 });

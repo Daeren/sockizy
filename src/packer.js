@@ -445,12 +445,12 @@ const packer = (function() {
                 switch(type) {
                     case TYPE_STR: {
                         if(input) {
-                            let offset = bufAType.byteLength;
-                            let byteLen = input ? bufType.write(input, offset) : 0;
+                            bytes += bufAType[0] = bufType.write(input, bytes);
+
+                            bufBytes = bufType;
+                            bufType._blen = bytes;
 
                             //-----]>
-
-                            bufAType[0] = byteLen;
 
                             if(isBigEndian) {
                                 bufType[0] = bufABytes[1];
@@ -460,15 +460,6 @@ const packer = (function() {
                                 bufType[0] = bufABytes[0];
                                 bufType[1] = bufABytes[1];
                             }
-
-                            //-----]>
-
-                            byteLen += offset;
-
-                            bufBytes = bufType;
-                            bufType._blen = byteLen;
-
-                            bytes = byteLen;
                         }
                         else {
                             bufBytes = zeroUI16;
@@ -602,7 +593,7 @@ const packer = (function() {
                             target[name] = "";
                         }
                         else {
-                            const needMem = Math.min(bufType.length, byteLen);
+                            const needMem = Math.min(bufType.length - bytes, length, byteLen);
 
                             for(let i = 0; i < needMem; ++i) {
                                 bufType[i] = bin[pktOffset++];
@@ -638,7 +629,7 @@ const packer = (function() {
         function buildTypedBuf(type, size) {
             switch(type) {
                 case TYPE_STR:
-                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc(size || 256), new Uint16Array(1)];
+                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 256) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
 
                 case TYPE_INT:
                     switch(size) {
