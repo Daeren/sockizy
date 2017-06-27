@@ -195,27 +195,23 @@ function main(port, options, isCluster) {
                     return;
                 }
 
-                for(let w of workers) {
-                    w.send(data);
-                }
+                workers.forEach((w) => w.send(data));
             });
 
             workers.push(worker);
         }
     }
-    else {
-        if(isCluster) {
-            wss.__broadcast = wss.broadcast;
-            wss.broadcast = function(data, options) {
-                process.send([0, "wss.broadcast", data, options]);
-            };
+    else if(isCluster) {
+        wss.__broadcast = wss.broadcast;
+        wss.broadcast = function(data, options) {
+            process.send([0, "wss.broadcast", Buffer.from(data).toString("binary"), options]);
+        };
 
-            process.on("message", function([type, id, data, params]) {
-                if(!type && id === "wss.broadcast") {
-                    wss.__broadcast(data, params);
-                }
-            });
-        }
+        process.on("message", function([type, id, data, params]) {
+            if(!type && id === "wss.broadcast") {
+                wss.__broadcast(Buffer.from(data, "binary"), params);
+            }
+        });
     }
 
     if(wss && options.ping && options.ping.interval > 0) {
