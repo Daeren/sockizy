@@ -121,7 +121,7 @@ function testUnpackData(d1, d2) {
         if(typeof(t1) === "number") {
             expect(t2).to.be.closeTo(t1, 0.001);
         } else {
-            expect(t2).should.equal(t1);
+            expect(t2).to.equal(t1);
         }
     }
 }
@@ -206,14 +206,14 @@ describe("Packer", function() {
         srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
         packDataWithStrings = srzDataWithStrings.pack(gMid, gDataWithStrings);
 
-        expect(rPacker.getId(packDataWithStrings)).should.equal(gMid);
+        expect(rPacker.getId(packDataWithStrings)).to.be.a("number").and.equal(gMid);
     });
 
     it("Common: getId | WithoutStrings", function() {
         srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
         packDataWithoutStrings = srzDataWithoutStrings.pack(gMid, gDataWithoutStrings);
 
-        expect(rPacker.getId(packDataWithoutStrings)).should.equal(gMid);
+        expect(rPacker.getId(packDataWithoutStrings)).to.be.a("number").and.equal(gMid);
     });
 
 });
