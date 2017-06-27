@@ -63,6 +63,7 @@ function main(port, options, isCluster) {
     });
 
     isCluster = typeof(isCluster) === "undefined" ? options.cluster : isCluster;
+    Promise = typeof(options.promise) === "undefined" ? Promise : options.promise;
 
     //-------------]>
 
@@ -228,7 +229,9 @@ function main(port, options, isCluster) {
         workers,
         workerId,
 
-        wss
+        wss,
+
+        Promise
     };
 
     //-------------]>

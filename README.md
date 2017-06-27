@@ -124,38 +124,59 @@ io.on("connection", function(socket, request) {
     });
 
     socket.on("common.signIn", async function(data) {
-        if(this.user || this.userAuthPrc) {
+        if(this.session.uid || this.userAuthPrc) {
             return;
         }
+
+        //-----------]>
+
+        const C_MAX_USER_CONN = 1;
+
+        let user, count, size,
+            response;
+
+        //-----------]>
 
         this.userAuthPrc = true;
 
+        //-----------]>
+
         try {
-            this.user = await auth(data.login, data.password);
-        } catch(e) {
-            return;
-        } finally {
-            this.userAuthPrc = false;
+            user = await auth(data.login, data.password);
+
+            if(user) {
+                count = await this.session.count(user.id);
+
+                if(count < C_MAX_USER_CONN) {
+                    size = await this.session.set(user.id);
+                }
+            }
+        } catch(e) {}
+
+        //-----------]>
+
+        if(user) {
+            if(size) {
+                response = "USER.OK | " + user.id + " | " + size;
+            }
+            else if(count) {
+                response = "USER.MAX.CONN | " + C_MAX_USER_CONN + " | " + count;
+            }
+            else {
+                response = "USER.ERROR";
+            }
         }
+        else {
+            response = "USER.BAD | " + data.login + " | " + data.password;
+        }
+
+        //-----------]>
+
+        this.userAuthPrc = false;
         
-        if(!this.user) {
-            return;
-        }
-
-        this.session.set(this.user.id, function(error, num) {
-            this.size(function(error, num) {
-                const data = "USER.OK | " + this.uid + " | " + num;
-                this.emit(data /*, targetUid*/);
-            });
-        });
-
-        /*
-        this.session.uid;
-        this.session.delete(function() { // cur socket
-        });
-        this.session.clear(function() { // all sockets
-        });
-        */
+        this.session.emit(response /*, targetUid*/);
+        this.text(response);
+		
     });
 
     function auth(login, password) {
@@ -170,6 +191,24 @@ io.on("connection", function(socket, request) {
     }
 });
 
+
+/*
+socket.on("session", function(data) {});
+socket.on("session.clear", function(uid) {});
+
+
+socket.session.uid;
+
+
+socket.session.set(uid[, callback(error, num)])
+socket.session.delete([callback(error)])
+socket.session.clear([uid = this.uid][, callback(error)])
+
+socket.session.count(uid[, callback(error, num)])
+socket.session.size([callback(error, num)])
+
+socket.session.emit(message[, uid = this.uid])
+*/
 ```
 
 
@@ -363,6 +402,7 @@ io.on("connection", function(socket, request) {
 | cluster           | default: false                       |
 |                   | -                                    |
 | ssl               |                                      |
+| promise           | default: Promise                     |
 | numCPUs           | default: max(cpu - 1, 1)             |
 | maxSockets        | Infinity                             |
 |                   | -                                    |
