@@ -62,7 +62,7 @@ function main(port, options, isCluster) {
         }
     });
 
-    isCluster = options.cluster;
+    isCluster = typeof(isCluster) === "undefined" ? options.cluster : isCluster;
 
     //-------------]>
 
@@ -191,6 +191,10 @@ function main(port, options, isCluster) {
             const worker = rCluster.fork();
 
             worker.on("message", function(data) {
+                if(!Array.isArray(data) || data[0]) {
+                    return;
+                }
+
                 for(let w of workers) {
                     w.send(data);
                 }
@@ -202,12 +206,12 @@ function main(port, options, isCluster) {
     else {
         if(isCluster) {
             wss.__broadcast = wss.broadcast;
-            wss.broadcast = function(data, params) {
-                process.send(["wss.broadcast", data, params]);
+            wss.broadcast = function(data, options) {
+                process.send([0, "wss.broadcast", data, options]);
             };
 
-            process.on("message", function([id, data, params]) {
-                if(id === "wss.broadcast") {
+            process.on("message", function([type, id, data, params]) {
+                if(!type && id === "wss.broadcast") {
                     wss.__broadcast(data, params);
                 }
             });
@@ -248,7 +252,7 @@ function main(port, options, isCluster) {
 
     //-------------]>
 
-    return isMaster ? app : rApp(app, options);
+    return rApp(app, options);
 }
 
 //-----------------------------------------------------

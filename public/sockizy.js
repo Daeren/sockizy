@@ -36,20 +36,20 @@ var io = function (module) {
 
             _createClass(EE, [{
                 key: "on",
-                value: function on(name, listener) {
-                    var ev = this._events[name];
+                value: function on(type, listener) {
+                    var ev = this._events[type];
 
                     if (typeof ev === "function") {
-                        this._events[name] = [ev, listener];
+                        this._events[type] = [ev, listener];
                     } else {
-                        this._events[name] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
+                        this._events[type] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
                     }
 
                     return this;
                 }
             }, {
                 key: "off",
-                value: function off(name, listener) {
+                value: function off(type, listener) {
                     var argsLen = arguments.length;
 
                     //--------------]>
@@ -61,11 +61,11 @@ var io = function (module) {
 
                     //--------------]>
 
-                    var ev = this._events[name];
+                    var ev = this._events[type];
 
                     if (typeof ev === "function") {
                         if (argsLen === 1 || ev === listener) {
-                            this._events[name] = null;
+                            this._events[type] = null;
                         }
 
                         return this;
@@ -87,14 +87,14 @@ var io = function (module) {
                         if (evLen === 1) {
                             ev.pop();
                         } else {
-                            this._events[name] = new Array();
+                            this._events[type] = new Array();
                         }
                     } else if (evLen === 1) {
                         if (ev[0] === listener) {
                             ev.pop();
                         }
                     } else if (ev.indexOf(listener) >= 0) {
-                        this._events[name] = this._arrayCloneWithout(ev, evLen, listener);
+                        this._events[type] = this._arrayCloneWithout(ev, evLen, listener);
                     }
 
                     //--------------]>
@@ -103,13 +103,13 @@ var io = function (module) {
                 }
             }, {
                 key: "_emit",
-                value: function _emit(name) {
-                    var events = this._events[name];
+                value: function _emit(type) {
+                    var events = this._events[type];
 
                     //--------------]>
 
                     if (!events) {
-                        if (name === "error") {
+                        if (type === "error") {
                             var error = arguments[1];
 
                             if (error instanceof Error) {

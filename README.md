@@ -23,6 +23,7 @@ git clone https://github.com/Daeren/sockizy.git
 
 * [Start](#refStart)
 * [SSL](#refSSL)
+* [Session](#refSession)
 * [Verify](#refVerifyClient)
 * [Packets](#refPackets)
 * [Bundle](#refBundle)
@@ -94,6 +95,75 @@ const ssl = {
 //-----------------------------------------------------
 
 const io = rSockizy(1337, {ssl, "maxPayload": 1024 * 16});
+```
+
+
+
+<a name="refSession"></a>
+#### Session
+
+```javascript
+const io = rSockizy(1337, null, true).session();
+
+if(io.isMaster) {
+    return;
+}
+
+io.packets(
+    null,
+    null,
+    {
+        "common.signIn": [
+            "login:str24",
+            "password:str24"
+        ]
+    }
+);
+
+io.on("connection", function(socket, request) {
+    socket.on("session", function(data) {
+        io.text(data);
+    });
+
+    socket.on("common.signIn", async function(data) {
+        if(this.user) {
+            return;
+        }
+
+        this.user = await auth(data.login, data.password);
+
+        if(this.user) {
+            this.session.set(this.user.id, function(error, num) {
+                this.size(function(error, num) {
+                    const data = "USER.OK | " + this.uid + " | " + num;
+                    this.emit(data /*, targetUid*/);
+                });
+            });
+
+            /*
+            this.session.uid;
+
+            this.session.delete(function() { // cur socket
+            });
+            
+            this.session.clear(function() { // all sockets
+            });
+            */
+        }
+    });
+
+    function auth(login, password) {
+        if(login !== "dt" || password !== "13" && password !== "6") {
+            return Promise.resolve(null);
+        }
+
+        return Promise.resolve({
+            "id":    parseInt(password),
+            "token": "x"
+        });
+    }
+});
+
 ```
 
 
@@ -269,10 +339,10 @@ io.on("connection", function(socket, request) {
 | Name              | Alias   | Note                       |
 |-------------------|---------|----------------------------|
 |                   | -       |                            |
-| str<size (byte)>  | s<size> | default: max 256           |
-| int<size (bit)>   | i<size> | size: 8, 16, 32            |
-| uint<size (bit)>  | u<size> | size: 8, 16, 32            |
-| float<size (bit)> | f<size> | size: 32, 64               |
+| str<size (byte)>  | s       | default: max 256           |
+| int<size (bit)>   | i       | size: 8, 16, 32            |
+| uint<size (bit)>  | u       | size: 8, 16, 32            |
+| float<size (bit)> | f       | size: 32, 64               |
 
 
 ##### Server options
@@ -330,6 +400,7 @@ io.on("connection", function(socket, request) {
 |                                      | -                   |                                             |
 | packets([unpack, pack, shared])      |                     | return this;                                |
 | verifyClient(func(info[, callback])) |                     | return this;                                |
+| session([store])                     |                     | default: memory; return this;               |
 |                                      | -                   |                                             |
 | on(name, listener)                   |                     | return this;                                |
 | off([name, listener])                |                     | return this;                                |
@@ -367,7 +438,7 @@ io.on("connection", function(socket, request) {
 | ping (message)                       |                     |                                             |
 | pong (message)                       |                     |                                             |
 |                                      | -                   |                                             |
-| <myEvent> (data)                     |                     |                                             |
+| *myEvent* (data)                     |                     |                                             |
 
 
 
@@ -422,7 +493,7 @@ io.on("connection", function(socket, request) {
 | packet (name, data)                  |                  |                                             |
 | error (data)                         |                  |                                             |
 |                                      | -                |                                             |
-| <myEvent> (data)                     |                  |                                             |
+| *myEvent* (data)                     |                  |                                             |
 
 
 

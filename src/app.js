@@ -9,13 +9,14 @@
 
 //-----------------------------------------------------
 
-const SEE       = require("./SEE"),
-      rPacker   = require("./packer"),
-      rToString = require("./toString");
+const rSEE          = require("./SEE"),
+      rPacker       = require("./packer"),
+      rToString     = require("./toString"),
+      rUserSession  = require("./userSession");
 
 //-----------------------------------------------------
 
-class Socket extends SEE {
+class Socket extends rSEE {
     constructor(io, ws) {
         super();
 
@@ -122,7 +123,7 @@ class Socket extends SEE {
     }
 }
 
-class Io extends SEE {
+class Io extends rSEE {
     constructor(app, options) {
         super();
 
@@ -258,6 +259,11 @@ class Io extends SEE {
         return this;
     }
 
+    session(store = rUserSession) {
+        store(this);
+        return this;
+    }
+
 
     _bundle() {
         const self = this;
@@ -322,6 +328,10 @@ function main(app, options) {
     const io = new Io(app, options);
 
     //-----------------]>
+
+    if(io.isMaster) {
+        return io;
+    }
 
     app.wss.on("connection", function(ws) {
         const socket = new Socket(io, ws);

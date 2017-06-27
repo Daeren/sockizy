@@ -16,20 +16,20 @@ const SEE = (function() {
         }
 
 
-        on(name, listener) {
-            const ev = this._events[name];
+        on(type, listener) {
+            const ev = this._events[type];
 
             if(typeof(ev) === "function") {
-                this._events[name] = [ev, listener];
+                this._events[type] = [ev, listener];
             }
             else {
-                this._events[name] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
+                this._events[type] = ev ? this._arrayCloneWith(ev, ev.length, listener) : listener;
             }
 
             return this;
         }
 
-        off(name, listener) {
+        off(type, listener) {
             const argsLen = arguments.length;
 
             //--------------]>
@@ -41,11 +41,11 @@ const SEE = (function() {
 
             //--------------]>
 
-            const ev = this._events[name];
+            const ev = this._events[type];
 
             if(typeof(ev) === "function") {
                 if(argsLen === 1 || ev === listener) {
-                    this._events[name] = null;
+                    this._events[type] = null;
                 }
 
                 return this;
@@ -68,7 +68,7 @@ const SEE = (function() {
                     ev.pop();
                 }
                 else {
-                    this._events[name] = new Array();
+                    this._events[type] = new Array();
                 }
             }
             else if(evLen === 1) {
@@ -77,7 +77,7 @@ const SEE = (function() {
                 }
             }
             else if(ev.indexOf(listener) >= 0) {
-                this._events[name] = this._arrayCloneWithout(ev, evLen, listener);
+                this._events[type] = this._arrayCloneWithout(ev, evLen, listener);
             }
 
             //--------------]>
@@ -86,13 +86,13 @@ const SEE = (function() {
         }
 
 
-        _emit(name) {
-            const events = this._events[name];
+        _emit(type) {
+            const events = this._events[type];
 
             //--------------]>
 
             if(!events) {
-                if(name === "error") {
+                if(type === "error") {
                     const error = arguments[1];
 
                     if(error instanceof Error) {
