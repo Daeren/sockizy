@@ -99,6 +99,11 @@ function main(io, evHandler) {
             },
 
             clear(uid = this.uid, callback = null) {
+                if(typeof(uid) === "function") {
+                    callback = uid;
+                    uid = this.uid;
+                }
+
                 if(arguments.length <= 1) {
                     return new io.Promise((resolve, reject) => {
                         this.clear(uid, (error, result) => error ? reject(error) : resolve(result));
@@ -114,7 +119,12 @@ function main(io, evHandler) {
             },
 
 
-            count(uid = this.uid, callback) {
+            count(uid = this.uid, callback = null) {
+                if(typeof(uid) === "function") {
+                    callback = uid;
+                    uid = this.uid;
+                }
+
                 if(arguments.length <= 1) {
                     return new io.Promise((resolve, reject) => {
                         this.count(uid, (error, result) => error ? reject(error) : resolve(result));

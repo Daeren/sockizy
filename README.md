@@ -114,7 +114,8 @@ io.packets(
         "common.signIn": [
             "login:str24",
             "password:str24"
-        ]
+        ],
+        "common.signOut": null
     }
 );
 
@@ -178,6 +179,16 @@ io.on("connection", function(socket, request) {
         this.text(response);
 		
     });
+
+    socket.on("common.signOut", async function(data) {
+        if(!this.session.uid) {
+            return;
+        }
+
+        await this.session.delete();
+    });
+
+    //----------------------------]>
 
     function auth(login, password) {
         if(login !== "D" || password !== "13" && password !== "6") {
