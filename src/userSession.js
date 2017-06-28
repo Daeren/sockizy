@@ -10,7 +10,7 @@
 //-----------------------------------------------------
 
 function main(io, evHandler) {
-    const C_IPC_ID              = 9;
+    const C_IPC_ID              = -1;
     const C_IDX_MSG_DATA        = 2;
     const C_MAX_SAFE_INTEGER    = Number.MAX_SAFE_INTEGER;
 
@@ -27,14 +27,79 @@ function main(io, evHandler) {
     //------------------------]>
 
     if(io.isMaster) {
-        io.workers.forEach((worker) => worker.on("message", onWorkerMessage));
+        io.workers.forEach((worker) => {
+            worker.on("message", function(data) {
+                if(!Array.isArray(data) || data[0] !== C_IPC_ID) {
+                    return;
+                }
+
+                onWorkerMessage(data);
+            });
+        });
     }
     else {
         if(wid > 0) {
-            process.on("message", onMasterMessage);
+            process.on("message", function(data) {
+                if(!Array.isArray(data) || data[0] !== C_IPC_ID) {
+                    return;
+                }
+
+                onMasterMessage(data);
+            });
         }
 
         io.on("connection", onIoConncetion);
+
+        //---------]>
+
+        io.session = {
+            clear(uid, callback) {
+                if(arguments.length <= 1) {
+                    return new io.Promise((resolve, reject) => {
+                        this.clear(uid, (error, result) => error ? reject(error) : resolve(result));
+                    });
+                }
+
+                if(typeof(uid) !== "undefined" && uid !== null) {
+                    prcSendWrapper(this, "wss.userSession.clear", {uid}, callback);
+                }
+                else if(callback) {
+                    callback(null);
+                }
+            },
+
+
+            count(uid, callback) {
+                if(arguments.length <= 1) {
+                    return new io.Promise((resolve, reject) => {
+                        this.count(uid, (error, result) => error ? reject(error) : resolve(result));
+                    });
+                }
+
+                if(typeof(uid) !== "undefined" && uid !== null) {
+                    prcSendWrapper(this, "wss.userSession.count", {uid}, callback);
+                }
+                else if(callback) {
+                    callback(new Error("Not specified 'uid'"));
+                }
+            },
+
+            size(callback) {
+                if(arguments.length <= 0) {
+                    return new io.Promise((resolve, reject) => {
+                        this.size((error, result) => error ? reject(error) : resolve(result));
+                    });
+                }
+
+                prcSendWrapper(this, "wss.userSession.size", null, callback);
+            },
+
+
+            emit(message, uid) {
+                const all = arguments.length <= 1;
+                prcSendWrapper(this, "wss.userSession.emit", {uid, message, all});
+            }
+        };
     }
 
     //------------------------]>
@@ -98,6 +163,24 @@ function main(io, evHandler) {
                 }
             },
 
+            delete(callback) {
+                const uid = this.uid;
+
+                if(arguments.length <= 0) {
+                    return new io.Promise((resolve, reject) => {
+                        this.delete((error, result) => error ? reject(error) : resolve(result));
+                    });
+                }
+
+                if(typeof(uid) !== "undefined" && uid !== null) {
+                    this._reset();
+                    prcSendWrapper(this, "wss.userSession.delete", {uid, sidx}, callback);
+                }
+                else if(callback) {
+                    callback(null);
+                }
+            },
+
             clear(uid = this.uid, callback = null) {
                 if(typeof(uid) === "function") {
                     callback = uid;
@@ -157,24 +240,6 @@ function main(io, evHandler) {
                 }
 
                 return false;
-            },
-
-            delete(callback) {
-                const uid = this.uid;
-
-                if(arguments.length <= 0) {
-                    return new io.Promise((resolve, reject) => {
-                        this.delete((error, result) => error ? reject(error) : resolve(result));
-                    });
-                }
-
-                if(typeof(uid) !== "undefined" && uid !== null) {
-                    this._reset();
-                    prcSendWrapper(this, "wss.userSession.delete", {uid, sidx}, callback);
-                }
-                else if(callback) {
-                    callback(null);
-                }
             }
         };
 
@@ -186,10 +251,6 @@ function main(io, evHandler) {
     }
 
     function onMasterMessage([type, id, data, params]) {
-        if(type !== C_IPC_ID) {
-            return;
-        }
-
         switch(id) {
             case "wss.userSession.customEv": {
                 const {sid, event} = params;
@@ -281,8 +342,8 @@ function main(io, evHandler) {
 
 
             case "wss.userSession.emit": {
-                const {uid, message} = data;
-                sendCustomEv(uid, "session", message);
+                const {uid, message, all} = data;
+                sendCustomEv(uid, "session", message, false, all);
 
                 break;
             }
@@ -321,7 +382,15 @@ function main(io, evHandler) {
 
         //---------]>
 
-        function sendCustomEv(uid, event, message, onlyOneSocket) {
+        function sendCustomEv(uid, event, message, onlyOneSocket, allUsers) {
+            if(allUsers) {
+                for(let id of sessions.keys()) {
+                    sendCustomEv(id, event, message, onlyOneSocket);
+                }
+
+                return;
+            }
+
             const s = sessions.get(uid);
 
             //--------]>

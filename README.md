@@ -221,6 +221,15 @@ socket.session.size([callback(error, num)])
 
 // event: "session"
 socket.session.emit(message[, uid = this.uid])
+
+//-----]>
+
+io.session.clear([uid][, callback(error)])
+
+io.session.count(uid[, callback(error, num)])
+io.session.size([callback(error, num)])
+
+io.session.emit(message[, uid])
 */
 ```
 

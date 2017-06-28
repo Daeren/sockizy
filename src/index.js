@@ -192,7 +192,7 @@ function main(port, options, isCluster) {
             const worker = rCluster.fork();
 
             worker.on("message", function(data) {
-                if(!Array.isArray(data) || data[0]) {
+                if(!Array.isArray(data) || data[0] !== 0) {
                     return;
                 }
 
@@ -208,9 +208,15 @@ function main(port, options, isCluster) {
             process.send([0, "wss.broadcast", Buffer.from(data).toString("binary"), options]);
         };
 
-        process.on("message", function([type, id, data, params]) {
-            if(!type && id === "wss.broadcast") {
-                wss.__broadcast(Buffer.from(data, "binary"), params);
+        process.on("message", function(data) {
+            if(!Array.isArray(data) || data[0] !== 0) {
+                return;
+            }
+
+            const [type, id, message, params] = data;
+
+            if(id === "wss.broadcast") {
+                wss.__broadcast(Buffer.from(message, "binary"), params);
             }
         });
     }
