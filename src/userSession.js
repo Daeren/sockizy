@@ -114,7 +114,7 @@ function main(io, evHandler) {
             },
 
 
-            count(uid, callback) {
+            count(uid = this.uid, callback) {
                 if(arguments.length <= 1) {
                     return new io.Promise((resolve, reject) => {
                         this.count(uid, (error, result) => error ? reject(error) : resolve(result));
@@ -171,8 +171,7 @@ function main(io, evHandler) {
         //---------]>
 
         socket.on("close", function() {
-            sockets.delete(sid);
-            this.session.delete(null);
+            this.session.delete(() => sockets.delete(sid));
         });
     }
 
@@ -248,7 +247,10 @@ function main(io, evHandler) {
                 const {uid} = data;
 
                 sendCustomEv(uid, "session.clear", uid);
+                sendCustomEv(uid, "session.end", uid, true);
+
                 sessions.delete(uid);
+
                 sendCallback(null);
 
                 break;
@@ -286,6 +288,10 @@ function main(io, evHandler) {
                     break;
                 }
 
+                if(s.size === 1) {
+                    sendCustomEv(uid, "session.end", uid);
+                }
+
                 s.delete(sidx);
 
                 if(!s.size) {
@@ -305,14 +311,20 @@ function main(io, evHandler) {
 
         //---------]>
 
-        function sendCustomEv(uid, event, message) {
+        function sendCustomEv(uid, event, message, onlyOneSocket) {
             const s = sessions.get(uid);
 
             //--------]>
 
-            if(!s) {
+            if(!s || !s.size) {
                 return;
             }
+
+            //--------]>
+
+            const result = [C_IPC_ID, "wss.userSession.customEv", null, null];
+
+            //--------]>
 
             for(let e of s.keys()) {
                 e = e.split(":");
@@ -322,7 +334,10 @@ function main(io, evHandler) {
                 const workerId = parseInt(e[0], 10) - 1;
                 const sid = e[1];
 
-                const result = [C_IPC_ID, "wss.userSession.customEv", message, {sid, event}];
+                //--------]>
+
+                result[2] = message;
+                result[3] = {sid, event};
 
                 //--------]>
 
@@ -331,6 +346,10 @@ function main(io, evHandler) {
                 }
                 else {
                     onMasterMessage(result);
+                }
+
+                if(onlyOneSocket) {
+                    break;
                 }
             }
         }

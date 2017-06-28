@@ -193,8 +193,9 @@ io.on("connection", function(socket, request) {
 
 
 /*
-socket.on("session", function(data) {});
-socket.on("session.clear", function(uid) {});
+socket.on("session", data => {});      // notify: all sockets
+socket.on("session.clear", uid => {}); // notify: all sockets
+socket.on("session.end", uid => {});   // notify: a single(last) socket
 
 
 socket.session.uid;
@@ -204,9 +205,10 @@ socket.session.set(uid[, callback(error, num)])
 socket.session.delete([callback(error)])
 socket.session.clear([uid = this.uid][, callback(error)])
 
-socket.session.count(uid[, callback(error, num)])
+socket.session.count([uid = this.uid][, callback(error, num)])
 socket.session.size([callback(error, num)])
 
+// event: "session"
 socket.session.emit(message[, uid = this.uid])
 */
 ```
