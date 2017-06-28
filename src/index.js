@@ -151,8 +151,8 @@ function main(port, options, isCluster) {
 
                 const certDir = ssl.dir || "";
 
-                const optKey  = rFs.readFileSync(certDir + ssl.key),
-                      optCert = rFs.readFileSync(certDir + ssl.cert);
+                const optKey  = ssl.key && rFs.readFileSync(certDir + ssl.key),
+                      optCert = ssl.cert && rFs.readFileSync(certDir + ssl.cert);
 
                 let optCa     = ssl.ca;
 
