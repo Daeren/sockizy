@@ -427,7 +427,9 @@ io.on("connection", function(socket, request) {
 | host              | default: *                           |
 | server            | default: http.Server                 |
 | path              | default: "/"                         |
+|                   | -                                    |
 | cluster           | default: false                       |
+| forkTimeout       | default: 5 (sec); off: 0             |
 |                   | -                                    |
 | ssl               |                                      |
 | promise           | default: Promise                     |

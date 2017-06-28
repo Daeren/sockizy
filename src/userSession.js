@@ -152,7 +152,7 @@ function main(io, evHandler) {
             data[C_IDX_MSG_DATA].wid = wid;
 
             rpcMap.set(rpcIdInc, (a, b) => callback.call(self, a, b));
-            rpcIdInc = ++rpcIdInc % C_MAX_SAFE_INTEGER
+            rpcIdInc = ++rpcIdInc % C_MAX_SAFE_INTEGER;
         }
 
         prcSend(data);

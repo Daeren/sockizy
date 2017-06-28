@@ -44,6 +44,8 @@ function main(port, options, isCluster) {
     options.binary = true;
 
     options.cluster = !!options.cluster;
+    options.forkTimeout = typeof(options.forkTimeout) === "undefined" ? 5 : (parseInt(options.forkTimeout) || 0);
+
     options.verifyClient = (function verifyClient(info, callback) {
         const func = verifyClient.func;
 
@@ -193,8 +195,8 @@ function main(port, options, isCluster) {
 
             //--------]>
 
-            if(worker.exitedAfterDisconnect !== true) {
-                setTimeout(forkWorker, 1000 * 5);
+            if(options.forkTimeout && worker.exitedAfterDisconnect !== true) {
+                setTimeout(forkWorker, 1000 * options.forkTimeout);
             }
         });
 
