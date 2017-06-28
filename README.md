@@ -105,9 +105,13 @@ const io = rSockizy(1337, {ssl, "maxPayload": 1024 * 16});
 ```javascript
 const io = rSockizy(1337, null, true).session();
 
+//-----------------------------------------------------
+
 if(io.isMaster) {
     return;
 }
+
+//-----------------------------------------------------
 
 io.packets(
     {
@@ -118,6 +122,8 @@ io.packets(
         "common.signOut": null
     }
 );
+
+//-----------------------------------------------------
 
 io.on("connection", function(socket, request) {
     socket.on("session", function(data) {

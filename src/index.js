@@ -69,7 +69,7 @@ function main(port, options, isCluster) {
 
     const isMaster  = isCluster && rCluster.isMaster;
 
-    const workers   = [];
+    const workers   = new Map();
     const workerId  = !isCluster || isMaster ? -1 : rCluster.worker.id;
 
     const numCPUs   = options.numCPUs || Math.max(rOs.cpus().length - 1, 1);
@@ -188,18 +188,18 @@ function main(port, options, isCluster) {
     //-------------]>
 
     if(isMaster) {
+        rCluster.on("exit", function(worker, code, signal) {
+            workers.delete(worker.id);
+
+            //--------]>
+
+            if(worker.exitedAfterDisconnect !== true) {
+                setTimeout(forkWorker, 1000 * 5);
+            }
+        });
+
         for(let i = 0; i < numCPUs; i++) {
-            const worker = rCluster.fork();
-
-            worker.on("message", function(data) {
-                if(!Array.isArray(data) || data[0] !== 0) {
-                    return;
-                }
-
-                workers.forEach((w) => w.send(data));
-            });
-
-            workers.push(worker);
+            forkWorker();
         }
     }
     else if(isCluster) {
@@ -258,6 +258,22 @@ function main(port, options, isCluster) {
     //-------------]>
 
     return rApp(app, options);
+
+    //-------------]>
+
+    function forkWorker() {
+        const worker = rCluster.fork();
+
+        worker.on("message", function(data) {
+            if(!Array.isArray(data) || data[0] !== 0) {
+                return;
+            }
+
+            workers.forEach((w) => w.isConnected() && w.send(data));
+        });
+
+        workers.set(worker.id, worker);
+    }
 }
 
 //-----------------------------------------------------

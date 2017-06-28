@@ -27,17 +27,57 @@ function main(io, evHandler) {
     //------------------------]>
 
     if(io.isMaster) {
-        io.workers.forEach((worker) => {
-            worker.on("message", function(data) {
-                if(!Array.isArray(data) || data[0] !== C_IPC_ID) {
-                    return;
-                }
+        io.cluster.on("exit", function(worker, code, signal) {
+            if(worker.exitedAfterDisconnect === true) {
+                return;
+            }
 
-                onWorkerMessage(data);
-            });
+            //--------]>
+
+            const deadWorkerId = worker.id;
+
+            //--------]>
+
+            for(let [uid, session] of sessions) {
+                for(let e of session.keys()) {
+                    const workerId = parseInt(e.split(":")[0], 10);
+
+                    if(workerId === deadWorkerId) {
+                        session.delete(e);
+
+                        if(!session.size) {
+                            sessions.delete(uid);
+                        }
+                    }
+                }
+            }
         });
+
+        //--------]>
+
+        (function() {
+            io.workers.forEach(attachWorkerEvents);
+
+            process.nextTick(function() {
+                io.cluster.on("fork", attachWorkerEvents);
+            });
+
+            //--------]>
+
+            function attachWorkerEvents(worker) {
+                worker.on("message", function(data) {
+                    if(!Array.isArray(data) || data[0] !== C_IPC_ID) {
+                        return;
+                    }
+
+                    onWorkerMessage(data);
+                });
+            }
+        })();
     }
     else {
+        io.on("connection", onIoConncetion);
+
         if(wid > 0) {
             process.on("message", function(data) {
                 if(!Array.isArray(data) || data[0] !== C_IPC_ID) {
@@ -47,8 +87,6 @@ function main(io, evHandler) {
                 onMasterMessage(data);
             });
         }
-
-        io.on("connection", onIoConncetion);
 
         //---------]>
 
@@ -410,7 +448,7 @@ function main(io, evHandler) {
 
                 //--------]>
 
-                const workerId = parseInt(e[0], 10) - 1;
+                const workerId = parseInt(e[0], 10);
                 const sid = e[1];
 
                 //--------]>
@@ -420,8 +458,12 @@ function main(io, evHandler) {
 
                 //--------]>
 
-                if(workerId >= 0) {
-                    io.workers[workerId].send(result);
+                if(workerId > 0) {
+                    const w = io.workers.get(workerId);
+
+                    if(w.isConnected()) {
+                        w.send(result);
+                    }
                 }
                 else {
                     onMasterMessage(result);
@@ -440,11 +482,15 @@ function main(io, evHandler) {
                 return;
             }
 
-            const workerId = data.wid - 1;
+            const workerId = data.wid;
             const result = [C_IPC_ID, "wss.userSession.callback", message, {rid, error}];
 
-            if(workerId >= 0) {
-                io.workers[workerId].send(result);
+            if(workerId > 0) {
+                const w = io.workers.get(workerId);
+
+                if(w.isConnected()) {
+                    w.send(result);
+                }
             }
             else {
                 onMasterMessage(result);
