@@ -194,16 +194,29 @@ class Io extends rSEE {
     }
 
 
-    packets(unpack, pack, shared) {
+    packets(...args) {
+        let namespace, unpack, pack, shared;
+
+        //----------]>
+
+        if(typeof(arguments[0]) === "string") {
+            [namespace, unpack, pack, shared] = args;
+        }
+        else {
+            [unpack, pack, shared] = args;
+        }
+
+        namespace = namespace ? (namespace + ".") : "";
+
+        //----------]>
+
         forEach(unpack, (name, srz) => {
-            this._unpackMapById.push([name, srz]);
+            this._unpackMapById.push([namespace + name, srz]);
         });
 
         forEach(pack, (name, srz) => {
-            this._packMapByName.set(name, [this._packMapByName.size, srz]);
+            this._packMapByName.set(namespace + name, [this._packMapByName.size, srz]);
         });
-
-        //----------]>
 
         if(shared) {
             return this.packets(shared, shared);

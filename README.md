@@ -474,7 +474,7 @@ io.on("connection", function(socket, request) {
 | listen([port, host, callback])       |                     | default: "localhost:1337"                   |
 | close([callback])                    |                     |                                             |
 |                                      | -                   |                                             |
-| packets([unpack, pack, shared])      |                     | return this;                                |
+| packets([ns][,unpack, pack, shared]) |                     | return this;                                |
 | verifyClient(func(info[, callback])) |                     | return this;                                |
 | session([store])                     |                     | default: memory; return this;               |
 |                                      | -                   |                                             |
@@ -549,7 +549,7 @@ io.on("connection", function(socket, request) {
 | connect(url[, secure])               |                  |                                             |
 | disconnect(code, reason)             |                  |                                             |
 |                                      | -                |                                             |
-| packets([pack, unpack, shared])      |                  | return this;                                |
+| packets([ns][, pack, unpack, shared])|                  | return this;                                |
 |                                      | -                |                                             |
 | on(name, listener)                   |                  | return this;                                |
 | off([name, listener])                |                  | return this;                                |

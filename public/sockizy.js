@@ -1137,18 +1137,42 @@ var io = function (module) {
                 }
             }, {
                 key: "packets",
-                value: function packets(pack, unpack, shared) {
+                value: function packets() {
                     var _this2 = this;
 
+                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                        args[_key] = arguments[_key];
+                    }
+
+                    var namespace = void 0,
+                        unpack = void 0,
+                        pack = void 0,
+                        shared = void 0;
+
+                    //----------]>
+
+                    if (typeof arguments[0] === "string") {
+                        namespace = args[0];
+                        pack = args[1];
+                        unpack = args[2];
+                        shared = args[3];
+                    } else {
+                        pack = args[0];
+                        unpack = args[1];
+                        shared = args[2];
+                    }
+
+                    namespace = namespace ? namespace + "." : "";
+
+                    //----------]>
+
                     forEach(unpack, function (name, srz) {
-                        _this2._unpackMapById.push([name, srz]);
+                        _this2._unpackMapById.push([namespace + name, srz]);
                     });
 
                     forEach(pack, function (name, srz) {
-                        _this2._packMapByName.set(name, [_this2._packMapByName.size, srz]);
+                        _this2._packMapByName.set(namespace + name, [_this2._packMapByName.size, srz]);
                     });
-
-                    //----------]>
 
                     if (shared) {
                         return this.packets(shared, shared);
