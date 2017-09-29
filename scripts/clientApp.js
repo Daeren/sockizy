@@ -93,7 +93,7 @@ return function(url, options = {}) {
             const tWsUrlParse = url.trim().split(/(^wss?:\/\/)/i);
 
             const wsUrl = tWsUrlParse.pop().replace(/^[:\/\/]*/, "");
-            const wsProtocol = tWsUrlParse.pop().trim();
+            const wsProtocol = (tWsUrlParse.pop() || "").trim();
             const wsSecProtocol = !!(wsProtocol && wsProtocol.match(/^wss:\/\//i));
 
             //------------]>

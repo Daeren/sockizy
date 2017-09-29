@@ -980,33 +980,32 @@ var io = function (module) {
 
     //-----------------------------------------------------
 
-    var toString = function () {
-        return function (data) {
-            if (data === null) {
-                return "";
-            }
-
-            switch (typeof data === "undefined" ? "undefined" : _typeof(data)) {
-                case "string":
-                    return data;
-
-                case "undefined":
-                    return "";
-                case "number":
-                    return isNaN(data) ? "" : data + "";
-                case "symbol":
-                    return data.toString();
-
-                default:
-                    return JSON.stringify(data);
-            }
-        };
-    }();
+    module.exports = toString;
 
     //-----------------------------------------------------
 
-    module.exports = toString;
+    function toString(data) {
+        if (data === null) {
+            return "";
+        }
 
+        switch (typeof data === "undefined" ? "undefined" : _typeof(data)) {
+            case "string":
+                return data;
+
+            case "undefined":
+                return "";
+            case "boolean":
+                return data ? "true" : "false";
+            case "number":
+                return isNaN(data) ? "" : data + "";
+            case "symbol":
+                return data.toString();
+
+            default:
+                return JSON.stringify(data);
+        }
+    }
     //-----------------------------------------------------
     //
     // Author: Daeren
@@ -1099,7 +1098,7 @@ var io = function (module) {
                     var tWsUrlParse = url.trim().split(/(^wss?:\/\/)/i);
 
                     var wsUrl = tWsUrlParse.pop().replace(/^[:\/\/]*/, "");
-                    var wsProtocol = tWsUrlParse.pop().trim();
+                    var wsProtocol = (tWsUrlParse.pop() || "").trim();
                     var wsSecProtocol = !!(wsProtocol && wsProtocol.match(/^wss:\/\//i));
 
                     //------------]>
