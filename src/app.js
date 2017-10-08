@@ -238,7 +238,8 @@ class Io extends rSEE {
 
                 let name,
                     useHolderArray,
-                    holderNew;
+                    holderNew,
+                    schema;
 
                 //-------]>
 
@@ -246,10 +247,12 @@ class Io extends rSEE {
                 useHolderArray = t.shift() === "[";
                 holderNew = t.shift() === "@";
 
+                schema = data[field];
+
                 //-------]>
 
                 testName(name);
-                callback(name, rPacker.createPacket(data[field], useHolderArray, holderNew));
+                callback(name, rPacker.createPacket(schema, useHolderArray, holderNew));
             });
         }
 
@@ -390,7 +393,10 @@ function main(app, options) {
 
                 if(data) {
                     io._emit("packet", name, data, socket);
-                    socket._emit(name, data);
+
+                    if(!socket.dropPackets) {
+                        socket._emit(name, data);
+                    }
 
                     return;
                 }
@@ -403,6 +409,7 @@ function main(app, options) {
 
         ws.on("close", function(code, reason) {
             socket._emit("close", code, reason);
+            io._emit("close", socket, code, reason);
 
             if(code === 1000) {
                 socket._emit("disconnected", code, reason);

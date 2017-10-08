@@ -12,7 +12,7 @@
 const SEE = (function() {
     class EE {
         constructor() {
-            this._events = {};
+            this._events = Object.create(null);
         }
 
 
@@ -35,7 +35,7 @@ const SEE = (function() {
             //--------------]>
 
             if(!argsLen) {
-                this._events = {};
+                this._events = Object.create(null);
                 return this;
             }
 
@@ -83,6 +83,23 @@ const SEE = (function() {
             //--------------]>
 
             return this;
+        }
+
+        listenerCount(eventName) {
+            const events = this._events;
+
+            if(events) {
+                const ev = events[type];
+
+                if(typeof(ev) === "function") {
+                    return 1;
+                }
+                else if(ev) {
+                    return ev.length;
+                }
+            }
+
+            return 0;
         }
 
 

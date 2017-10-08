@@ -31,7 +31,7 @@ var io = function (module) {
             function EE() {
                 _classCallCheck(this, EE);
 
-                this._events = {};
+                this._events = Object.create(null);
             }
 
             _createClass(EE, [{
@@ -55,7 +55,7 @@ var io = function (module) {
                     //--------------]>
 
                     if (!argsLen) {
-                        this._events = {};
+                        this._events = Object.create(null);
                         return this;
                     }
 
@@ -100,6 +100,23 @@ var io = function (module) {
                     //--------------]>
 
                     return this;
+                }
+            }, {
+                key: "listenerCount",
+                value: function listenerCount(eventName) {
+                    var events = this._events;
+
+                    if (events) {
+                        var ev = events[type];
+
+                        if (typeof ev === "function") {
+                            return 1;
+                        } else if (ev) {
+                            return ev.length;
+                        }
+                    }
+
+                    return 0;
                 }
             }, {
                 key: "_emit",
@@ -614,25 +631,25 @@ var io = function (module) {
                 var name = e.shift();
                 var subType = e.shift();
 
-                var type = getTypeId(subType.replace(/[\d\[\]]/g, ""));
+                var _type = getTypeId(subType.replace(/[\d\[\]]/g, ""));
                 var size = parseInt(subType.replace(/\D/g, ""), 10) || 0;
 
-                var _buildTypedBuf = buildTypedBuf(type, size),
+                var _buildTypedBuf = buildTypedBuf(_type, size),
                     _buildTypedBuf2 = _slicedToArray(_buildTypedBuf, 3),
                     bytes = _buildTypedBuf2[0],
                     bufType = _buildTypedBuf2[1],
                     bufAType = _buildTypedBuf2[2];
 
-                var bufBytes = TYPE_STR & type ? null : new Uint8Array(bufType.buffer);
+                var bufBytes = TYPE_STR & _type ? null : new Uint8Array(bufType.buffer);
                 var bufABytes = bufAType ? new Uint8Array(bufAType.buffer) : null;
 
                 //---------]>
 
-                fields[i] = [name, type, bytes, bufType, bufBytes, bufAType, bufABytes];
+                fields[i] = [name, _type, bytes, bufType, bufBytes, bufAType, bufABytes];
 
                 pktMinSize += bytes;
 
-                if (!pktHasStr && TYPE_STR & type) {
+                if (!pktHasStr && TYPE_STR & _type) {
                     pktHasStr = true;
                 }
             }
@@ -1193,7 +1210,8 @@ var io = function (module) {
 
                             var name = void 0,
                                 useHolderArray = void 0,
-                                holderNew = void 0;
+                                holderNew = void 0,
+                                schema = void 0;
 
                             //-------]>
 
@@ -1201,10 +1219,12 @@ var io = function (module) {
                             useHolderArray = t.shift() === "[";
                             holderNew = t.shift() === "@";
 
+                            schema = data[field];
+
                             //-------]>
 
                             testName(name);
-                            callback(name, packer.createPacket(data[field], useHolderArray, holderNew));
+                            callback(name, packer.createPacket(schema, useHolderArray, holderNew));
                         });
                     }
 

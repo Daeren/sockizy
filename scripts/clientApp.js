@@ -176,7 +176,8 @@ return function(url, options = {}) {
 
                     let name,
                         useHolderArray,
-                        holderNew;
+                        holderNew,
+                        schema;
 
                     //-------]>
 
@@ -184,10 +185,12 @@ return function(url, options = {}) {
                     useHolderArray = t.shift() === "[";
                     holderNew = t.shift() === "@";
 
+                    schema = data[field];
+
                     //-------]>
 
                     testName(name);
-                    callback(name, packer.createPacket(data[field], useHolderArray, holderNew));
+                    callback(name, packer.createPacket(schema, useHolderArray, holderNew));
                 });
             }
 

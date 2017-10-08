@@ -482,6 +482,7 @@ io.on("connection", function(socket, request) {
 | off([name, listener])                |                     | return this;                                |
 |                                      | **app.events**      |                                             |
 | connection (socket)                  |                     |                                             |
+| close (socket, code, reason)         |                     |                                             |
 | packet (name, data, socket)          |                     |                                             |
 | error (data, socket)                 |                     |                                             |
 |                                      | **socket.property** |                                             |
@@ -490,6 +491,8 @@ io.on("connection", function(socket, request) {
 | remotePort                           |                     | (read only)                                 |
 | remoteAddress                        |                     | (read only)                                 |
 | remoteFamily                         |                     | (read only)                                 |
+|                                      | -                   |                                             |
+| dropPackets                          |                     | true/false                                  |
 |                                      | **socket.method**   |                                             |
 | emit(name, data[, isBroadcast])      |                     | data: hashTable or array; returns: bool     |
 | bundle([isBroadcast])                |                     |                                             |
