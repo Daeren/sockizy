@@ -114,4 +114,52 @@ describe("SEE", function() {
         ee._emit("msg");
     });
 
+    it("listenerCount", function() {
+        const ee = new rSee();
+
+        function fNope() {
+            done("Nope");
+        }
+
+        function fNope2() {
+            done("Nope");
+        }
+
+        ee.on("msg", fNope);
+        ee.off("msg", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(0);
+
+
+        ee.on("msg", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(1);
+
+
+        ee.on("msg", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
+
+
+        ee.on("msg", fNope2);
+        ee.off("msg", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
+
+
+        ee.off("msg", fNope2);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
+
+
+        ee.on("msg", fNope);
+        ee.on("msg", fNope);
+        ee.on("msg", fNope2);
+        ee.on("msg", fNope2);
+
+        ee.on("msgX", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(6);
+    });
+
 });

@@ -107,7 +107,7 @@ var io = function (module) {
                     var events = this._events;
 
                     if (events) {
-                        var ev = events[type];
+                        var ev = events[eventName];
 
                         if (typeof ev === "function") {
                             return 1;
@@ -631,25 +631,25 @@ var io = function (module) {
                 var name = e.shift();
                 var subType = e.shift();
 
-                var _type = getTypeId(subType.replace(/[\d\[\]]/g, ""));
+                var type = getTypeId(subType.replace(/[\d\[\]]/g, ""));
                 var size = parseInt(subType.replace(/\D/g, ""), 10) || 0;
 
-                var _buildTypedBuf = buildTypedBuf(_type, size),
+                var _buildTypedBuf = buildTypedBuf(type, size),
                     _buildTypedBuf2 = _slicedToArray(_buildTypedBuf, 3),
                     bytes = _buildTypedBuf2[0],
                     bufType = _buildTypedBuf2[1],
                     bufAType = _buildTypedBuf2[2];
 
-                var bufBytes = TYPE_STR & _type ? null : new Uint8Array(bufType.buffer);
+                var bufBytes = TYPE_STR & type ? null : new Uint8Array(bufType.buffer);
                 var bufABytes = bufAType ? new Uint8Array(bufAType.buffer) : null;
 
                 //---------]>
 
-                fields[i] = [name, _type, bytes, bufType, bufBytes, bufAType, bufABytes];
+                fields[i] = [name, type, bytes, bufType, bufBytes, bufAType, bufABytes];
 
                 pktMinSize += bytes;
 
-                if (!pktHasStr && TYPE_STR & _type) {
+                if (!pktHasStr && TYPE_STR & type) {
                     pktHasStr = true;
                 }
             }

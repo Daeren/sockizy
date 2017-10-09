@@ -89,7 +89,7 @@ const SEE = (function() {
             const events = this._events;
 
             if(events) {
-                const ev = events[type];
+                const ev = events[eventName];
 
                 if(typeof(ev) === "function") {
                     return 1;
