@@ -74,6 +74,10 @@ return function(url, options = {}) {
             this.send(toString(data));
         }
 
+        json(data) {
+            this.send(JSON.stringify(data));
+        }
+
         send(data) {
             try {
                 this._ws.send(data);
@@ -247,6 +251,21 @@ return function(url, options = {}) {
 
         if(typeof(data) === "string") {
             socket._emit("text", data, event);
+
+            if(socket.listenerCount("json")) {
+                let json;
+
+                try {
+                    json = JSON.parse(data);
+                }
+                catch(e) {
+                }
+
+                if(typeof(json) !== "undefined") {
+                    socket._emit("json", json, event);
+                }
+            }
+
             return;
         }
         else if(socket._emit("arraybuffer", data, event)) {

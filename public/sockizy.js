@@ -1095,6 +1095,11 @@ var io = function (module) {
                     this.send(toString(data));
                 }
             }, {
+                key: "json",
+                value: function json(data) {
+                    this.send(JSON.stringify(data));
+                }
+            }, {
                 key: "send",
                 value: function send(data) {
                     try {
@@ -1299,6 +1304,19 @@ var io = function (module) {
 
             if (typeof data === "string") {
                 socket._emit("text", data, event);
+
+                if (socket.listenerCount("json")) {
+                    var json = void 0;
+
+                    try {
+                        json = JSON.parse(data);
+                    } catch (e) {}
+
+                    if (typeof json !== "undefined") {
+                        socket._emit("json", json, event);
+                    }
+                }
+
                 return;
             } else if (socket._emit("arraybuffer", data, event)) {
                 return;

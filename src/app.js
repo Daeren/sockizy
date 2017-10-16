@@ -100,6 +100,15 @@ class Socket extends rSEE {
         }
     }
 
+    json(data, isBroadcast) {
+        if(isBroadcast) {
+            this._io.json(data);
+        }
+        else {
+            this.send(JSON.stringify(data), null);
+        }
+    }
+
     send(data, options = this._io._msgOptions) {
         this._ws.send(data, options, (e) => {
             if(e) {
@@ -178,6 +187,10 @@ class Io extends rSEE {
 
     text(data) {
         this.broadcast(rToString(data), null);
+    }
+
+    json(data) {
+        this.broadcast(JSON.stringify(data), null);
     }
 
     broadcast(data, options = this._msgOptions) {
@@ -365,6 +378,21 @@ function main(app, options) {
 
             if(typeof(data) === "string") {
                 socket._emit("text", data);
+
+                if(socket.listenerCount("json")) {
+                    let json;
+
+                    try {
+                        json = JSON.parse(data);
+                    }
+                    catch(e) {
+                    }
+
+                    if(typeof(json) !== "undefined") {
+                        socket._emit("json", json);
+                    }
+                }
+
                 return;
             }
             else if(socket._emit("arraybuffer", data)) {

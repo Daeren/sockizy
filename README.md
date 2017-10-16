@@ -469,6 +469,7 @@ io.on("connection", function(socket, request) {
 | emit(name, data)                     |                     | data: hashTable or array; returns: bool     |
 | bundle()                             |                     |                                             |
 | text(data)                           |                     |                                             |
+| json(data)                           |                     |                                             |
 | broadcast(data[, options])           |                     | native                                      |
 |                                      | -                   |                                             |
 | listen([port, host, callback])       |                     | default: "localhost:1337"                   |
@@ -496,6 +497,8 @@ io.on("connection", function(socket, request) {
 |                                      | **socket.method**   |                                             |
 | emit(name, data[, isBroadcast])      |                     | data: hashTable or array; returns: bool     |
 | bundle([isBroadcast])                |                     |                                             |
+| text (data, isBroadcast)             |                     |                                             |
+| json (data, isBroadcast)             |                     |                                             |
 | send(data[, options])                |                     | native                                      |
 |                                      | -                   |                                             |
 | disconnect([code, reason])           |                     |                                             |
@@ -512,6 +515,7 @@ io.on("connection", function(socket, request) {
 |                                      | -                   |                                             |
 | message (data)                       |                     |                                             |
 | text (data)                          |                     |                                             |
+| json (data)                          |                     |                                             |
 | arraybuffer (data)                   |                     | intercepts and blocks unpacking of packets  |
 |                                      | -                   |                                             |
 | ping (message)                       |                     |                                             |
@@ -547,6 +551,7 @@ io.on("connection", function(socket, request) {
 |                                      | -                |                                             |
 | emit(name, data)                     |                  | data: hashTable or array; returns: bool     |
 | text(data)                           |                  |                                             |
+| json(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |
 |                                      | -                |                                             |
 | connect(url[, secure])               |                  |                                             |
@@ -568,6 +573,7 @@ io.on("connection", function(socket, request) {
 |                                      | -                |                                             |
 | message (data, event)                |                  |                                             |
 | text (data, event)                   |                  |                                             |
+| json (data, event)                   |                  |                                             |
 | arraybuffer (data, event)            |                  | intercepts and blocks unpacking of packets  |
 | packet (name, data)                  |                  |                                             |
 | error (data)                         |                  |                                             |
