@@ -12,7 +12,7 @@
 const rSEE          = require("./SEE"),
       rPacker       = require("./packer"),
       rToString     = require("./toString"),
-      rUserSession  = require("./userSession");
+      rUserSession  = require("./../experimental/userSession");
 
 //-----------------------------------------------------
 
@@ -25,11 +25,11 @@ class Socket extends rSEE {
         this._io = io;
         this._ws = ws;
 
-        //-------]>
+        //-----------------]>
 
         const _s = ws._socket;
 
-        //-------]>
+        //-----------------]>
 
         this.remotePort = _s.remotePort;
         this.remoteAddress = _s.remoteAddress;
@@ -380,16 +380,15 @@ function main(app, options) {
                 socket._emit("text", data);
 
                 if(socket.listenerCount("json")) {
-                    let json;
-
                     try {
-                        json = JSON.parse(data);
+                        data = JSON.parse(data);
                     }
                     catch(e) {
+                        data = void(e);
                     }
 
-                    if(typeof(json) !== "undefined") {
-                        socket._emit("json", json);
+                    if(typeof(data) !== "undefined") {
+                        socket._emit("json", data);
                     }
                 }
 

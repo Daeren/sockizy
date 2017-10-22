@@ -1306,14 +1306,14 @@ var io = function (module) {
                 socket._emit("text", data, event);
 
                 if (socket.listenerCount("json")) {
-                    var json = void 0;
-
                     try {
-                        json = JSON.parse(data);
-                    } catch (e) {}
+                        data = JSON.parse(data);
+                    } catch (e) {
+                        data = void e;
+                    }
 
-                    if (typeof json !== "undefined") {
-                        socket._emit("json", json, event);
+                    if (typeof data !== "undefined") {
+                        socket._emit("json", data, event);
                     }
                 }
 

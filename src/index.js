@@ -67,7 +67,7 @@ function main(port, options, isCluster) {
     isCluster = typeof(isCluster) === "undefined" ? options.cluster : isCluster;
     Promise = typeof(options.promise) === "undefined" ? Promise : options.promise;
 
-    //-------------]>
+    //--------------------------------]>
 
     const isMaster  = isCluster && rCluster.isMaster;
 
@@ -187,7 +187,7 @@ function main(port, options, isCluster) {
 
     const wss = isMaster ? null : new rUws.Server(options);
 
-    //-------------]>
+    //--------------------------------]>
 
     if(isMaster) {
         rCluster.on("exit", function(worker, code, signal) {
@@ -207,17 +207,23 @@ function main(port, options, isCluster) {
     else if(isCluster) {
         wss.__broadcast = wss.broadcast;
         wss.broadcast = function(data, options) {
-            process.send([0, "wss.broadcast", Buffer.from(data).toString("binary"), options]);
+            process.send([0, 1000, Buffer.from(data).toString("binary"), options]);
         };
 
+        //-------]>
+
         process.on("message", function(data) {
-            if(!Array.isArray(data) || data[0] !== 0) {
+            if(!Array.isArray(data) || data[0] !== 0) { // 0 - sys
                 return;
             }
 
-            const [type, id, message, params] = data;
+            //-------]>
 
-            if(id === "wss.broadcast") {
+            const [/*type*/, id, message, params] = data;
+
+            //-------]>
+
+            if(id === 1000) {
                 wss.__broadcast(Buffer.from(message, "binary"), params);
             }
         });
@@ -227,7 +233,7 @@ function main(port, options, isCluster) {
         wss.startAutoPing(Math.max(options.ping.interval, parseInt(1000 / 30)), options.ping.message);
     }
 
-    //-------------]>
+    //--------------------------------]>
 
     const app = {
         "cluster":  rCluster,
@@ -257,11 +263,11 @@ function main(port, options, isCluster) {
         };
     }
 
-    //-------------]>
+    //--------------------------------]>
 
     return rApp(app, options);
 
-    //-------------]>
+    //--------------------------------]>
 
     function forkWorker() {
         const worker = rCluster.fork();

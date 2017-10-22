@@ -253,16 +253,15 @@ return function(url, options = {}) {
             socket._emit("text", data, event);
 
             if(socket.listenerCount("json")) {
-                let json;
-
                 try {
-                    json = JSON.parse(data);
+                    data = JSON.parse(data);
                 }
                 catch(e) {
+                    data = void(e);
                 }
 
-                if(typeof(json) !== "undefined") {
-                    socket._emit("json", json, event);
+                if(typeof(data) !== "undefined") {
+                    socket._emit("json", data, event);
                 }
             }
 

@@ -9,11 +9,11 @@
 
 //-----------------------------------------------------
 
-const rSockizy  = require("./../../index.js");
+const sockizy  = require("./../../index.js");
 
 //-----------------------------------------------------
 
-const io = rSockizy().listen(); // default: localhost:1337
+const io = sockizy().listen(); // default: localhost:1337
 
 //-----------------------------------------------------
 
