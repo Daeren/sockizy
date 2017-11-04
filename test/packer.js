@@ -142,13 +142,13 @@ describe("Packer", function() {
 
     //-----------------]>
 
-    it("Common: createPacket", function() {
+    it("createPacket", function() {
         srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
         srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
     });
 
 
-    it("Common: pack", function() {
+    it("pack", function() {
         srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
         srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
 
@@ -156,7 +156,7 @@ describe("Packer", function() {
         packDataWithoutStrings = srzDataWithoutStrings.pack(gMid, gDataWithoutStrings);
     });
 
-    it("Common: unpack", function() {
+    it("unpack", function() {
         srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
         srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
 
@@ -170,7 +170,7 @@ describe("Packer", function() {
         testUnpackData(unpackDataWithoutStrings, gExpDataWithoutStrings);
     });
 
-    it("Common: unpack | StrCut & StrLen & SchOrder", function() {
+    it("unpack | StrCut & StrLen & SchOrder", function() {
         const schema = rPacker.createPacket([
             "msg:str4",
             "num:int8"
@@ -202,18 +202,57 @@ describe("Packer", function() {
     });
 
 
-    it("Common: getId | WithStrings", function() {
+    it("getId | WithStrings", function() {
         srzDataWithStrings = rPacker.createPacket(gSchemaWithStrings);
         packDataWithStrings = srzDataWithStrings.pack(gMid, gDataWithStrings);
 
         expect(rPacker.getId(packDataWithStrings)).to.be.a("number").and.equal(gMid);
     });
 
-    it("Common: getId | WithoutStrings", function() {
+    it("getId | WithoutStrings", function() {
         srzDataWithoutStrings = rPacker.createPacket(gSchemaWithoutStrings);
         packDataWithoutStrings = srzDataWithoutStrings.pack(gMid, gDataWithoutStrings);
 
         expect(rPacker.getId(packDataWithoutStrings)).to.be.a("number").and.equal(gMid);
+    });
+
+    it("getId | wide", function() {
+        const id = 13666;
+        const data = 888;
+
+        const p = rPacker.createPacket("uint16", false, false, true);
+        const b = p.pack(id, data);
+        const u = p.unpack(b, 0, b.length);
+        const i = rPacker.getId(b);
+
+        expect(i).to.be.a("number").and.equal(id);
+        expect(u).to.be.a("number").and.equal(data);
+    });
+
+
+    it("primitive", function() {
+        const id = 13;
+        const data = "test";
+
+        const p = rPacker.createPacket("str");
+        const b = p.pack(id, data);
+        const u = p.unpack(b, 0, b.length);
+        const i = rPacker.getId(b);
+
+        expect(i).to.be.a("number").and.equal(id);
+        expect(u).to.be.a("string").and.equal(data);
+    });
+
+    it("empty", function() {
+        const id = 13;
+
+        const p = rPacker.createPacket();
+        const b = p.pack(id);
+        const u = p.unpack(b, 0, b.length);
+        const i = rPacker.getId(b);
+
+        expect(i).to.be.a("number").and.equal(id);
+        expect(u).to.equal(true);
     });
 
 });

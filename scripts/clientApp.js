@@ -10,6 +10,14 @@ return function(url, options = {}) {
 
     //---------------]>
 
+    if(!Uint8Array.prototype.slice) {
+        Object.defineProperty(Uint8Array.prototype, "slice", {
+            "value": Array.prototype.slice
+        });
+    }
+
+    //---------------]>
+
     class Io extends SEE {
         constructor() {
             super();
@@ -296,7 +304,7 @@ return function(url, options = {}) {
             //-----------]>
 
             const [name, srz] = pktSchema;
-            const message = srz.unpack(pkt, offset, dataByteLength, moveOffset);
+            const message = srz.unpack(pkt, offset, dataByteLength, cbMoveOffset);
 
             //-----------]>
 
@@ -316,7 +324,7 @@ return function(url, options = {}) {
 
         //-----------]>
 
-        function moveOffset(size) {
+        function cbMoveOffset(size) {
             offset += size;
         }
     }

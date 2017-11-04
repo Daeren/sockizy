@@ -569,14 +569,6 @@ var io = function (module) {
             }
         }();
 
-        //---------)>
-
-        if (!Uint8Array.prototype.slice) {
-            Object.defineProperty(Uint8Array.prototype, "slice", {
-                "value": Array.prototype.slice
-            });
-        }
-
         //-------------------------]>
 
         var isBigEndian = function () {
@@ -586,7 +578,10 @@ var io = function (module) {
             return b[0] === 0x12;
         }();
 
-        var sysOffset = 1;
+        var sysOffset = 2;
+
+        var idUI16Buf = new Uint16Array(1);
+        var idUI8Buf = new Uint8Array(idUI16Buf.buffer);
 
         //-------------------------]>
 
@@ -595,13 +590,15 @@ var io = function (module) {
         //-------------------------]>
 
         function createPacket(schema, useHolderArray, holderNew) {
-            if (!Array.isArray(schema)) {
-                schema = new Array();
+            if (!schema) {
+                schema = [];
             }
 
             //-----------------]>
 
-            var schLen = schema.length;
+            var isPrimitive = typeof schema === "string";
+
+            var schLen = isPrimitive ? 1 : schema.length;
 
             var fields = new Array(schLen);
             var buffers = new Array(schLen);
@@ -624,7 +621,7 @@ var io = function (module) {
             //-----------------]>
 
             for (var e, i = 0; i < schLen; ++i) {
-                e = schema[i].split(":");
+                e = isPrimitive ? ["", schema] : schema[i].split(":");
 
                 //---------]>
 
@@ -701,7 +698,7 @@ var io = function (module) {
                     bufABytes = _field2[6];
 
 
-                    input = data[isArray ? fieldIdx : name];
+                    input = isPrimitive ? data : data[isArray ? fieldIdx : name];
 
                     //------]>
 
@@ -777,7 +774,10 @@ var io = function (module) {
 
                 //--------]>
 
-                result[0] = id;
+                idUI16Buf[0] = id;
+
+                result[0] = idUI8Buf[0];
+                result[1] = idUI8Buf[1];
 
                 //--------]>
 
@@ -785,20 +785,20 @@ var io = function (module) {
             }
 
             function unpack(bin, offset, length, cbEndInfo, target) {
-                target = target || (holderNew ? useHolderArray ? [] : {} : pktDataHolder);
-
-                //--------]>
-
-                if (!bin || (typeof bin === "undefined" ? "undefined" : _typeof(bin)) !== "object" || !pktHasStr && bin.byteLength !== pktMinSize || bin.byteLength < pktMinSize) {
-                    return null;
-                }
-
                 if (!schLen) {
                     if (cbEndInfo) {
                         cbEndInfo(sysOffset);
                     }
 
-                    return target;
+                    return true;
+                }
+
+                if (!bin || (typeof bin === "undefined" ? "undefined" : _typeof(bin)) !== "object" || !pktHasStr && bin.byteLength !== pktMinSize || bin.byteLength < pktMinSize) {
+                    return null;
+                }
+
+                if (!isPrimitive) {
+                    target = target || (holderNew ? useHolderArray ? [] : {} : pktDataHolder);
                 }
 
                 //--------]>
@@ -820,26 +820,18 @@ var io = function (module) {
                 //--------]>
 
                 while (fieldIdx--) {
-                    field = fields[fieldIdx];
-
 
                     //------]>
 
-                    var _field3 = field;
+                    var _fields$fieldIdx = _slicedToArray(fields[fieldIdx], 7);
 
-                    var _field4 = _slicedToArray(_field3, 7);
-
-                    name = _field4[0];
-                    type = _field4[1];
-                    bytes = _field4[2];
-                    bufType = _field4[3];
-                    bufBytes = _field4[4];
-                    bufAType = _field4[5];
-                    bufABytes = _field4[6];
-                    if (useHolderArray) {
-                        name = fieldIdx;
-                    }
-
+                    name = _fields$fieldIdx[0];
+                    type = _fields$fieldIdx[1];
+                    bytes = _fields$fieldIdx[2];
+                    bufType = _fields$fieldIdx[3];
+                    bufBytes = _fields$fieldIdx[4];
+                    bufAType = _fields$fieldIdx[5];
+                    bufABytes = _fields$fieldIdx[6];
                     for (var _i2 = 0; _i2 < bytes; ++_i2) {
                         if (pktOffset >= length) {
                             return null;
@@ -868,7 +860,7 @@ var io = function (module) {
                                 //--------]>
 
                                 if (!byteLen || byteLen >= length) {
-                                    target[name] = "";
+                                    field = "";
                                 } else {
                                     var needMem = Math.min(bufType.length - bytes, length, byteLen);
 
@@ -876,7 +868,7 @@ var io = function (module) {
                                         bufType[_i3] = bin[pktOffset++];
                                     }
 
-                                    target[name] = bufType.toString("utf8", 0, needMem);
+                                    field = bufType.toString("utf8", 0, needMem);
                                 }
 
                                 break;
@@ -888,8 +880,18 @@ var io = function (module) {
                                     bufBytes.reverse();
                                 }
 
-                                target[name] = bufType[0];
+                                field = bufType[0];
                             }
+                    }
+
+                    if (isPrimitive) {
+                        target = field;
+                    } else {
+                        if (useHolderArray) {
+                            name = fieldIdx;
+                        }
+
+                        target[name] = field;
                     }
                 }
 
@@ -978,7 +980,14 @@ var io = function (module) {
         //-----------)>
 
         function getId(data) {
-            return data[0];
+            idUI8Buf[0] = data[0];
+            idUI8Buf[1] = data[1];
+
+            if (isBigEndian) {
+                idUI8Buf.reverse();
+            }
+
+            return idUI16Buf[0];
         }
     }();
 
@@ -1034,6 +1043,14 @@ var io = function (module) {
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
         var WSocket = window.WebSocket || window.MozWebSocket;
+
+        //---------------]>
+
+        if (!Uint8Array.prototype.slice) {
+            Object.defineProperty(Uint8Array.prototype, "slice", {
+                "value": Array.prototype.slice
+            });
+        }
 
         //---------------]>
 
@@ -1350,7 +1367,7 @@ var io = function (module) {
                     name = _pktSchema[0],
                     srz = _pktSchema[1];
 
-                var message = srz.unpack(pkt, offset, dataByteLength, moveOffset);
+                var message = srz.unpack(pkt, offset, dataByteLength, cbMoveOffset);
 
                 //-----------]>
 
@@ -1370,7 +1387,7 @@ var io = function (module) {
 
             //-----------]>
 
-            function moveOffset(size) {
+            function cbMoveOffset(size) {
                 offset += size;
             }
         }

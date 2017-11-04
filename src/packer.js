@@ -300,7 +300,7 @@ const packer = (function() {
                 b[m] = i;
             }
 
-            function decodeCodePointsArray (codePoints) {
+            function decodeCodePointsArray(codePoints) {
                 const len = codePoints.length;
 
                 if(len <= MAX_ARGUMENTS_LENGTH) {
@@ -322,24 +322,19 @@ const packer = (function() {
             }
         })();
 
-    //---------)>
-
-    if(!Uint8Array.prototype.slice) {
-        Object.defineProperty(Uint8Array.prototype, "slice", {
-            "value": Array.prototype.slice
-        });
-    }
-
     //-------------------------]>
 
-    const isBigEndian = (function() {
+    const isBigEndian   = (function() {
         const a = new Uint32Array([0x12345678]);
         const b = new Uint8Array(a.buffer, a.byteOffset, a.byteLength);
 
         return b[0] === 0x12;
     })();
 
-    const sysOffset = 1;
+    const sysOffset     = 2;
+
+    const idUI16Buf     = new Uint16Array(1);
+    const idUI8Buf      = new Uint8Array(idUI16Buf.buffer);
 
     //-------------------------]>
 
@@ -348,13 +343,15 @@ const packer = (function() {
     //-------------------------]>
 
     function createPacket(schema, useHolderArray, holderNew) {
-        if(!Array.isArray(schema)) {
-            schema = new Array();
+        if(!schema) {
+            schema = [];
         }
 
         //-----------------]>
 
-        const schLen        = schema.length;
+        const isPrimitive   = typeof(schema) === "string";
+
+        const schLen        = isPrimitive ? 1 : schema.length;
 
         const fields        = new Array(schLen);
         const buffers       = new Array(schLen);
@@ -378,7 +375,7 @@ const packer = (function() {
         //-----------------]>
 
         for(let e, i = 0; i < schLen; ++i) {
-            e = schema[i].split(":");
+            e = isPrimitive ? ["", schema] : schema[i].split(":");
 
             //---------]>
 
@@ -438,7 +435,7 @@ const packer = (function() {
                 field = fields[fieldIdx];
                 [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
 
-                input = data[isArray ? fieldIdx : name];
+                input = isPrimitive ? data : data[isArray ? fieldIdx : name];
 
                 //------]>
 
@@ -515,7 +512,10 @@ const packer = (function() {
 
             //--------]>
 
-            result[0] = id;
+            idUI16Buf[0] = id;
+
+            result[0] = idUI8Buf[0];
+            result[1] = idUI8Buf[1];
 
             //--------]>
 
@@ -523,20 +523,20 @@ const packer = (function() {
         }
 
         function unpack(bin, offset, length, cbEndInfo, target) {
-            target = target || (holderNew ? (useHolderArray ? [] : {}) : pktDataHolder);
-
-            //--------]>
-
-            if(!bin || typeof(bin) !== "object" || !pktHasStr && bin.byteLength !== pktMinSize || bin.byteLength < pktMinSize) {
-                return null;
-            }
-
             if(!schLen) {
                 if(cbEndInfo) {
                     cbEndInfo(sysOffset);
                 }
 
-                return target;
+                return true;
+            }
+
+            if(!bin || typeof(bin) !== "object" || !pktHasStr && bin.byteLength !== pktMinSize || bin.byteLength < pktMinSize) {
+                return null;
+            }
+
+            if(!isPrimitive) {
+                target = target || (holderNew ? (useHolderArray ? [] : {}) : pktDataHolder);
             }
 
             //--------]>
@@ -553,14 +553,9 @@ const packer = (function() {
             //--------]>
 
             while(fieldIdx--) {
-                field = fields[fieldIdx];
-                [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = field;
+                [name, type, bytes, bufType, bufBytes, bufAType, bufABytes] = fields[fieldIdx];
 
                 //------]>
-
-                if(useHolderArray) {
-                    name = fieldIdx;
-                }
 
                 for(let i = 0; i < bytes; ++i) {
                     if(pktOffset >= length) {
@@ -590,7 +585,7 @@ const packer = (function() {
                         //--------]>
 
                         if(!byteLen || byteLen >= length) {
-                            target[name] = "";
+                            field = "";
                         }
                         else {
                             const needMem = Math.min(bufType.length - bytes, length, byteLen);
@@ -599,7 +594,7 @@ const packer = (function() {
                                 bufType[i] = bin[pktOffset++];
                             }
 
-                            target[name] = bufType.toString("utf8", 0, needMem);
+                            field = bufType.toString("utf8", 0, needMem);
                         }
 
                         break;
@@ -610,8 +605,19 @@ const packer = (function() {
                             bufBytes.reverse();
                         }
 
-                        target[name] = bufType[0];
+                        field = bufType[0];
                     }
+                }
+
+                if(isPrimitive) {
+                    target = field;
+                }
+                else {
+                    if(useHolderArray) {
+                        name = fieldIdx;
+                    }
+
+                    target[name] = field;
                 }
             }
 
@@ -694,7 +700,14 @@ const packer = (function() {
     //-----------)>
 
     function getId(data) {
-        return data[0];
+        idUI8Buf[0] = data[0];
+        idUI8Buf[1] = data[1];
+
+        if(isBigEndian) {
+            idUI8Buf.reverse();
+        }
+
+        return idUI16Buf[0];
     }
 })();
 

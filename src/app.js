@@ -138,6 +138,8 @@ class Io extends rSEE {
 
         Object.assign(this, app);
 
+        //----------]>
+
         this._msgOptions = {
             "binary":   !!options.binary
         };
@@ -416,6 +418,7 @@ function main(app, options) {
 
             if(pktSchema) {
                 const [name, srz] = pktSchema;
+
                 data = srz.unpack(tBufData, 0, dataByteLength);
 
                 if(data) {

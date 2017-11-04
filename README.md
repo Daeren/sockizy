@@ -7,7 +7,6 @@ git clone https://github.com/Daeren/sockizy.git
 
 
 * SSL
-* Cluster
 * Binary (Little/Big - Endian)
 * Relative and absolute zero-copy operations wherever possible
 
@@ -136,13 +135,11 @@ io.verifyClient(function(info) {
 
 io.packets(
     // Unpack | server.socket.on
-
     {
         "rtt": null
     },
 
     // Pack | server.socket.emit
-
     {
         "rtt": null,
 
@@ -153,8 +150,8 @@ io.packets(
     },
 
     // Shared | server.socket.on | server.socket.emit
-
     {
+        "user.gold": "uint16",
         "chat.message": [
             "uid:uint32",
             "text:str"
@@ -174,20 +171,22 @@ io.packets(
 
 io.packets(
     // Pack | server.socket.on
-
     {
         "rtt": null
     },
 
     // Unpack | server.socket.emit
-
     {
-        "rtt": null
+        "rtt": null,
+        "monster": [
+            "lvl:uint8",
+            "hp:uint8"
+        ]
     },
 
     // Shared | server.socket.on | server.socket.emit
-
     {
+        "user.gold": "uint16",
         "chat.message": [
             "uid:uint32",
             "text:str"
@@ -205,11 +204,14 @@ io.packets(
 
 // Server
 
+io.emit("user.gold", 20);
 io.emit("monster", {lvl: 13, hp: 69});
+
 
 // Client
 
 io.on("monster", console.log);
+
 
 // Server or Client
 
@@ -230,17 +232,17 @@ io.packets(
     null,
     null,
     {
-        "ev.on.arg.asArray.copy ([])": [
+        "onEv.arg.asArray.copy ([])": [
             "text:str"
         ],
-        "ev.on.arg.asArray.new ([@])": [
+        "onEv.arg.asArray.new ([@])": [
             "text:str"
         ],
 		
-        "ev.on.arg.asHashTable.copy.default": [
+        "onEv.arg.asHashTable.copy.default": [
             "text:str"
         ],
-        "ev.on.arg.asHashTable.new ({@})": [
+        "onEv.arg.asHashTable.new ({@})": [
             "text:str"
         ]
     }
