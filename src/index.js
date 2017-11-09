@@ -39,7 +39,7 @@ function main(port, options, isCluster) {
     options.ping = typeof(options.ping) === "undefined" ? {"interval": 1000} : options.ping;
     options.clientJs = typeof(options.clientJs) === "undefined" ? true : !!options.clientJs;
 
-    options.maxPayload = options.maxPayload || 1024;
+    options.maxPayload = options.maxPayload || (1024 * 32);
     options.noDelay = typeof(options.noDelay) === "undefined" ? true : !!options.noDelay;
     options.binary = true;
 
@@ -113,27 +113,26 @@ function main(port, options, isCluster) {
             const libDeflate = rZlib.deflateSync(lib, zlibOptions);
             const libGzip = rZlib.gzipSync(lib, zlibOptions);
 
+            let data, acceptEncoding;
+
             //--------------------]>
 
             return function(request, response) {
-                const acceptEncoding = request.headers["accept-encoding"];
+                data = lib;
+                acceptEncoding = request.headers["accept-encoding"];
 
                 if(acceptEncoding && typeof(acceptEncoding) === "string") {
                     if(acceptEncoding.match(reGzip)) {
+                        data = libGzip;
                         response.writeHead(200, objGzip);
-                        response.end(libGzip);
                     }
                     else if(acceptEncoding.match(reDeflate)) {
+                        data = libDeflate;
                         response.writeHead(200, objDeflate);
-                        response.end(libDeflate);
-                    }
-                    else {
-                        response.end(lib);
                     }
                 }
-                else {
-                    response.end(lib);
-                }
+
+                response.end(data);
             };
         })();
 
@@ -180,7 +179,7 @@ function main(port, options, isCluster) {
             }
         }
 
-        options.isNtSrv = options.server instanceof rHttp.Server || options.server instanceof rHttps.Server;
+        options.isNtSrv = options.server instanceof(rHttp.Server) || options.server instanceof(rHttps.Server);
     }
     
     //-------------]>
@@ -212,6 +211,12 @@ function main(port, options, isCluster) {
 
         //-------]>
 
+        if(options.ping && options.ping.interval > 0 && wss.startAutoPing) {
+            wss.startAutoPing(Math.max(options.ping.interval, parseInt(1000 / 30)), options.ping.message);
+        }
+
+        //-------]>
+
         process.on("message", function(data) {
             if(!Array.isArray(data) || data[0] !== 0) { // 0 - sys
                 return;
@@ -227,10 +232,6 @@ function main(port, options, isCluster) {
                 wss.__broadcast(Buffer.from(message, "binary"), params);
             }
         });
-    }
-
-    if(wss && options.ping && options.ping.interval > 0) {
-        wss.startAutoPing(Math.max(options.ping.interval, parseInt(1000 / 30)), options.ping.message);
     }
 
     //--------------------------------]>

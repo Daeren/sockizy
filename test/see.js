@@ -110,12 +110,37 @@ describe("SEE", function() {
         ee.off();
         ee._emit("msg");
 
-        ee.on("msg", done);
+        ee.on("msg", function() {
+            let j = 4;
+
+            [1,2,3,4].forEach(function(e) {
+                const name = "id." + e;
+
+                ee.on(name, onTest);
+
+                setTimeout(function() {
+                    ee._emit(name);
+                });
+
+                //--------]>
+
+                function onTest(data) {
+                    ee.off(name, onTest);
+
+                    j--;
+
+                    if(!j) {
+                        done();
+                    }
+                }
+            });
+        });
         ee._emit("msg");
     });
 
     it("listenerCount", function() {
         const ee = new rSee();
+
 
         function fNope() {
             done("Nope");
@@ -124,6 +149,7 @@ describe("SEE", function() {
         function fNope2() {
             done("Nope");
         }
+
 
         ee.on("msg", fNope);
         ee.off("msg", fNope);
@@ -142,6 +168,10 @@ describe("SEE", function() {
 
 
         ee.on("msg", fNope2);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(3);
+
+
         ee.off("msg", fNope);
 
         expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
@@ -149,7 +179,7 @@ describe("SEE", function() {
 
         ee.off("msg", fNope2);
 
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(1);
 
 
         ee.on("msg", fNope);
@@ -159,7 +189,7 @@ describe("SEE", function() {
 
         ee.on("msgX", fNope);
 
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(6);
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(5);
     });
 
 });

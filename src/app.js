@@ -421,7 +421,7 @@ function main(app, options) {
 
                 data = srz.unpack(tBufData, 0, dataByteLength);
 
-                if(data) {
+                if(typeof(data) !== "undefined") {
                     io._emit("packet", name, data, socket);
 
                     if(!socket.dropPackets) {

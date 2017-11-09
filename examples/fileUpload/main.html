@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Sockizy: start</title>
+        <meta charset="utf-8">
+    </head>
+
+
+    <style>
+        #files_zone {
+            border: 2px dashed #bbb;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            padding: 25px;
+            text-align: center;
+            color: #bbb;
+        }
+    </style>
+
+
+    <body>
+        <input id="files" type="file" name="files[]" multiple/>
+        <br/><br/>
+        <div id="files_zone">Drop files here</div>
+
+        <output id="files_list"></output>
+    </body>
+
+
+    <script src="http://localhost:1337"></script>
+    <script>
+        const socket = io("localhost:1337");
+
+        //-----------------------------------------------------
+
+        socket.packets(
+            null,
+            null,
+            {
+                "upload.file.init": [
+                    "id:u8",
+                    "name:s256",
+                    "type:s128",
+                    "size:u32",
+                    "begin:u32"
+                ],
+
+                "upload.file.body": [
+                    "id:u8",
+                    "chunk:b16384"
+                ],
+
+                "upload.file.next": [
+                    "id:u8"
+                ]
+            }
+        );
+
+        //-----------------------------------------------------
+
+        (function() {
+            const elmFiles = document.getElementById("files");
+            const elmFilesZone = document.getElementById("files_zone");
+
+            let fileIndex = 0;
+
+            //---------------]>
+
+            elmFiles.addEventListener("change", handleFileSelect, false);
+
+            elmFilesZone.addEventListener("dragover", handleDragOver, false);
+            elmFilesZone.addEventListener("drop", handleFileSelect, false);
+
+            //---------------]>
+
+            function handleFileSelect(evt) {
+                evt.stopPropagation();
+                evt.preventDefault();
+
+                //----------]>
+
+                const files = evt.dataTransfer.files;
+                const output = [];
+
+                //----------]>
+
+                for(let i = 0, file; file = files[i]; i++) {
+                    output.push("<li><strong>", escape(file.name), "</strong> (", file.type || "n/a", ") - ",
+                        file.size, " bytes, last modified: ",
+                        file.lastModifiedDate.toLocaleDateString(), "</li>");
+
+                    console.log(file);
+
+                    //-----------]>
+
+                    if(!file.type.match("image.*")) {
+                        continue;
+                    }
+
+                    //-----------]>
+
+                    file.slice = file.slice || file.webkitSlice || file.mozSlice;
+
+                    //-----------]>
+
+                    (function() {
+                        const fid = fileIndex++;
+                        const reader = new FileReader();
+
+                        //--------]>
+
+                        reader.addEventListener("progress", function(evt) {
+                            if(evt.lengthComputable) {
+                                const percentLoaded = Math.round((evt.loaded / evt.total) * 100);
+
+                                if(percentLoaded < 100) {
+                                }
+                                else {
+                                }
+                            }
+                        });
+
+                        reader.addEventListener("load", function(evt) {
+                            console.log("load", evt);
+
+                            socket.emit("upload.file.body", {
+                                "id":       fid,
+                                "chunk":    new Uint8Array(evt.target.result)
+                            });
+                        });
+
+                        reader.addEventListener("loadstart", function() {
+                        });
+
+                        reader.addEventListener("loadend", function(evt) {
+                            if(evt.target.readyState == FileReader.DONE) {
+                                console.log("loadend", evt);
+                            }
+                        });
+
+                        reader.addEventListener("abort", function() {
+                        });
+
+                        reader.addEventListener("error", function(evt) {
+                            const {error} = evt.target;
+
+                            if(error.ABORT_ERR) {
+                                return;
+                            }
+                        });
+
+                        //--------]>
+
+                        let offset  = 0,
+                            step    = 16384;
+
+                        //--------]>
+
+                        socket
+                            .on("upload.file.next", onUploadFileNext)
+                            .emit("upload.file.init", {
+                                "id":   fid,
+                                "size": file.size
+                            });
+
+                        //--------]>
+
+                        function onUploadFileNext(data) {
+                            const {id} = data;
+
+                            if(fid !== id) {
+                                return;
+                            }
+
+                            if(offset >= file.size) {
+                                console.log("END", fid);
+                                socket.off("upload.file.next", onUploadFileNext);
+                            }
+
+                            reader.readAsArrayBuffer(file.slice(offset, Math.min(file.size, offset + step)));
+                            offset += step;
+                        }
+
+//                        reader.abort();
+                    })();
+                }
+
+                document.getElementById("files_list").innerHTML = "<ul>" + output.join('') + "</ul>";
+            }
+
+            function handleDragOver(evt) {
+                evt.stopPropagation();
+                evt.preventDefault();
+
+                evt.dataTransfer.dropEffect = "copy";
+            }
+        })();
+        
+        //-----------------------------------------------------
+
+        socket.on("upload.file.init", function(data) {
+        });
+
+        socket.on("upload.file.body", function(data) {
+        });
+
+        //-----------------------------------------------------
+
+        socket.on("open", function() {
+            console.log("event: open");
+        });
+
+        socket.on("message", function() {
+            console.log("event: message");
+        });
+
+        socket.on("terminated", function(code) {
+            console.log("event: terminated", code);
+        });
+
+        socket.on("error", function() {
+            console.log("event: error");
+        });
+
+        //---------------)>
+
+        socket.on("packet", function(name, data) {
+            console.log("socket.packet: " + name + " |---v");
+        });
+    </script>
+</html>

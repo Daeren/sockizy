@@ -156,15 +156,17 @@ const SEE = (function() {
         }
 
         _arrayCloneWithout(arr, n, listener) {
-            const copy = new Array(--n);
+            const copy = new Array(n - 1);
 
-            let t;
+            let t,
+                i = 0;
 
             while(n--) {
                 t = arr[n];
 
                 if(listener !== t) {
-                    copy[n] = t;
+                    copy[i] = t;
+                    ++i;
                 }
             }
 
@@ -174,11 +176,11 @@ const SEE = (function() {
         _arrayCloneWith(arr, n, listener) {
             const copy = new Array(n + 1);
 
+            copy[n] = listener;
+
             while(n--) {
                 copy[n] = arr[n];
             }
-
-            copy[n] = listener;
 
             return copy;
         }

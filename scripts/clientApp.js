@@ -116,9 +116,7 @@ return function(url, options = {}) {
 
             //------------]>
 
-            const w =
-                this._ws =
-                    new WSocket((secure ? "wss" : "ws") + "://" + wsUrl);
+            const w = this._ws = new WSocket((secure ? "wss" : "ws") + "://" + wsUrl);
 
             //------------]>
 
@@ -308,7 +306,7 @@ return function(url, options = {}) {
 
             //-----------]>
 
-            if(!message) {
+            if(typeof(message) === "undefined") {
                 break;
             }
 

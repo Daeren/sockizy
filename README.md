@@ -9,6 +9,7 @@ git clone https://github.com/Daeren/sockizy.git
 * SSL
 * Binary (Little/Big - Endian)
 * Relative and absolute zero-copy operations wherever possible
+* [fileUpload][3]
 
 
 #### Goals:
@@ -40,7 +41,7 @@ const sockizy = require("sockizy");
 
 //-----------------------------------------------------
 
-const io = sockizy(1337, {"maxPayload": 1024 * 16}, true);
+const io = sockizy(1337, {"maxPayload": 1024}, true);
 
 //-----------------------------------------------------
 
@@ -92,7 +93,7 @@ const ssl = {
 
 //-----------------------------------------------------
 
-const io = sockizy(1337, {ssl, "maxPayload": 1024 * 16});
+const io = sockizy(1337, {ssl, "maxPayload": 1024});
 ```
 
 
@@ -268,13 +269,15 @@ io.on("connection", function(socket, request) {
 
 ##### Packet type
 
-| Name              | Alias   | Note                       |
-|-------------------|---------|----------------------------|
-|                   | -       |                            |
-| str<size (byte)>  | s       | default: max 256           |
-| int<size (bit)>   | i       | size: 8, 16, 32            |
-| uint<size (bit)>  | u       | size: 8, 16, 32            |
-| float<size (bit)> | f       | size: 32, 64               |
+| Name                | Alias   | Note                                                             |
+|---------------------|---------|------------------------------------------------------------------|
+|                     | -       |                                                                  |
+| bin<size (byte)>    | b       | default: max 1024 (0-65535); server: Buffer; client: Uint8Array; |
+| str<size (byte)>    | s       | default: max 256 (0-65535)                                       |
+| int<size (bit)>     | i       | size: 8, 16, 32                                                  |
+| uint<size (bit)>    | u       | size: 8, 16, 32                                                  |
+| float<size (bit)>   | f       | size: 32, 64                                                     |
+| json<size (byte)>   | j       | default: max 8192 (0-65535)                                      |
 
 
 ##### Server options
@@ -295,7 +298,7 @@ io.on("connection", function(socket, request) {
 | numCPUs           | default: max(cpu - 1, 1)             |
 | maxSockets        | Infinity                             |
 |                   | -                                    |
-| maxPayload 		| default: 1024                        |
+| maxPayload 		| default: 1024 * 32                   |
 | perMessageDeflate | default: false                       |
 | noDelay           | default: true                        |
 |                   | -                                    |
@@ -452,6 +455,7 @@ MIT
 
 [1]: http://666.io
 [2]: https://telegram.me/io666
+[3]: https://github.com/Daeren/sockizy/tree/master/examples/fileUpload
 
 [cod_b]: https://img.shields.io/codacy/3307552f95d34748bf5a7b573f5815d8.svg
 [cod_l]: https://www.codacy.com/app/daeren/sockizy/dashboard

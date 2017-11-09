@@ -23,16 +23,7 @@ const packer = (function() {
 
             Buffer.prototype = Object.create(null);
             Buffer.prototype.write = write;
-            Buffer.prototype.toString = function(encoding, start, end) {
-                start = start || 0;
-                end = end || this.length;
-
-                if(end === 0) {
-                    return "";
-                }
-
-                return utf8Slice(this, start, end);
-            };
+            Buffer.prototype.toString = toString;
 
             //---------------------]>
 
@@ -278,24 +269,18 @@ const packer = (function() {
                 return blitBuffer(utf8ToBytes(string, this.length - offset), this, offset, length);
             }
 
-            //--------)>
+            function toString(encoding, start, end) {
+                start = start || 0;
+                end = end || this.length;
 
-            function blitBuffer(src, dst, offset, length) {
-                let i;
-
-                for(i = 0; i < length; ++i) {
-                    if((i + offset >= dst.length) || (i >= src.length)) {
-                        break;
-                    }
-
-                    dst[i + offset] = src[i];
-                }
-
-                return i;
+                return end === 0 ? "" : utf8Slice(this, start, end);
             }
+
+            //--------)>
 
             function swap(b, n, m) {
                 const i = b[n];
+
                 b[n] = b[m];
                 b[m] = i;
             }
@@ -360,17 +345,19 @@ const packer = (function() {
 
         let pktDataHolder   = useHolderArray ? new Array() : Object.create(null),
             pktMinSize      = 0,
-            pktHasStr       = false,
+            pktDynamicSize  = false,
 
             pktBufStrict    = null,
             pktBufPack      = null;
 
         //-----------------]>
 
-        const TYPE_STR      = 1;
-        const TYPE_INT      = 2;
-        const TYPE_UINT     = 4;
-        const TYPE_FLOAT    = 8;
+        const TYPE_BIN      = 1;
+        const TYPE_STR      = 2;
+        const TYPE_INT      = 4;
+        const TYPE_UINT     = 8;
+        const TYPE_FLOAT    = 16;
+        const TYPE_JSON     = 32;
 
         //-----------------]>
 
@@ -391,7 +378,7 @@ const packer = (function() {
                 bufAType
             ]               = buildTypedBuf(type, size);
 
-            const bufBytes  = (TYPE_STR & type) ? null : new Uint8Array(bufType.buffer);
+            const bufBytes  = (type & (TYPE_BIN | TYPE_STR)) ? null : new Uint8Array(bufType.buffer);
             const bufABytes = bufAType ? new Uint8Array(bufAType.buffer) : null;
 
             //---------]>
@@ -400,14 +387,14 @@ const packer = (function() {
 
             pktMinSize += bytes;
 
-            if(!pktHasStr && (TYPE_STR & type)) {
-                pktHasStr = true;
+            if(!pktDynamicSize && (type & (TYPE_BIN | TYPE_STR))) {
+                pktDynamicSize = true;
             }
         }
 
         pktMinSize += sysOffset;
 
-        if(!pktHasStr) {
+        if(!pktDynamicSize) {
             pktBufStrict = new Uint8Array(pktMinSize);
         }
 
@@ -439,33 +426,37 @@ const packer = (function() {
 
                 //------]>
 
-                switch(type) {
-                    case TYPE_STR: {
-                        if(input) {
-                            bytes += bufAType[0] = bufType.write(input, bytes);
-
-                            bufBytes = bufType;
-                            bufType._blen = bytes;
-
-                            //-----]>
-
-                            if(isBigEndian) {
-                                bufType[0] = bufABytes[1];
-                                bufType[1] = bufABytes[0];
-                            }
-                            else {
-                                bufType[0] = bufABytes[0];
-                                bufType[1] = bufABytes[1];
-                            }
-                        }
-                        else {
-                            bufBytes = zeroUI16;
-                        }
-
-                        break;
+                if(type & (TYPE_BIN | TYPE_STR)) {
+                    if(type & TYPE_JSON) {
+                        input = JSON.stringify(input);
                     }
 
-                    default: {
+                    if(input) {
+                        bytes += bufAType[0] = type & TYPE_BIN ? blitBuffer(input, bufType, bytes, input.byteLength) : bufType.write(input, bytes);
+
+                        bufBytes = bufType;
+                        bufType._blen = bytes;
+
+                        //-----]>
+
+                        if(isBigEndian) {
+                            bufType[0] = bufABytes[1];
+                            bufType[1] = bufABytes[0];
+                        }
+                        else {
+                            bufType[0] = bufABytes[0];
+                            bufType[1] = bufABytes[1];
+                        }
+                    }
+                    else {
+                        bufBytes = zeroUI16;
+                    }
+                }
+                else {
+                    if(input === null || isNaN(input) || !isFinite(input) || typeof(input) === "undefined") {
+                        bufType[0] = 0;
+                    }
+                    else {
                         bufType[0] = input;
 
                         if(isBigEndian && bufType.byteLength > 1) {
@@ -528,11 +519,11 @@ const packer = (function() {
                     cbEndInfo(sysOffset);
                 }
 
-                return true;
+                return null;
             }
 
-            if(!bin || typeof(bin) !== "object" || !pktHasStr && bin.byteLength !== pktMinSize || bin.byteLength < pktMinSize) {
-                return null;
+            if(!bin || typeof(bin) !== "object" || pktBufStrict && bin.byteLength !== pktMinSize || bin.byteLength < pktMinSize) {
+                return void(0);
             }
 
             if(!isPrimitive) {
@@ -559,7 +550,7 @@ const packer = (function() {
 
                 for(let i = 0; i < bytes; ++i) {
                     if(pktOffset >= length) {
-                        return null;
+                        return void(0);
                     }
 
                     if(bufAType) {
@@ -572,42 +563,53 @@ const packer = (function() {
 
                 //------]>
 
-                switch(type) {
-                    case TYPE_STR: {
-                        if(isBigEndian) {
-                            bufABytes.reverse();
-                        }
-
-                        //--------]>
-
-                        const byteLen = bufAType[0];
-
-                        //--------]>
-
-                        if(!byteLen || byteLen >= length) {
-                            field = "";
-                        }
-                        else {
-                            const needMem = Math.min(bufType.length - bytes, length, byteLen);
-
-                            for(let i = 0; i < needMem; ++i) {
-                                bufType[i] = bin[pktOffset++];
-                            }
-
-                            field = bufType.toString("utf8", 0, needMem);
-                        }
-
-                        break;
+                if(type & (TYPE_BIN | TYPE_STR)) {
+                    if(isBigEndian) {
+                        bufABytes.reverse();
                     }
 
-                    default: {
-                        if(isBigEndian && bufType.byteLength > 1) {
-                            bufBytes.reverse();
+                    //--------]>
+
+                    const byteLen = bufAType[0];
+
+                    //--------]>
+
+                    if(!byteLen || byteLen >= length) {
+                        field = type & (TYPE_BIN | TYPE_JSON) ? null : "";
+                    }
+                    else {
+                        const needMem = Math.min(bufType.length - bytes, length, byteLen);
+                        const buf = type & TYPE_BIN ? holyBuffer.alloc(needMem) : bufType;
+
+                        //-------]>
+
+                        for(let i = 0; i < needMem; ++i) {
+                            buf[i] = bin[pktOffset++];
                         }
 
-                        field = bufType[0];
+                        //-------]>
+
+                        field = type & TYPE_BIN ? buf : buf.toString("utf8", 0, needMem);
+
+                        if(type & TYPE_JSON) {
+                            try {
+                                field = JSON.parse(field);
+                            }
+                            catch(e) {
+                                field = null;
+                            }
+                        }
                     }
                 }
+                else {
+                    if(isBigEndian && bufType.byteLength > 1) {
+                        bufBytes.reverse();
+                    }
+
+                    field = bufType[0];
+                }
+
+                //------]>
 
                 if(isPrimitive) {
                     target = field;
@@ -633,10 +635,19 @@ const packer = (function() {
         //-----------------]>
 
         function buildTypedBuf(type, size) {
-            switch(type) {
-                case TYPE_STR:
-                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 256) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
+            if(type & TYPE_BIN) {
+                return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 1024) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
+            }
 
+            if(type & TYPE_JSON) {
+                return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 8192) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
+            }
+
+            if(type & TYPE_STR) {
+                return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 256) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
+            }
+
+            switch(type) {
                 case TYPE_INT:
                     switch(size) {
                         case 8: return [Int8Array.BYTES_PER_ELEMENT, new Int8Array(1)];
@@ -675,6 +686,14 @@ const packer = (function() {
 
         function getTypeId(type) {
             switch(type) {
+                case "b":
+                case "bin":
+                    return TYPE_BIN;
+
+                case "j":
+                case "json":
+                    return TYPE_STR | TYPE_JSON;
+
                 case "s":
                 case "str":
                     return TYPE_STR;
@@ -708,6 +727,22 @@ const packer = (function() {
         }
 
         return idUI16Buf[0];
+    }
+
+    //-----------)>
+
+    function blitBuffer(src, dst, offset, length) {
+        let i;
+
+        for(i = 0; i < length; ++i) {
+            if((i + offset >= dst.byteLength) || (i >= src.byteLength)) {
+                break;
+            }
+
+            dst[i + offset] = src[i];
+        }
+
+        return i;
     }
 })();
 

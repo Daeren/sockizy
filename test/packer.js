@@ -21,6 +21,8 @@ const rPacker = require("./../src/packer");
 //-----------------------------------------------------
 
 const gDataWithStrings = {
+    bin:    Buffer.from("test"),
+    json:   {x:1, b: "b".repeat(1)},
     data:   JSON.stringify({x:1, b: "b".repeat(1)}),
     name:   "DT | (っ◕‿◕)っ ♥ | Привет",
     status: "X  | (っ◕‿◕)っ ♥  Да",
@@ -44,6 +46,8 @@ const gDataWithoutStrings = {
 //------)>
 
 const gExpDataWithStrings = {
+    bin:    Buffer.from("test"),
+    json:   {x:1, b: "b".repeat(1)},
     data:   JSON.stringify({x:1, b: "b".repeat(1)}),
     name:   "DT | (っ◕‿◕)っ ♥ | Привет",
     status: "X  | (っ◕‿◕)っ ♥  Да",
@@ -70,6 +74,8 @@ const gExpDataWithoutStrings = {
 //------)>
 
 const gSchemaWithStrings = [
+    "bin:bin",
+    "json:json",
     "data:str",
     "name:str",
     "status:str",
@@ -121,7 +127,7 @@ function testUnpackData(d1, d2) {
         if(typeof(t1) === "number") {
             expect(t2).to.be.closeTo(t1, 0.001);
         } else {
-            expect(t2).to.equal(t1);
+            expect(t2).to.deep.equal(t1);
         }
     }
 }
@@ -252,7 +258,7 @@ describe("Packer", function() {
         const i = rPacker.getId(b);
 
         expect(i).to.be.a("number").and.equal(id);
-        expect(u).to.equal(true);
+        expect(u).to.equal(null);
     });
 
 });
