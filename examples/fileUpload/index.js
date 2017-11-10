@@ -9,7 +9,9 @@
 
 //-----------------------------------------------------
 
-const sockizy  = require("./../../index.js");
+const fs        = require("fs");
+
+const sockizy   = require("./../../index.js");
 
 //-----------------------------------------------------
 
@@ -42,9 +44,7 @@ io.packets(
 
 //-----------------------------------------------------
 
-const fs = require("fs");
-
-function bindDownload(socket) {
+io.on("connection", function(socket) {
     const upload = socket.upload = socket.upload || Object.create(null);
 
     //---------]>
@@ -57,7 +57,7 @@ function bindDownload(socket) {
         }
 
         upload[id] = {
-            "stream":   fs.createWriteStream("./store/" + (Date.now() + Math.random()).toString(32) + "test.jpg"),
+            "stream":   fs.createWriteStream("./store/" + (Date.now() + Math.random()).toString(32) + ".jpg"),
             "size":     size,
             "bytes":    0
         };
@@ -66,8 +66,6 @@ function bindDownload(socket) {
     });
 
     socket.on("upload.file.body", function(data) {
-        console.log("upload.file.body", data && data.chunk);
-
         const {id, chunk} = data;
         const u = upload[id]
 
@@ -88,13 +86,9 @@ function bindDownload(socket) {
             socket.emit("upload.file.next", [id]);
         }
     });
-}
-
-io.on("connection", function(socket, request) {
-    bindDownload(socket, function(info, stream) {
-    });
 });
 
 io.on("packet", function(name, data, socket) {
-    console.log("socket.packet: " + name + " |---v");
+    console.log(`io.packet: ${name} |---v`);
+    console.log(data);
 });
