@@ -527,7 +527,7 @@ const packer = (function() {
             }
 
             if(!isPrimitive) {
-                target = target || (holderNew ? (useHolderArray ? [] : {}) : pktDataHolder);
+                target = target || (holderNew ? (useHolderArray ? new Array() : Object.create(null)) : pktDataHolder);
             }
 
             //--------]>
@@ -583,8 +583,8 @@ const packer = (function() {
 
                         //-------]>
 
-                        for(let i = 0; i < needMem; ++i) {
-                            buf[i] = bin[pktOffset++];
+                        for(let i = 0; i < needMem; ++i, ++pktOffset) {
+                            buf[i] = bin[pktOffset];
                         }
 
                         //-------]>

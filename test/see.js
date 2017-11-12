@@ -142,13 +142,8 @@ describe("SEE", function() {
         const ee = new rSee();
 
 
-        function fNope() {
-            done("Nope");
-        }
-
-        function fNope2() {
-            done("Nope");
-        }
+        function fNope() {}
+        function fNope2() {}
 
 
         ee.on("msg", fNope);

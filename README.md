@@ -233,14 +233,14 @@ io.packets(
     null,
     null,
     {
-        "onEv.arg.asArray.copy ([])": [
+        "onEv.arg.asArray.zCopy ([])": [
             "text:str"
         ],
         "onEv.arg.asArray.new ([@])": [
             "text:str"
         ],
 		
-        "onEv.arg.asHashTable.copy.default": [
+        "onEv.arg.asHashTable.zCopy.default": [
             "text:str"
         ],
         "onEv.arg.asHashTable.new ({@})": [
@@ -250,15 +250,15 @@ io.packets(
 );
 
 io.on("connection", function(socket, request) {
-    socket.on("ev.on.arg.asHashTable.new", function(data) {
+    socket.on("onEv.arg.asHashTable.new", function(data) {
         const bd = this.bundle(true);
 
         for(let i = 0; i < 10; ++i) { 
-            bd.write("ev.on.arg.asArray.copy", {text: `Helword: ${i}`});
+            bd.write("onEv.arg.asArray.zCopy", {text: `Helword: ${i}`});
         }
 
-        bd.write("ev.on.arg.asArray.copy");
-        bd.end("ev.on.arg.asArray.copy", ["Helword: end"]);
+        bd.write("onEv.arg.asArray.zCopy");
+        bd.end("onEv.arg.asArray.zCopy", ["Helword: end"]);
     });
 });
 ```

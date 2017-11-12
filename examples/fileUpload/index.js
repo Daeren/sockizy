@@ -67,7 +67,7 @@ io.on("connection", function(socket) {
 
     socket.on("upload.file.body", function(data) {
         const {id, chunk} = data;
-        const u = upload[id]
+        const u = upload[id];
 
         if(!chunk || !u) {
             return;
