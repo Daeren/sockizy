@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Sockizy: start</title>
+        <meta charset="utf-8">
+    </head>
+
+    <body></body>
+
+    <script src="http://localhost:1337"></script>
+    <script>
+        const socket = io("localhost:1337/");
+
+        //-----------------------------------------------------
+
+        socket.packets(
+            null,
+            null,
+            {
+                "call": null,
+                "terminate": null,
+                "badPacket": null
+            }
+        );
+
+        //-----------------------------------------------------
+
+        socket.on("open", function() {
+            console.log("event: open");
+
+            this.emit("call");
+        });
+
+        socket.on("message", function() {
+            console.log("event: message");
+        });
+
+        socket.on("close", function(code, reason) {
+            console.log("event: close |", code, reason);
+        });
+
+        socket.on("disconnected", function() {
+            console.log("event: disconnected");
+        });
+
+        socket.on("terminated", function() {
+            console.log("event: terminated");
+        });
+
+        socket.on("error", function() {
+            console.log("event: error");
+        });
+
+        //---------------)>
+
+        socket.on("packet", function(name) {
+            console.log("socket.packet: " + name + " |---v");
+        });
+    </script>
+</html>

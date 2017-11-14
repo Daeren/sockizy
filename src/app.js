@@ -9,6 +9,8 @@
 
 //-----------------------------------------------------
 
+const rUrl          = require("url");
+
 const rSEE          = require("./SEE"),
       rPacker       = require("./packer"),
       rToString     = require("./toString"),
@@ -23,17 +25,7 @@ class Socket extends rSEE {
         //-------]>
 
         this._io = io;
-        this._ws = ws;
-
-        //-----------------]>
-
-        const _s = ws._socket;
-
-        //-----------------]>
-
-        this.remotePort = _s.remotePort;
-        this.remoteAddress = _s.remoteAddress;
-        this.remoteFamily = _s.remoteFamily;
+        this._bind(ws);
 
         //-------]>
 
@@ -44,6 +36,10 @@ class Socket extends rSEE {
 
     get readyState() {
         return this._ws.readyState;
+    }
+
+    get upgradeReq() {
+        return this._ws.upgradeReq;
     }
 
 
@@ -119,16 +115,33 @@ class Socket extends rSEE {
 
 
     disconnect(code, reason) {
+        this._disconnected = true;
         this._ws.close(code, reason);
     }
 
     terminate() {
+        this._terminated = true;
         this._ws.terminate();
     }
 
 
     ping(message) {
         this._ws.ping(message);
+    }
+
+
+    _bind(ws) {
+        this._ws = ws;
+
+        //-----------]>
+
+        const _s = ws._socket;
+
+        //-----------]>
+
+        this.remotePort = _s.remotePort;
+        this.remoteAddress = _s.remoteAddress;
+        this.remoteFamily = _s.remoteFamily;
     }
 }
 
@@ -147,6 +160,7 @@ class Io extends rSEE {
         this._srv = options.server;
         this._isNtSrv = options.isNtSrv;
 
+        this._restoringTimeout = options.restoringTimeout;
         this._verifyClient = options.verifyClient;
 
         this._packMapByName = new Map();
@@ -357,6 +371,7 @@ class Io extends rSEE {
 
 function main(app, options) {
     const io = new Io(app, options);
+    const socketsRestoringMap = Object.create(null);
 
     //-----------------]>
 
@@ -365,9 +380,22 @@ function main(app, options) {
     }
 
     app.wss.on("connection", function(ws) {
-        const socket = new Socket(io, ws);
+        const {upgradeReq} = ws;
+        const {query} = rUrl.parse(upgradeReq.url, true);
 
-        let tBufData;
+        const sid = query.id;
+
+        //-----------------]>
+
+        if(!sid || typeof(sid) !== "string" || sid.length !== 36) {
+            ws.terminate();
+            return;
+        }
+
+        //-----------------]>
+
+        let socket = releaseSR(sid),
+            tBufData;
 
         //-----------------]>
 
@@ -434,18 +462,32 @@ function main(app, options) {
 
             //-----------]>
 
-            ws.terminate();
+            socket.disconnect(1003);
         });
 
         ws.on("close", function(code, reason) {
-            socket._emit("close", code, reason);
-            io._emit("close", socket, code, reason);
+            const {_disconnected, _terminated} = socket;
+            const wasClean = !!(_disconnected || _terminated);
 
-            if(code === 1000) {
-                socket._emit("disconnected", code, reason);
+            //--------]>
+
+            socket._emit("close", code, reason, wasClean);
+            io._emit("close", socket, code, reason, wasClean);
+
+            //--------]>
+
+            if(_disconnected || code === 1000) {
+                socket._emit("disconnected", code, reason, wasClean);
             }
             else {
-                socket._emit("terminated", code);
+                const timeout = io._restoringTimeout;
+
+                if(!_terminated && timeout) {
+                    socketsRestoringMap[sid] = socket;
+                    socket._rtm = setTimeout(releaseSR, timeout, sid, timeout);
+                }
+
+                socket._emit("terminated", code, wasClean);
             }
         });
 
@@ -463,12 +505,39 @@ function main(app, options) {
 
         //-----------------]>
 
-        io._emit("connection", socket, ws.upgradeReq);
+        if(socket) {
+            socket._bind(ws);
+
+            io._emit("restored", socket, upgradeReq);
+        }
+        else {
+            socket = new Socket(io, ws);
+            socket.id = sid;
+
+            io._emit("connection", socket, upgradeReq);
+        }
     });
 
     //-----------------]>
 
     return io;
+
+    //-----------------]>
+
+    function releaseSR(sid, timeout) {
+        const s = socketsRestoringMap[sid];
+
+        if(s) {
+            clearTimeout(s._rtm);
+            delete socketsRestoringMap[sid];
+
+            if(timeout) {
+                io._emit("unrestored", s, timeout);
+            }
+        }
+
+        return s;
+    }
 }
 
 //-----------------------------------------------------

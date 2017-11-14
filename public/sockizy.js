@@ -158,6 +158,8 @@ var io = function (module) {
                             emitTwo(events, isFn, this, arguments[1], arguments[2]);break;
                         case 4:
                             emitThree(events, isFn, this, arguments[1], arguments[2], arguments[3]);break;
+                        case 5:
+                            emitFour(events, isFn, this, arguments[1], arguments[2], arguments[3], arguments[4]);break;
 
                         default:
                             {
@@ -227,6 +229,7 @@ var io = function (module) {
                 }
             }
         }
+
         function emitOne(handler, isFn, self, arg1) {
             if (isFn) {
                 handler.call(self, arg1);
@@ -236,6 +239,7 @@ var io = function (module) {
                 }
             }
         }
+
         function emitTwo(handler, isFn, self, arg1, arg2) {
             if (isFn) {
                 handler.call(self, arg1, arg2);
@@ -245,6 +249,7 @@ var io = function (module) {
                 }
             }
         }
+
         function emitThree(handler, isFn, self, arg1, arg2, arg3) {
             if (isFn) {
                 handler.call(self, arg1, arg2, arg3);
@@ -254,6 +259,17 @@ var io = function (module) {
                 }
             }
         }
+
+        function emitFour(handler, isFn, self, arg1, arg2, arg3, arg4) {
+            if (isFn) {
+                handler.call(self, arg1, arg2, arg3, arg4);
+            } else {
+                for (var i = 0, len = handler.length; i < len; ++i) {
+                    handler[i].call(self, arg1, arg2, arg3, arg4);
+                }
+            }
+        }
+
         function emitMany(handler, isFn, self, args) {
             if (isFn) {
                 handler.apply(self, args);
@@ -787,7 +803,7 @@ var io = function (module) {
                 }
 
                 if (!isPrimitive) {
-                    target = target || (holderNew ? useHolderArray ? [] : {} : pktDataHolder);
+                    target = target || (holderNew ? useHolderArray ? new Array() : Object.create(null) : pktDataHolder);
                 }
 
                 //--------]>
@@ -854,8 +870,8 @@ var io = function (module) {
 
                             //-------]>
 
-                            for (var _i3 = 0; _i3 < needMem; ++_i3) {
-                                buf[_i3] = bin[pktOffset++];
+                            for (var _i3 = 0; _i3 < needMem; ++_i3, ++pktOffset) {
+                                buf[_i3] = bin[pktOffset];
                             }
 
                             //-------]>
@@ -1102,6 +1118,7 @@ var io = function (module) {
 
                 //-------]>
 
+                _this.id = options.id || genId();
                 _this.reconnecting = false;
 
                 //-------]>
@@ -1177,16 +1194,7 @@ var io = function (module) {
 
                     //------------]>
 
-                    var w = this._ws = new WSocket((secure ? "wss" : "ws") + "://" + wsUrl);
-
-                    //------------]>
-
-                    w.binaryType = "arraybuffer";
-
-                    w.onmessage = wsOnMessage.bind(this, this);
-                    w.onopen = wsOnOpen.bind(this, this);
-                    w.onclose = wsOnClose.bind(this, this);
-                    w.onerror = wsOnError.bind(this, this);
+                    this._connect((secure ? "wss" : "ws") + "://" + wsUrl + "/?id=" + this.id);
 
                     //------------]>
 
@@ -1194,7 +1202,10 @@ var io = function (module) {
                 }
             }, {
                 key: "disconnect",
-                value: function disconnect(code, reason) {
+                value: function disconnect() {
+                    var code = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000;
+                    var reason = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+
                     this._ws.close(code, reason);
                     this._ws = null;
 
@@ -1290,9 +1301,23 @@ var io = function (module) {
                     }
                 }
             }, {
+                key: "_connect",
+                value: function _connect(url) {
+                    var w = this._ws = new WSocket(url);
+
+                    //------------]>
+
+                    w.binaryType = "arraybuffer";
+
+                    w.onmessage = wsOnMessage.bind(this, this);
+                    w.onopen = wsOnOpen.bind(this, this);
+                    w.onclose = wsOnClose.bind(this, this);
+                    w.onerror = wsOnError.bind(this, this);
+                }
+            }, {
                 key: "_reconnect",
                 value: function _reconnect() {
-                    return this.connect(this.url);
+                    this._connect(this.url);
                 }
             }, {
                 key: "_pack",
@@ -1318,17 +1343,17 @@ var io = function (module) {
             }, {
                 key: "bufferedAmount",
                 get: function get() {
-                    return this._ws.bufferedAmount;
+                    return this._ws && this._ws.bufferedAmount || 0;
                 }
             }, {
                 key: "readyState",
                 get: function get() {
-                    return this._ws.readyState;
+                    return this._ws && this._ws.readyState || this.CLOSED;
                 }
             }, {
                 key: "url",
                 get: function get() {
-                    return this._ws.url;
+                    return this._ws && this._ws.url || "";
                 }
             }]);
 
@@ -1430,7 +1455,6 @@ var io = function (module) {
 
             if (this.reconnecting) {
                 this.reconnecting = false;
-
                 this._emit("restored", rcAttemptsCount);
             }
 
@@ -1443,6 +1467,7 @@ var io = function (module) {
             var code = event.code,
                 reason = event.reason;
 
+            //--------]>
 
             this._emit("close", code, reason, event);
 
@@ -1476,6 +1501,28 @@ var io = function (module) {
 
         function wsOnError(socket, error) {
             this._emit("error", error);
+        }
+
+        //--------)>
+
+        function genId() {
+            return crypto ? uuidv4() : guid();
+
+            //----------]>
+
+            function guid() {
+                return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
+
+                function s4() {
+                    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+                }
+            }
+
+            function uuidv4() {
+                return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (c) {
+                    return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
+                });
+            }
         }
     };
 }({});

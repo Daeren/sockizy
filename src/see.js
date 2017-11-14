@@ -112,7 +112,7 @@ const SEE = (function() {
                 if(type === "error") {
                     const error = arguments[1];
 
-                    if(error instanceof Error) {
+                    if(error instanceof(Error)) {
                         throw error;
                     }
                     else {
@@ -138,6 +138,7 @@ const SEE = (function() {
                 case 2: emitOne(events, isFn, this, arguments[1]); break;
                 case 3: emitTwo(events, isFn, this, arguments[1], arguments[2]); break;
                 case 4: emitThree(events, isFn, this, arguments[1], arguments[2], arguments[3]); break;
+                case 5: emitFour(events, isFn, this, arguments[1], arguments[2], arguments[3], arguments[4]); break;
 
                 default: {
                     const args = new Array(argsLen - 1);
@@ -202,6 +203,7 @@ const SEE = (function() {
             }
         }
     }
+
     function emitOne(handler, isFn, self, arg1) {
         if(isFn) {
             handler.call(self, arg1);
@@ -212,6 +214,7 @@ const SEE = (function() {
             }
         }
     }
+
     function emitTwo(handler, isFn, self, arg1, arg2) {
         if(isFn) {
             handler.call(self, arg1, arg2);
@@ -222,6 +225,7 @@ const SEE = (function() {
             }
         }
     }
+
     function emitThree(handler, isFn, self, arg1, arg2, arg3) {
         if(isFn) {
             handler.call(self, arg1, arg2, arg3);
@@ -232,6 +236,18 @@ const SEE = (function() {
             }
         }
     }
+
+    function emitFour(handler, isFn, self, arg1, arg2, arg3, arg4) {
+        if(isFn) {
+            handler.call(self, arg1, arg2, arg3, arg4);
+        }
+        else {
+            for(let i = 0, len = handler.length; i < len; ++i) {
+                handler[i].call(self, arg1, arg2, arg3, arg4);
+            }
+        }
+    }
+
     function emitMany(handler, isFn, self, args) {
         if(isFn) {
             handler.apply(self, args);

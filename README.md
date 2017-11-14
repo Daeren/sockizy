@@ -301,6 +301,7 @@ io.on("connection", function(socket, request) {
 | maxPayload 		| default: 1024 * 32                   |
 | perMessageDeflate | default: false                       |
 | noDelay           | default: true                        |
+| restoringTimeout  | default: 10 (sec); off: 0            |
 |                   | -                                    |
 | ping              | default: {"interval": 1000}          |
 | clientJs          | default: true                        |
@@ -317,73 +318,77 @@ io.on("connection", function(socket, request) {
 
 ##### Server: app([port, options, isCluster])
 
-| Name                                 |                     | Note                                        |
-|--------------------------------------|---------------------|---------------------------------------------|
-|                                      | **app.property**    |                                             |
-| cluster                              |                     |                                             |
-| isMaster                             |                     |                                             |
-|                                      | -                   |                                             |
-| workers                              |                     |                                             |
-| workerId                             |                     |                                             |
-|                                      | -                   |                                             |
-| wss                                  |                     | uws                                         |
-|                                      | **app.method**      |                                             |
-| emit(name, data)                     |                     | data: hashTable or array; returns: bool     |
-| bundle()                             |                     |                                             |
-| text(data)                           |                     |                                             |
-| json(data)                           |                     |                                             |
-| broadcast(data[, options])           |                     | native                                      |
-|                                      | -                   |                                             |
-| listen([port, host, callback])       |                     | default: "localhost:1337"                   |
-| close([callback])                    |                     |                                             |
-|                                      | -                   |                                             |
-| packets([ns][,unpack, pack, shared]) |                     | return this;                                |
-| verifyClient(func(info[, callback])) |                     | return this;                                |
-| session([store])                     |                     | default: memory; return this;               |
-|                                      | -                   |                                             |
-| on(name, listener)                   |                     | return this;                                |
-| off([name, listener])                |                     | return this;                                |
-|                                      | **app.events**      |                                             |
-| connection (socket)                  |                     |                                             |
-| close (socket, code, reason)         |                     |                                             |
-| packet (name, data, socket)          |                     |                                             |
-| error (data, socket)                 |                     |                                             |
-|                                      | **socket.property** |                                             |
-| readyState                           |                     | number (read only)                          |
-|                                      | -                   |                                             |
-| remotePort                           |                     | (read only)                                 |
-| remoteAddress                        |                     | (read only)                                 |
-| remoteFamily                         |                     | (read only)                                 |
-|                                      | -                   |                                             |
-| dropPackets                          |                     | true/false                                  |
-|                                      | **socket.method**   |                                             |
-| emit(name, data[, isBroadcast])      |                     | data: hashTable or array; returns: bool     |
-| bundle([isBroadcast])                |                     |                                             |
-| text (data, isBroadcast)             |                     |                                             |
-| json (data, isBroadcast)             |                     |                                             |
-| send(data[, options])                |                     | native                                      |
-|                                      | -                   |                                             |
-| disconnect([code, reason])           |                     |                                             |
-| terminate()                          |                     |                                             |
-|                                      | -                   |                                             |
-| ping([message])                      |                     |                                             |
-|                                      | -                   |                                             |
-| on(name, listener)                   |                     | return this;                                |
-| off([name, listener])                |                     | return this;                                |
-|                                      | **socket.events**   |                                             |
-| close (code, reason)                 |                     |                                             |
-| disconnected (code, reason)          |                     |                                             |
-| terminated (code)                    |                     |                                             |
-|                                      | -                   |                                             |
-| message (data)                       |                     |                                             |
-| text (data)                          |                     |                                             |
-| json (data)                          |                     |                                             |
-| arraybuffer (data)                   |                     | intercepts and blocks unpacking of packets  |
-|                                      | -                   |                                             |
-| ping (message)                       |                     |                                             |
-| pong (message)                       |                     |                                             |
-|                                      | -                   |                                             |
-| *myEvent* (data)                     |                     |                                             |
+| Name                                   |                     | Note                                        |
+|----------------------------------------|---------------------|---------------------------------------------|
+|                                        | **app.property**    |                                             |
+| cluster                                |                     |                                             |
+| isMaster                               |                     |                                             |
+|                                        | -                   |                                             |
+| workers                                |                     |                                             |
+| workerId                               |                     |                                             |
+|                                        | -                   |                                             |
+| wss                                    |                     | uws                                         |
+|                                        | **app.method**      |                                             |
+| emit(name, data)                       |                     | data: hashTable or array; returns: bool     |
+| bundle()                               |                     |                                             |
+| text(data)                             |                     |                                             |
+| json(data)                             |                     |                                             |
+| broadcast(data[, options])             |                     | native                                      |
+|                                        | -                   |                                             |
+| listen([port, host, callback])         |                     | default: "localhost:1337"                   |
+| close([callback])                      |                     |                                             |
+|                                        | -                   |                                             |
+| packets([ns][,unpack, pack, shared])   |                     | return this;                                |
+| verifyClient(func(info[, callback]))   |                     | return this;                                |
+| session([store])                       |                     | default: memory; return this;               |
+|                                        | -                   |                                             |
+| on(name, listener)                     |                     | return this;                                |
+| off([name, listener])                  |                     | return this;                                |
+|                                        | **app.events**      |                                             |
+| restored (socket, request)             |                     |                                             |
+| unrestored (socket, timeout)           |                     |                                             |
+|                                        | -                   |                                             |
+| connection (socket, request)           |                     |                                             |
+| close (socket, code, reason, wasClean) |                     |                                             |
+| packet (name, data, socket)            |                     |                                             |
+| error (data, socket)                   |                     |                                             |
+|                                        | **socket.property** |                                             |
+| readyState                             |                     | number (read only)                          |
+| upgradeReq                             |                     | object (read only)                          |
+|                                        | -                   |                                             |
+| remotePort                             |                     | (read only)                                 |
+| remoteAddress                          |                     | (read only)                                 |
+| remoteFamily                           |                     | (read only)                                 |
+|                                        | -                   |                                             |
+| dropPackets                            |                     | true/false                                  |
+|                                        | **socket.method**   |                                             |
+| emit(name, data[, isBroadcast])        |                     | data: hashTable or array; returns: bool     |
+| bundle([isBroadcast])                  |                     |                                             |
+| text (data, isBroadcast)               |                     |                                             |
+| json (data, isBroadcast)               |                     |                                             |
+| send(data[, options])                  |                     | native                                      |
+|                                        | -                   |                                             |
+| disconnect([code, reason])             |                     |                                             |
+| terminate()                            |                     |                                             |
+|                                        | -                   |                                             |
+| ping([message])                        |                     |                                             |
+|                                        | -                   |                                             |
+| on(name, listener)                     |                     | return this;                                |
+| off([name, listener])                  |                     | return this;                                |
+|                                        | **socket.events**   |                                             |
+| close (code, reason, wasClean)         |                     |                                             |
+| disconnected (code, reason, wasClean)  |                     |                                             |
+| terminated (code, wasClean)            |                     |                                             |
+|                                        | -                   |                                             |
+| message (data)                         |                     |                                             |
+| text (data)                            |                     |                                             |
+| json (data)                            |                     |                                             |
+| arraybuffer (data)                     |                     | intercepts and blocks unpacking of packets  |
+|                                        | -                   |                                             |
+| ping (message)                         |                     |                                             |
+| pong (message)                         |                     |                                             |
+|                                        | -                   |                                             |
+| *myEvent* (data)                       |                     |                                             |
 
 
 
@@ -394,6 +399,7 @@ io.on("connection", function(socket, request) {
 | Name                      | Note                                 |
 |---------------------------|--------------------------------------|
 |                           | -                                    |
+| id                        | GUID / UUIDv4                        |
 | secure                    |                                      |
 | reconnectionDelay         | default: 1 sec (minimum)             |
 | reconnectionAttempts      | default: Infinity                    |

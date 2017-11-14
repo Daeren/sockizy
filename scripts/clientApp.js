@@ -33,6 +33,7 @@ return function(url, options = {}) {
 
             //-------]>
 
+            this.id = options.id || genId();
             this.reconnecting = false;
 
             //-------]>
@@ -51,15 +52,15 @@ return function(url, options = {}) {
 
 
         get bufferedAmount() {
-            return this._ws.bufferedAmount;
+            return this._ws && this._ws.bufferedAmount || 0;
         }
 
         get readyState() {
-            return this._ws.readyState;
+            return this._ws && this._ws.readyState || this.CLOSED;
         }
 
         get url() {
-            return this._ws.url;
+            return this._ws && this._ws.url || "";
         }
 
 
@@ -116,23 +117,14 @@ return function(url, options = {}) {
 
             //------------]>
 
-            const w = this._ws = new WSocket((secure ? "wss" : "ws") + "://" + wsUrl);
-
-            //------------]>
-
-            w.binaryType = "arraybuffer";
-
-            w.onmessage = wsOnMessage.bind(this, this);
-            w.onopen = wsOnOpen.bind(this, this);
-            w.onclose = wsOnClose.bind(this, this);
-            w.onerror = wsOnError.bind(this, this);
+            this._connect((secure ? "wss" : "ws") + "://" + wsUrl + "/?id=" + this.id);
 
             //------------]>
 
             return this;
         }
 
-        disconnect(code, reason) {
+        disconnect(code = 1000, reason = "") {
             this._ws.close(code, reason);
             this._ws = null;
 
@@ -219,8 +211,21 @@ return function(url, options = {}) {
         }
 
 
+        _connect(url) {
+            const w = this._ws = new WSocket(url);
+
+            //------------]>
+
+            w.binaryType = "arraybuffer";
+
+            w.onmessage = wsOnMessage.bind(this, this);
+            w.onopen = wsOnOpen.bind(this, this);
+            w.onclose = wsOnClose.bind(this, this);
+            w.onerror = wsOnError.bind(this, this);
+        }
+
         _reconnect() {
-            return this.connect(this.url);
+            this._connect(this.url);
         }
 
         _pack(name, data) {
@@ -336,7 +341,6 @@ return function(url, options = {}) {
 
         if(this.reconnecting) {
             this.reconnecting = false;
-
             this._emit("restored", rcAttemptsCount);
         }
 
@@ -345,6 +349,8 @@ return function(url, options = {}) {
 
     function wsOnClose(socket, event) {
         const {code, reason} = event;
+
+        //--------]>
 
         this._emit("close", code, reason, event);
 
@@ -380,5 +386,25 @@ return function(url, options = {}) {
 
     function wsOnError(socket, error) {
         this._emit("error", error);
+    }
+
+    //--------)>
+
+    function genId() {
+        return crypto ? uuidv4() : guid();
+
+        //----------]>
+
+        function guid() {
+            return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
+
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+            }
+        }
+
+        function uuidv4() {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c) => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+        }
     }
 };
