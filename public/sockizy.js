@@ -1206,8 +1206,11 @@ var io = function (module) {
                     var code = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000;
                     var reason = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
 
-                    this._ws.close(code, reason);
-                    this._ws = null;
+                    var st = this.readyState;
+
+                    if (st !== this.CLOSING && st !== this.CLOSED) {
+                        this._ws.close(code, reason);
+                    }
 
                     //------------]>
 

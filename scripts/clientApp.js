@@ -125,8 +125,11 @@ return function(url, options = {}) {
         }
 
         disconnect(code = 1000, reason = "") {
-            this._ws.close(code, reason);
-            this._ws = null;
+            const st = this.readyState;
+
+            if(st !== this.CLOSING && st !== this.CLOSED) {
+                this._ws.close(code, reason);
+            }
 
             //------------]>
 

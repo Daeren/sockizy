@@ -114,14 +114,18 @@ class Socket extends rSEE {
     }
 
 
-    disconnect(code, reason) {
-        this._disconnected = true;
-        this._ws.close(code, reason);
+    disconnect(code = 1000, reason = "") {
+        if(this.readyState === this.OPEN) {
+            this._disconnected = true;
+            this._ws.close(code, reason);
+        }
     }
 
     terminate() {
-        this._terminated = true;
-        this._ws.terminate();
+        if(this.readyState === this.OPEN) {
+            this._terminated = true;
+            this._ws.terminate();
+        }
     }
 
 
@@ -467,7 +471,7 @@ function main(app, options) {
 
         ws.on("close", function(code, reason) {
             const {_disconnected, _terminated} = socket;
-            const wasClean = !!(_disconnected || _terminated);
+            const wasClean = !!_disconnected || code === 1000;
 
             //--------]>
 
@@ -476,7 +480,7 @@ function main(app, options) {
 
             //--------]>
 
-            if(_disconnected || code === 1000) {
+            if(wasClean) {
                 socket._emit("disconnected", code, reason, wasClean);
             }
             else {
@@ -528,8 +532,11 @@ function main(app, options) {
         const s = socketsRestoringMap[sid];
 
         if(s) {
-            clearTimeout(s._rtm);
             delete socketsRestoringMap[sid];
+
+            if(s._rtm) {
+                clearTimeout(s._rtm);
+            }
 
             if(timeout) {
                 io._emit("unrestored", s, timeout);
