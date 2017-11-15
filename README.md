@@ -301,7 +301,7 @@ io.on("connection", function(socket, request) {
 | maxPayload 		| default: 1024 * 32                   |
 | perMessageDeflate | default: false                       |
 | noDelay           | default: true                        |
-| restoringTimeout  | default: 10 (sec); off: 0            |
+| restoreTimeout    | default: 10 (sec); off: 0            |
 |                   | -                                    |
 | ping              | default: {"interval": 1000}          |
 | clientJs          | default: true                        |

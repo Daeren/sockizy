@@ -41,7 +41,7 @@ function main(port, options, isCluster) {
 
     options.maxPayload = options.maxPayload || (1024 * 32);
     options.noDelay = typeof(options.noDelay) === "undefined" ? true : !!options.noDelay;
-    options.restoringTimeout = 1000 * (typeof(options.restoringTimeout) === "undefined" ? 10 : (parseInt(options.restoringTimeout, 10) || 0));
+    options.restoreTimeout = 1000 * (typeof(options.restoreTimeout) === "undefined" ? 10 : (parseInt(options.restoreTimeout, 10) || 0));
     options.binary = true;
 
     options.cluster = !!options.cluster;

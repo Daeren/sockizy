@@ -164,7 +164,7 @@ class Io extends rSEE {
         this._srv = options.server;
         this._isNtSrv = options.isNtSrv;
 
-        this._restoringTimeout = options.restoringTimeout;
+        this._restoreTimeout = options.restoreTimeout;
         this._verifyClient = options.verifyClient;
 
         this._packMapByName = new Map();
@@ -484,7 +484,7 @@ function main(app, options) {
                 socket._emit("disconnected", code, reason, wasClean);
             }
             else {
-                const timeout = io._restoringTimeout;
+                const timeout = io._restoreTimeout;
 
                 if(!_terminated && timeout && code === 1006) {
                     socketsRestoringMap[cid] = socket;
