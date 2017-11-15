@@ -30,10 +30,10 @@ return function(url, options = {}) {
 
             this._packMapByName = new Map();
             this._unpackMapById = new Array();
+            this._id = genId();
 
             //-------]>
 
-            this.id = options.id || genId();
             this.reconnecting = false;
 
             //-------]>
@@ -46,7 +46,23 @@ return function(url, options = {}) {
             //-------]>
 
             if(url) {
-                this.connect(url, options.secure);
+                const tWsUrlParse = url.trim().split(/(^wss?:\/\/)/i);
+
+                const wsUrl = tWsUrlParse.pop().replace(/^[:\/\/]*/, "");
+                const wsProtocol = (tWsUrlParse.pop() || "").trim();
+                const wsSecProtocol = !!(wsProtocol && wsProtocol.match(/^wss:\/\//i));
+
+                let {secure} = options;
+
+                //------------]>
+
+                if(typeof(secure) === "undefined") {
+                    secure = wsProtocol ? wsSecProtocol : !!document.location.protocol.match(/^https/i);
+                }
+
+                //------------]>
+
+                this._connect((secure ? "wss" : "ws") + "://" + wsUrl + "/?id=" + this._id);
             }
         }
 
@@ -88,41 +104,28 @@ return function(url, options = {}) {
         }
 
         send(data) {
+            const st = this.readyState;
+
+            let error;
+
+            //------------]>
+
             try {
-                this._ws.send(data);
+                if(st !== this.CLOSING && st !== this.CLOSED) {
+                    this._ws.send(data);
+                }
+                else {
+                    error = new Error("WebSocket is already in CLOSING or CLOSED state.");
+                }
             } catch(e) {
-                this._emit("error", e);
+                error = e;
+            }
+
+            if(error) {
+                this._emit("error", error);
             }
         }
 
-
-        connect(url, secure) {
-            if(this._ws) {
-                this._ws.close();
-            }
-
-            //------------]>
-
-            const tWsUrlParse = url.trim().split(/(^wss?:\/\/)/i);
-
-            const wsUrl = tWsUrlParse.pop().replace(/^[:\/\/]*/, "");
-            const wsProtocol = (tWsUrlParse.pop() || "").trim();
-            const wsSecProtocol = !!(wsProtocol && wsProtocol.match(/^wss:\/\//i));
-
-            //------------]>
-
-            if(typeof(secure) === "undefined") {
-                secure = wsProtocol ? wsSecProtocol : !!document.location.protocol.match(/^https/i);
-            }
-
-            //------------]>
-
-            this._connect((secure ? "wss" : "ws") + "://" + wsUrl + "/?id=" + this.id);
-
-            //------------]>
-
-            return this;
-        }
 
         disconnect(code = 1000, reason = "") {
             const st = this.readyState;
@@ -219,12 +222,12 @@ return function(url, options = {}) {
 
             //------------]>
 
-            w.binaryType = "arraybuffer";
+            w.onmessage = wsOnMessage.bind(w, this);
+            w.onopen = wsOnOpen.bind(w, this);
+            w.onclose = wsOnClose.bind(w, this);
+            w.onerror = wsOnError.bind(w, this);
 
-            w.onmessage = wsOnMessage.bind(this, this);
-            w.onopen = wsOnOpen.bind(this, this);
-            w.onclose = wsOnClose.bind(this, this);
-            w.onerror = wsOnError.bind(this, this);
+            w.binaryType = "arraybuffer";
         }
 
         _reconnect() {
@@ -344,10 +347,10 @@ return function(url, options = {}) {
 
         if(this.reconnecting) {
             this.reconnecting = false;
-            this._emit("restored", rcAttemptsCount);
+            socket._emit("restored", rcAttemptsCount);
         }
 
-        this._emit("open");
+        socket._emit("open");
     }
 
     function wsOnClose(socket, event) {
@@ -355,17 +358,17 @@ return function(url, options = {}) {
 
         //--------]>
 
-        this._emit("close", code, reason, event);
+        socket._emit("close", code, reason, event);
 
         if(event.wasClean) {
-            this._emit("disconnected", code, reason, event);
+            socket._emit("disconnected", code, reason, event);
         }
         else {
             const rcAttemptsCount = this._reconnectionAttemptsCount;
 
             //--------]>
 
-            this._emit("terminated", code, event);
+            socket._emit("terminated", code, event);
 
             //--------]>
 
@@ -376,19 +379,19 @@ return function(url, options = {}) {
                     this.reconnecting = true;
                     this._reconnect();
 
-                    this._emit("restoring", rcAttemptsCount);
+                    socket._emit("restoring", rcAttemptsCount);
                 }, this._reconnectionDelay);
             }
             else {
                 this.reconnecting = false;
 
-                this._emit("unrestored", rcAttemptsCount);
+                socket._emit("unrestored", rcAttemptsCount);
             }
         }
     }
 
     function wsOnError(socket, error) {
-        this._emit("error", error);
+        socket._emit("error", error);
     }
 
     //--------)>

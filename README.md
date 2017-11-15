@@ -399,7 +399,6 @@ io.on("connection", function(socket, request) {
 | Name                      | Note                                 |
 |---------------------------|--------------------------------------|
 |                           | -                                    |
-| id                        | GUID / UUIDv4                        |
 | secure                    |                                      |
 | reconnectionDelay         | default: 1 sec (minimum)             |
 | reconnectionAttempts      | default: Infinity                    |
@@ -422,7 +421,6 @@ io.on("connection", function(socket, request) {
 | json(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |
 |                                      | -                |                                             |
-| connect(url[, secure])               |                  |                                             |
 | disconnect(code, reason)             |                  |                                             |
 |                                      | -                |                                             |
 | packets([ns][, pack, unpack, shared])|                  | return this;                                |

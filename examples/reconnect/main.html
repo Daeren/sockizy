@@ -28,11 +28,12 @@
         socket.on("open", function() {
             console.log("event: open");
 
-            this.emit("call");
-        });
+            socket.emit("call");
+            socket.disconnect(3333);
 
-        socket.on("message", function() {
-            console.log("event: message");
+            setTimeout(function() {
+                socket._reconnect(); // ~/test
+            }, 1000 * 3);
         });
 
         socket.on("close", function(code, reason) {
@@ -47,8 +48,13 @@
             console.log("event: terminated");
         });
 
-        socket.on("error", function() {
-            console.log("event: error");
+
+        socket.on("message", function() {
+            console.log("event: message");
+        });
+
+        socket.on("error", function(error) {
+            console.log("event: error |", error);
         });
 
         //---------------)>

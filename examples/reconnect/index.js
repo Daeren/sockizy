@@ -29,7 +29,12 @@ io.packets(
 //-----------------------------------------------------
 
 io.on("connection", function(socket, request) {
+    socket.id = Date.now().toString(32);
     socket.count = socket.count || 0;
+
+
+    console.log("event: connection |", socket.id, socket.count);
+
 
     socket.on("call", function(data) {
         console.log("event: call |", socket.id, ++socket.count);
@@ -41,6 +46,7 @@ io.on("connection", function(socket, request) {
     });
 });
 
+
 io.on("restored", function(socket, request) {
     console.log("event: restored |", socket.id, socket.count);
 });
@@ -48,6 +54,7 @@ io.on("restored", function(socket, request) {
 io.on("unrestored", function(socket, timeout) {
     console.log("event: unrestored |", socket.id, socket.count, timeout);
 });
+
 
 io.on("close", function(socket, code, reason, wasClean) {
     console.log("event: close |", socket.id, socket.count, code, reason, wasClean);

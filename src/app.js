@@ -387,18 +387,18 @@ function main(app, options) {
         const {upgradeReq} = ws;
         const {query} = rUrl.parse(upgradeReq.url, true);
 
-        const sid = query.id;
+        const cid = query.id;
 
         //-----------------]>
 
-        if(!sid || typeof(sid) !== "string" || sid.length !== 36) {
+        if(!cid || typeof(cid) !== "string" || cid.length !== 36) {
             ws.terminate();
             return;
         }
 
         //-----------------]>
 
-        let socket = releaseSR(sid),
+        let socket = releaseSR(cid),
             tBufData;
 
         //-----------------]>
@@ -487,8 +487,8 @@ function main(app, options) {
                 const timeout = io._restoringTimeout;
 
                 if(!_terminated && timeout) {
-                    socketsRestoringMap[sid] = socket;
-                    socket._rtm = setTimeout(releaseSR, timeout, sid, timeout);
+                    socketsRestoringMap[cid] = socket;
+                    socket._rtm = setTimeout(releaseSR, timeout, cid, timeout);
                 }
 
                 socket._emit("terminated", code, wasClean);
@@ -516,7 +516,6 @@ function main(app, options) {
         }
         else {
             socket = new Socket(io, ws);
-            socket.id = sid;
 
             io._emit("connection", socket, upgradeReq);
         }
@@ -528,15 +527,12 @@ function main(app, options) {
 
     //-----------------]>
 
-    function releaseSR(sid, timeout) {
-        const s = socketsRestoringMap[sid];
+    function releaseSR(cid, timeout) {
+        const s = socketsRestoringMap[cid];
 
         if(s) {
-            delete socketsRestoringMap[sid];
-
-            if(s._rtm) {
-                clearTimeout(s._rtm);
-            }
+            delete socketsRestoringMap[cid];
+            clearTimeout(s._rtm);
 
             if(timeout) {
                 io._emit("unrestored", s, timeout);
