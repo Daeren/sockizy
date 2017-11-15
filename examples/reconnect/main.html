@@ -29,7 +29,10 @@
             console.log("event: open");
 
             socket.emit("call");
-            socket.disconnect(3333);
+
+            setTimeout(function() {
+                socket.disconnect(4500, "test");
+            }, 1000 * 2);
 
             setTimeout(function() {
                 socket._reconnect(); // ~/test

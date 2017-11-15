@@ -486,7 +486,7 @@ function main(app, options) {
             else {
                 const timeout = io._restoringTimeout;
 
-                if(!_terminated && timeout) {
+                if(!_terminated && timeout && code === 1006) {
                     socketsRestoringMap[cid] = socket;
                     socket._rtm = setTimeout(releaseSR, timeout, cid, timeout);
                 }
