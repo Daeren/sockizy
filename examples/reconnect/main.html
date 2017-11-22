@@ -62,8 +62,10 @@
 
         //---------------)>
 
-        socket.on("packet", function(name) {
+        socket.on("packet", function(name, data, accept) {
             console.log("socket.packet: " + name + " |---v");
+
+            accept();
         });
     </script>
 </html>

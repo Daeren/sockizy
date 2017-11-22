@@ -454,9 +454,10 @@ function main(app, options) {
                 data = srz.unpack(tBufData, 0, dataByteLength);
 
                 if(typeof(data) !== "undefined") {
-                    io._emit("packet", name, data, socket);
-
-                    if(!socket.dropPackets) {
+                    if(io.listenerCount("packet")) {
+                        io._emit("packet", name, data, socket, () => socket._emit(name, data));
+                    }
+                    else {
                         socket._emit(name, data);
                     }
 
@@ -495,8 +496,8 @@ function main(app, options) {
             }
         });
 
-        ws.on("error", function(data) {
-            io._emit("error", data, socket);
+        ws.on("error", function(error) {
+            io._emit("error", error, socket);
         });
 
         ws.on("ping", function(data) {

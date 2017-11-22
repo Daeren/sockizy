@@ -9,7 +9,7 @@
 
     <script src="http://localhost:1337"></script>
     <script>
-        const socket = io("localhost:1337");
+        const socket = io("localhost:1337/");
 
         //-----------------------------------------------------
 
@@ -17,10 +17,8 @@
             null,
             null,
             {
-                "chat.message": [
-                    "uid:uint32",
-                    "text:str8"
-                ]
+                "ok": ["key:u8"],
+                "bad": null
             }
         );
 
@@ -29,30 +27,35 @@
         socket.on("open", function() {
             console.log("event: open");
 
-            this.emit("chat.message", [6, "Hi"]);
+            socket.emit("bad");
+            socket.emit("ok", [13]);
         });
 
-        socket.on("message", function() {
-            console.log("event: message");
+        socket.on("close", function(code, reason) {
+            console.log("event: close |", code, reason);
+        });
+
+        socket.on("disconnected", function() {
+            console.log("event: disconnected");
         });
 
         socket.on("terminated", function() {
             console.log("event: terminated");
         });
 
-        socket.on("error", function() {
-            console.log("event: error");
+
+        socket.on("message", function() {
+            console.log("event: message");
+        });
+
+        socket.on("error", function(error) {
+            console.log("event: error |", error);
         });
 
         //---------------)>
 
-        socket.on("chat.message", function() {
-            console.log("event: chat.message");
-        });
-
         socket.on("packet", function(name, data, accept) {
             console.log("socket.packet: " + name + " |---v");
-            console.log(JSON.stringify(data, null, "  "));
 
             accept();
         });

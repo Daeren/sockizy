@@ -9,7 +9,8 @@ git clone https://github.com/Daeren/sockizy.git
 * SSL
 * Binary (Little/Big - Endian)
 * Relative and absolute zero-copy operations wherever possible
-* [fileUpload][3]
+* [Throttle][4]
+* [FileUpload][3]
 
 
 #### Goals:
@@ -350,7 +351,7 @@ io.on("connection", function(socket, request) {
 |                                        | -                   |                                             |
 | connection (socket, request)           |                     |                                             |
 | close (socket, code, reason, wasClean) |                     |                                             |
-| packet (name, data, socket)            |                     |                                             |
+| packet (name, data, socket, accept)    |                     |                                             |
 | error (data, socket)                   |                     |                                             |
 |                                        | **socket.property** |                                             |
 | readyState                             |                     | number (read only)                          |
@@ -359,8 +360,6 @@ io.on("connection", function(socket, request) {
 | remotePort                             |                     | (read only)                                 |
 | remoteAddress                          |                     | (read only)                                 |
 | remoteFamily                           |                     | (read only)                                 |
-|                                        | -                   |                                             |
-| dropPackets                            |                     | true/false                                  |
 |                                        | **socket.method**   |                                             |
 | emit(name, data[, isBroadcast])        |                     | data: hashTable or array; returns: bool     |
 | bundle([isBroadcast])                  |                     |                                             |
@@ -441,7 +440,7 @@ io.on("connection", function(socket, request) {
 | text (data, event)                   |                  |                                             |
 | json (data, event)                   |                  |                                             |
 | arraybuffer (data, event)            |                  | intercepts and blocks unpacking of packets  |
-| packet (name, data)                  |                  |                                             |
+| packet (name, data, accept)          |                  |                                             |
 | error (data)                         |                  |                                             |
 |                                      | -                |                                             |
 | *myEvent* (data)                     |                  |                                             |
@@ -460,6 +459,7 @@ MIT
 [1]: http://666.io
 [2]: https://telegram.me/io666
 [3]: https://github.com/Daeren/sockizy/tree/master/examples/fileUpload
+[4]: https://github.com/Daeren/sockizy/tree/master/examples/throttle
 
 [cod_b]: https://img.shields.io/codacy/3307552f95d34748bf5a7b573f5815d8.svg
 [cod_l]: https://www.codacy.com/app/daeren/sockizy/dashboard

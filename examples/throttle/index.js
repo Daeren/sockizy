@@ -21,26 +21,30 @@ io.packets(
     null,
     null,
     {
-        "chat.message": [
-            "uid:uint32",
-            "text:str8"
-        ]
+        "ok": ["key:u8"],
+        "bad": null
     }
 );
 
 //-----------------------------------------------------
 
 io.on("connection", function(socket, request) {
-    socket.on("chat.message", function(data) {
-        console.log("event: chat.message");
+    console.log("event: connection");
 
-        this.emit("chat.message", [13, "Hello"]);
+
+    socket.on("ok", function(data) {
+        console.log("event: ok |", data);
+    });
+
+    socket.on("bad", function(data) {
+        console.log("event: bad |", data);
     });
 });
 
 io.on("packet", function(name, data, socket, accept) {
     console.log(`io.packet: ${name} |---v`);
-    console.log(JSON.stringify(data, null, "  "));
 
-    accept();
+    if(data && data.key === 13) {
+        accept();
+    }
 });

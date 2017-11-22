@@ -1371,6 +1371,8 @@ var io = function (module) {
         //---------------]>
 
         function wsOnMessage(socket, event) {
+            var _this3 = this;
+
             var data = event.data;
 
             //-----------]>
@@ -1410,13 +1412,13 @@ var io = function (module) {
 
             //-----------]>
 
-            while (offset < dataByteLength) {
-                var pktSchema = this._unpackMapById[packer.getId(pkt)];
+            var _loop = function _loop() {
+                var pktSchema = _this3._unpackMapById[packer.getId(pkt)];
 
                 //-----------]>
 
                 if (!pktSchema) {
-                    break;
+                    return "break";
                 }
 
                 //-----------]>
@@ -1430,7 +1432,7 @@ var io = function (module) {
                 //-----------]>
 
                 if (typeof message === "undefined") {
-                    break;
+                    return "break";
                 }
 
                 if (dataByteLength > offset) {
@@ -1439,8 +1441,22 @@ var io = function (module) {
 
                 //-----------]>
 
+                if (socket.listenerCount("packet")) {
+                    socket._emit("packet", name, message, function () {
+                        return socket._emit(name, message);
+                    });
+                } else {
+                    socket._emit(name, message);
+                }
+
                 socket._emit("packet", name, message);
                 socket._emit(name, message);
+            };
+
+            while (offset < dataByteLength) {
+                var _ret = _loop();
+
+                if (_ret === "break") break;
             }
 
             //-----------]>
@@ -1466,7 +1482,7 @@ var io = function (module) {
         }
 
         function wsOnClose(socket, event) {
-            var _this3 = this;
+            var _this4 = this;
 
             var code = event.code,
                 reason = event.reason;
@@ -1490,8 +1506,8 @@ var io = function (module) {
                     this._reconnectionAttemptsCount++;
 
                     setTimeout(function () {
-                        _this3.reconnecting = true;
-                        _this3._reconnect();
+                        _this4.reconnecting = true;
+                        _this4._reconnect();
 
                         socket._emit("restoring", rcAttemptsCount);
                     }, this._reconnectionDelay);

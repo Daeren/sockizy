@@ -327,6 +327,13 @@ return function(url, options = {}) {
 
             //-----------]>
 
+            if(socket.listenerCount("packet")) {
+                socket._emit("packet", name, message, () => socket._emit(name, message));
+            }
+            else {
+                socket._emit(name, message);
+            }
+
             socket._emit("packet", name, message);
             socket._emit(name, message);
         }

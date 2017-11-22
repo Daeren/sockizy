@@ -88,7 +88,9 @@ io.on("connection", function(socket) {
     });
 });
 
-io.on("packet", function(name, data, socket) {
+io.on("packet", function(name, data, socket, accept) {
     console.log(`io.packet: ${name} |---v`);
     console.log(data);
+
+    accept();
 });

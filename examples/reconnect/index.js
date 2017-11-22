@@ -60,6 +60,8 @@ io.on("close", function(socket, code, reason, wasClean) {
     console.log("event: close |", socket.id, socket.count, code, reason, wasClean);
 });
 
-io.on("packet", function(name) {
+io.on("packet", function(name, data, socket, accept) {
     console.log(`io.packet: ${name} |---v`);
+
+    accept();
 });
