@@ -121,6 +121,10 @@ var io = function (module) {
             }, {
                 key: "_emit",
                 value: function _emit(type) {
+                    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+                        args[_key - 1] = arguments[_key];
+                    }
+
                     var events = this._events[type];
 
                     //--------------]>
@@ -144,33 +148,12 @@ var io = function (module) {
 
                     //--------------]>
 
-                    var isFn = typeof events === "function";
-                    var argsLen = arguments.length;
-
-                    //--------------]>
-
-                    switch (argsLen) {
-                        case 1:
-                            emitNone(events, isFn, this);break;
-                        case 2:
-                            emitOne(events, isFn, this, arguments[1]);break;
-                        case 3:
-                            emitTwo(events, isFn, this, arguments[1], arguments[2]);break;
-                        case 4:
-                            emitThree(events, isFn, this, arguments[1], arguments[2], arguments[3]);break;
-                        case 5:
-                            emitFour(events, isFn, this, arguments[1], arguments[2], arguments[3], arguments[4]);break;
-
-                        default:
-                            {
-                                var args = new Array(argsLen - 1);
-
-                                for (var i = 1; i < argsLen; ++i) {
-                                    args[i - 1] = arguments[i];
-                                }
-
-                                emitMany(events, isFn, this, args);
-                            }
+                    if (typeof events === "function") {
+                        events.apply(this, args);
+                    } else {
+                        for (var i = 0, len = events.length; i < len; ++i) {
+                            events[i].apply(this, args);
+                        }
                     }
 
                     //--------------]>
@@ -217,68 +200,6 @@ var io = function (module) {
         //-----------------------]>
 
         return EE;
-
-        //-----------------------]>
-
-        function emitNone(handler, isFn, self) {
-            if (isFn) {
-                handler.call(self);
-            } else {
-                for (var i = 0, len = handler.length; i < len; ++i) {
-                    handler[i].call(self);
-                }
-            }
-        }
-
-        function emitOne(handler, isFn, self, arg1) {
-            if (isFn) {
-                handler.call(self, arg1);
-            } else {
-                for (var i = 0, len = handler.length; i < len; ++i) {
-                    handler[i].call(self, arg1);
-                }
-            }
-        }
-
-        function emitTwo(handler, isFn, self, arg1, arg2) {
-            if (isFn) {
-                handler.call(self, arg1, arg2);
-            } else {
-                for (var i = 0, len = handler.length; i < len; ++i) {
-                    handler[i].call(self, arg1, arg2);
-                }
-            }
-        }
-
-        function emitThree(handler, isFn, self, arg1, arg2, arg3) {
-            if (isFn) {
-                handler.call(self, arg1, arg2, arg3);
-            } else {
-                for (var i = 0, len = handler.length; i < len; ++i) {
-                    handler[i].call(self, arg1, arg2, arg3);
-                }
-            }
-        }
-
-        function emitFour(handler, isFn, self, arg1, arg2, arg3, arg4) {
-            if (isFn) {
-                handler.call(self, arg1, arg2, arg3, arg4);
-            } else {
-                for (var i = 0, len = handler.length; i < len; ++i) {
-                    handler[i].call(self, arg1, arg2, arg3, arg4);
-                }
-            }
-        }
-
-        function emitMany(handler, isFn, self, args) {
-            if (isFn) {
-                handler.apply(self, args);
-            } else {
-                for (var i = 0, len = handler.length; i < len; ++i) {
-                    handler[i].apply(self, args);
-                }
-            }
-        }
     }();
 
     //-----------------------------------------------------
@@ -1222,8 +1143,8 @@ var io = function (module) {
                 value: function packets() {
                     var _this2 = this;
 
-                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                        args[_key] = arguments[_key];
+                    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                        args[_key2] = arguments[_key2];
                     }
 
                     var namespace = void 0,
@@ -1371,8 +1292,6 @@ var io = function (module) {
         //---------------]>
 
         function wsOnMessage(socket, event) {
-            var _this3 = this;
-
             var data = event.data;
 
             //-----------]>
@@ -1413,7 +1332,7 @@ var io = function (module) {
             //-----------]>
 
             var _loop = function _loop() {
-                var pktSchema = _this3._unpackMapById[packer.getId(pkt)];
+                var pktSchema = socket._unpackMapById[packer.getId(pkt)];
 
                 //-----------]>
 
@@ -1448,9 +1367,6 @@ var io = function (module) {
                 } else {
                     socket._emit(name, message);
                 }
-
-                socket._emit("packet", name, message);
-                socket._emit(name, message);
             };
 
             while (offset < dataByteLength) {
@@ -1482,7 +1398,7 @@ var io = function (module) {
         }
 
         function wsOnClose(socket, event) {
-            var _this4 = this;
+            var _this3 = this;
 
             var code = event.code,
                 reason = event.reason;
@@ -1506,8 +1422,8 @@ var io = function (module) {
                     this._reconnectionAttemptsCount++;
 
                     setTimeout(function () {
-                        _this4.reconnecting = true;
-                        _this4._reconnect();
+                        _this3.reconnecting = true;
+                        _this3._reconnect();
 
                         socket._emit("restoring", rcAttemptsCount);
                     }, this._reconnectionDelay);

@@ -103,7 +103,7 @@ const SEE = (function() {
         }
 
 
-        _emit(type) {
+        _emit(type, ...args) {
             const events = this._events[type];
 
             //--------------]>
@@ -128,26 +128,12 @@ const SEE = (function() {
 
             //--------------]>
 
-            const isFn = typeof(events) === "function";
-            const argsLen = arguments.length;
-
-            //--------------]>
-
-            switch(argsLen) {
-                case 1: emitNone(events, isFn, this); break;
-                case 2: emitOne(events, isFn, this, arguments[1]); break;
-                case 3: emitTwo(events, isFn, this, arguments[1], arguments[2]); break;
-                case 4: emitThree(events, isFn, this, arguments[1], arguments[2], arguments[3]); break;
-                case 5: emitFour(events, isFn, this, arguments[1], arguments[2], arguments[3], arguments[4]); break;
-
-                default: {
-                    const args = new Array(argsLen - 1);
-
-                    for(let i = 1; i < argsLen; ++i) {
-                        args[i - 1] = arguments[i];
-                    }
-
-                    emitMany(events, isFn, this, args);
+            if(typeof(events) === "function") {
+                events.apply(this, args);
+            }
+            else {
+                for(let i = 0, len = events.length; i < len; ++i) {
+                    events[i].apply(this, args);
                 }
             }
 
@@ -190,74 +176,6 @@ const SEE = (function() {
     //-----------------------]>
 
     return EE;
-
-    //-----------------------]>
-
-    function emitNone(handler, isFn, self) {
-        if(isFn) {
-            handler.call(self);
-        }
-        else {
-            for(let i = 0, len = handler.length; i < len; ++i) {
-                handler[i].call(self);
-            }
-        }
-    }
-
-    function emitOne(handler, isFn, self, arg1) {
-        if(isFn) {
-            handler.call(self, arg1);
-        }
-        else {
-            for(let i = 0, len = handler.length; i < len; ++i) {
-                handler[i].call(self, arg1);
-            }
-        }
-    }
-
-    function emitTwo(handler, isFn, self, arg1, arg2) {
-        if(isFn) {
-            handler.call(self, arg1, arg2);
-        }
-        else {
-            for(let i = 0, len = handler.length; i < len; ++i) {
-                handler[i].call(self, arg1, arg2);
-            }
-        }
-    }
-
-    function emitThree(handler, isFn, self, arg1, arg2, arg3) {
-        if(isFn) {
-            handler.call(self, arg1, arg2, arg3);
-        }
-        else {
-            for(let i = 0, len = handler.length; i < len; ++i) {
-                handler[i].call(self, arg1, arg2, arg3);
-            }
-        }
-    }
-
-    function emitFour(handler, isFn, self, arg1, arg2, arg3, arg4) {
-        if(isFn) {
-            handler.call(self, arg1, arg2, arg3, arg4);
-        }
-        else {
-            for(let i = 0, len = handler.length; i < len; ++i) {
-                handler[i].call(self, arg1, arg2, arg3, arg4);
-            }
-        }
-    }
-
-    function emitMany(handler, isFn, self, args) {
-        if(isFn) {
-            handler.apply(self, args);
-        }
-        else {
-            for(let i = 0, len = handler.length; i < len; ++i) {
-                handler[i].apply(self, args);
-            }
-        }
-    }
 })();
 
 //-----------------------------------------------------

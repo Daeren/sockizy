@@ -302,7 +302,7 @@ return function(url, options = {}) {
         //-----------]>
 
         while(offset < dataByteLength) {
-            const pktSchema = this._unpackMapById[packer.getId(pkt)];
+            const pktSchema = socket._unpackMapById[packer.getId(pkt)];
 
             //-----------]>
 
@@ -333,9 +333,6 @@ return function(url, options = {}) {
             else {
                 socket._emit(name, message);
             }
-
-            socket._emit("packet", name, message);
-            socket._emit(name, message);
         }
 
         //-----------]>
