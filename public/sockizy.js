@@ -1383,14 +1383,14 @@ var io = function (module) {
         }
 
         function wsOnOpen(socket, event) {
-            var rcAttemptsCount = this._reconnectionAttemptsCount;
+            var rcAttemptsCount = socket._reconnectionAttemptsCount;
 
             //--------]>
 
-            this._reconnectionAttemptsCount = 0;
+            socket._reconnectionAttemptsCount = 0;
 
-            if (this.reconnecting) {
-                this.reconnecting = false;
+            if (socket.reconnecting) {
+                socket.reconnecting = false;
                 socket._emit("restored", rcAttemptsCount);
             }
 
@@ -1398,8 +1398,6 @@ var io = function (module) {
         }
 
         function wsOnClose(socket, event) {
-            var _this3 = this;
-
             var code = event.code,
                 reason = event.reason;
 
@@ -1410,7 +1408,7 @@ var io = function (module) {
             if (event.wasClean) {
                 socket._emit("disconnected", code, reason, event);
             } else {
-                var rcAttemptsCount = this._reconnectionAttemptsCount;
+                var rcAttemptsCount = socket._reconnectionAttemptsCount;
 
                 //--------]>
 
@@ -1418,17 +1416,17 @@ var io = function (module) {
 
                 //--------]>
 
-                if (rcAttemptsCount < this._reconnectionAttempts) {
-                    this._reconnectionAttemptsCount++;
+                if (rcAttemptsCount < socket._reconnectionAttempts) {
+                    socket._reconnectionAttemptsCount++;
 
                     setTimeout(function () {
-                        _this3.reconnecting = true;
-                        _this3._reconnect();
+                        socket.reconnecting = true;
+                        socket._reconnect();
 
                         socket._emit("restoring", rcAttemptsCount);
-                    }, this._reconnectionDelay);
+                    }, socket._reconnectionDelay);
                 } else {
-                    this.reconnecting = false;
+                    socket.reconnecting = false;
 
                     socket._emit("unrestored", rcAttemptsCount);
                 }

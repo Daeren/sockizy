@@ -343,14 +343,14 @@ return function(url, options = {}) {
     }
 
     function wsOnOpen(socket, event) {
-        const rcAttemptsCount = this._reconnectionAttemptsCount;
+        const rcAttemptsCount = socket._reconnectionAttemptsCount;
 
         //--------]>
 
-        this._reconnectionAttemptsCount = 0;
+        socket._reconnectionAttemptsCount = 0;
 
-        if(this.reconnecting) {
-            this.reconnecting = false;
+        if(socket.reconnecting) {
+            socket.reconnecting = false;
             socket._emit("restored", rcAttemptsCount);
         }
 
@@ -368,7 +368,7 @@ return function(url, options = {}) {
             socket._emit("disconnected", code, reason, event);
         }
         else {
-            const rcAttemptsCount = this._reconnectionAttemptsCount;
+            const rcAttemptsCount = socket._reconnectionAttemptsCount;
 
             //--------]>
 
@@ -376,18 +376,18 @@ return function(url, options = {}) {
 
             //--------]>
 
-            if(rcAttemptsCount < this._reconnectionAttempts) {
-                this._reconnectionAttemptsCount++;
+            if(rcAttemptsCount < socket._reconnectionAttempts) {
+                socket._reconnectionAttemptsCount++;
 
                 setTimeout(() => {
-                    this.reconnecting = true;
-                    this._reconnect();
+                    socket.reconnecting = true;
+                    socket._reconnect();
 
                     socket._emit("restoring", rcAttemptsCount);
-                }, this._reconnectionDelay);
+                }, socket._reconnectionDelay);
             }
             else {
-                this.reconnecting = false;
+                socket.reconnecting = false;
 
                 socket._emit("unrestored", rcAttemptsCount);
             }
