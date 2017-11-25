@@ -329,6 +329,7 @@ io.on("connection", function(socket, request) {
 | workerId                               |                     |                                             |
 |                                        | -                   |                                             |
 | wss                                    |                     | uws                                         |
+| Promise                                |                     |                                             |
 |                                        | **app.method**      |                                             |
 | emit(name, data)                       |                     | data: hashTable or array; returns: bool     |
 | bundle()                               |                     |                                             |
@@ -413,8 +414,6 @@ io.on("connection", function(socket, request) {
 | bufferedAmount                       |                  | number (read only)                          |
 | readyState                           |                  | number (read only)                          |
 |                                      | **app.method**   |                                             |
-| isSupported()                        |                  |                                             |
-|                                      | -                |                                             |
 | emit(name, data)                     |                  | data: hashTable or array; returns: bool     |
 | text(data)                           |                  |                                             |
 | json(data)                           |                  |                                             |

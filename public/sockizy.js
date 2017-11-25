@@ -1005,9 +1005,7 @@ var io = function (module) {
     //
     //-----------------------------------------------------
 
-    return function (url) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
+    return function () {
         var WSocket = window.WebSocket || window.MozWebSocket;
 
         //---------------]>
@@ -1023,7 +1021,7 @@ var io = function (module) {
         var Io = function (_SEE) {
             _inherits(Io, _SEE);
 
-            function Io() {
+            function Io(url, options) {
                 _classCallCheck(this, Io);
 
                 //-------]>
@@ -1074,11 +1072,6 @@ var io = function (module) {
             }
 
             _createClass(Io, [{
-                key: "isSupported",
-                value: function isSupported() {
-                    return typeof WSocket !== "undefined";
-                }
-            }, {
                 key: "emit",
                 value: function emit(name, data) {
                     data = this._pack(name, data);
@@ -1287,7 +1280,11 @@ var io = function (module) {
 
         //---------------]>
 
-        return new Io();
+        return WSocket ? function (url) {
+            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+            return new Io(url, options);
+        } : null;
 
         //---------------]>
 
@@ -1458,6 +1455,6 @@ var io = function (module) {
                 });
             }
         }
-    };
+    }();
 }({});
 //# sourceMappingURL=sockizy.js.map

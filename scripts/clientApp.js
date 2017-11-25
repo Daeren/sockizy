@@ -5,7 +5,7 @@
 //
 //-----------------------------------------------------
 
-return function(url, options = {}) {
+return (function() {
     const WSocket = window.WebSocket || window.MozWebSocket;
 
     //---------------]>
@@ -19,7 +19,7 @@ return function(url, options = {}) {
     //---------------]>
 
     class Io extends SEE {
-        constructor() {
+        constructor(url, options) {
             super();
 
             //-------]>
@@ -77,11 +77,6 @@ return function(url, options = {}) {
 
         get url() {
             return this._ws && this._ws.url || "";
-        }
-
-
-        isSupported() {
-            return typeof(WSocket) !== "undefined";
         }
 
 
@@ -255,7 +250,9 @@ return function(url, options = {}) {
 
     //---------------]>
 
-    return new Io();
+    return WSocket ? function(url, options = {}) {
+        return new Io(url, options);
+    } : null;
 
     //---------------]>
 
@@ -417,4 +414,4 @@ return function(url, options = {}) {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c) => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
         }
     }
-};
+})();
