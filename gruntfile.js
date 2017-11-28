@@ -16,7 +16,12 @@ module.exports = function(grunt) {
     grunt.initConfig({
         concat: {
             dist: {
-                src: ["src/see.js","src/packer.js", "src/toString.js", "scripts/clientApp.js"],
+                src: [
+                    "src/see.js",
+                    "src/packer.js",
+                    "src/toString.js",
+                    "scripts/clientApp.js"
+                ],
                 dest: "public/sockizyES6_tmp.js",
             }
         },
@@ -26,7 +31,18 @@ module.exports = function(grunt) {
                 src: ["public/sockizyES6_tmp.js"],
                 dest: "public/sockizyES6.js",
                 options: {
-                    wrapper: ["const io = (function(module) {\n'use strict';\n\n", "\n})({});"]
+                    wrapper: [
+                        `const io = (function(module) {
+                        "use strict";
+                        
+                        if(!Uint8Array.prototype.slice) {
+                            Object.defineProperty(Uint8Array.prototype, "slice", {
+                                "value": Array.prototype.slice
+                            });
+                        }`,
+
+                        "return ws(window.WebSocket || window.MozWebSocket, toString, SEE, packer); })({});"
+                    ]
                 }
             }
         },

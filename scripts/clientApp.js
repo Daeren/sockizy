@@ -5,19 +5,11 @@
 //
 //-----------------------------------------------------
 
-return (function() {
-    const WSocket = window.WebSocket || window.MozWebSocket;
+"use strict";
 
-    //---------------]>
+//-----------------------------------------------------
 
-    if(!Uint8Array.prototype.slice) {
-        Object.defineProperty(Uint8Array.prototype, "slice", {
-            "value": Array.prototype.slice
-        });
-    }
-
-    //---------------]>
-
+const ws = (function(WSocket, toString = require("./../src/toString"), SEE = require("./../src/SEE"), packer = require("./../src/packer")) {
     class Io extends SEE {
         constructor(url, options) {
             super();
@@ -414,4 +406,8 @@ return (function() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c) => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
         }
     }
-})();
+});
+
+//-----------------------------------------------------
+
+module.exports = ws;

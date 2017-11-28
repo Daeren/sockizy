@@ -13,8 +13,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var io = function (module) {
-    'use strict';
+    "use strict";
 
+    if (!Uint8Array.prototype.slice) {
+        Object.defineProperty(Uint8Array.prototype, "slice", {
+            "value": Array.prototype.slice
+        });
+    }
     //-----------------------------------------------------
     //
     // Author: Daeren
@@ -1005,18 +1010,14 @@ var io = function (module) {
     //
     //-----------------------------------------------------
 
-    return function () {
-        var WSocket = window.WebSocket || window.MozWebSocket;
+    "use strict";
 
-        //---------------]>
+    //-----------------------------------------------------
 
-        if (!Uint8Array.prototype.slice) {
-            Object.defineProperty(Uint8Array.prototype, "slice", {
-                "value": Array.prototype.slice
-            });
-        }
-
-        //---------------]>
+    var ws = function ws(WSocket) {
+        var toString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : require("./../src/toString");
+        var SEE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : require("./../src/SEE");
+        var packer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : require("./../src/packer");
 
         var Io = function (_SEE) {
             _inherits(Io, _SEE);
@@ -1455,6 +1456,11 @@ var io = function (module) {
                 });
             }
         }
-    }();
+    };
+
+    //-----------------------------------------------------
+
+    module.exports = ws;
+    return ws(window.WebSocket || window.MozWebSocket, toString, SEE, packer);
 }({});
 //# sourceMappingURL=sockizy.js.map

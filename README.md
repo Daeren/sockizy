@@ -6,7 +6,6 @@ git clone https://github.com/Daeren/sockizy.git
 ```
 
 
-* SSL
 * Binary (Little/Big - Endian)
 * Relative and absolute zero-copy operations wherever possible
 * [Throttle][4]
