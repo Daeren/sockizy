@@ -466,7 +466,7 @@ function main(app, options) {
 
         ws.on("close", function(code, reason) {
             const {_disconnected, _terminated} = socket;
-            const wasClean = !!_disconnected || code === 1000;
+            const wasClean = !!_disconnected || code === 1000 || typeof(code) === "undefined";
 
             //--------]>
 
