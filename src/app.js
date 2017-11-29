@@ -476,17 +476,17 @@ function main(app, options) {
             //--------]>
 
             if(wasClean) {
-                socket._emit("disconnected", code, reason, wasClean);
+                socket._emit("disconnected", code, reason);
             }
             else {
                 const timeout = io._restoreTimeout;
 
-                if(!_terminated && timeout && code === 1006 && cidValid) {
+                if(!_terminated && timeout && cidValid && code === 1006) {
                     socketsRestoringMap[cid] = socket;
                     socket._rtm = setTimeout(releaseSR, timeout, cid, timeout);
                 }
 
-                socket._emit("terminated", code, wasClean);
+                socket._emit("terminated", code);
             }
         });
 

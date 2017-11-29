@@ -376,8 +376,8 @@ io.on("connection", function(socket, request) {
 | off([name, listener])                  |                     | return this;                                |
 |                                        | **socket.events**   |                                             |
 | close (code, reason, wasClean)         |                     |                                             |
-| disconnected (code, reason, wasClean)  |                     |                                             |
-| terminated (code, wasClean)            |                     |                                             |
+| disconnected (code, reason)            |                     |                                             |
+| terminated (code)                      |                     |                                             |
 |                                        | -                   |                                             |
 | message (data)                         |                     |                                             |
 | text (data)                            |                     |                                             |
