@@ -1461,6 +1461,7 @@ var io = function (module) {
     //-----------------------------------------------------
 
     module.exports = ws;
+
     return ws(window.WebSocket || window.MozWebSocket, toString, SEE, packer);
 }({});
 //# sourceMappingURL=sockizy.js.map

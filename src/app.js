@@ -388,17 +388,11 @@ function main(app, options) {
         const {query} = rUrl.parse(upgradeReq.url, true);
 
         const cid = query.id;
+        const cidValid = typeof(cid) === "string" && cid.length === 36;
 
         //-----------------]>
 
-        if(!cid || typeof(cid) !== "string" || cid.length !== 36) {
-            ws.terminate();
-            return;
-        }
-
-        //-----------------]>
-
-        let socket = releaseSR(cid),
+        let socket = cidValid ? releaseSR(cid) : null,
             tBufData;
 
         //-----------------]>
@@ -487,7 +481,7 @@ function main(app, options) {
             else {
                 const timeout = io._restoreTimeout;
 
-                if(!_terminated && timeout && code === 1006) {
+                if(!_terminated && timeout && code === 1006 && cidValid) {
                     socketsRestoringMap[cid] = socket;
                     socket._rtm = setTimeout(releaseSR, timeout, cid, timeout);
                 }
