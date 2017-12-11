@@ -951,7 +951,7 @@ var io = function (module) {
             var i = void 0;
 
             for (i = 0; i < length; ++i) {
-                if (i + offset >= dst.byteLength || i >= src.byteLength) {
+                if (i + offset >= dst.length || i >= src.length) {
                     break;
                 }
 

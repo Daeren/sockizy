@@ -77,10 +77,10 @@ const gSchemaWithStrings = [
     "bin:bin",
     "json:json",
     "data:str",
-    "name:str",
+    "name:str1024",
     "status:str",
-    "e8:str",
-    "e:str",
+    "e8:str512",
+    "e:str32",
     "e1:str",
     "e2:int8",
     "e3:str",
@@ -241,6 +241,19 @@ describe("Packer", function() {
         const data = "test";
 
         const p = rPacker.createPacket("str");
+        const b = p.pack(id, data);
+        const u = p.unpack(b, 0, b.length);
+        const i = rPacker.getId(b);
+
+        expect(i).to.be.a("number").and.equal(id);
+        expect(u).to.be.a("string").and.equal(data);
+    });
+
+    it("primitive:size", function() {
+        const id = 13;
+        const data = "test";
+
+        const p = rPacker.createPacket("str32");
         const b = p.pack(id, data);
         const u = p.unpack(b, 0, b.length);
         const i = rPacker.getId(b);
