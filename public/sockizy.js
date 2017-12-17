@@ -53,6 +53,14 @@ var io = function (module) {
                     return this;
                 }
             }, {
+                key: "once",
+                value: function once(type, listener) {
+                    return this.on(type, function ls() {
+                        this.off(type, ls);
+                        listener.apply(this, arguments);
+                    });
+                }
+            }, {
                 key: "off",
                 value: function off(type, listener) {
                     var argsLen = arguments.length;

@@ -477,16 +477,22 @@ function main(app, options) {
 
             if(wasClean) {
                 socket._emit("disconnected", code, reason);
+                io._emit("offline", socket);
             }
             else {
+                socket._emit("terminated", code);
+
+                //-----]>
+
                 const timeout = io._restoreTimeout;
 
                 if(!_terminated && timeout && cidValid && code === 1006) {
                     socketsRestoringMap[cid] = socket;
                     socket._rtm = setTimeout(releaseSR, timeout, cid, timeout);
                 }
-
-                socket._emit("terminated", code);
+                else {
+                    io._emit("offline", socket);
+                }
             }
         });
 
@@ -514,6 +520,8 @@ function main(app, options) {
 
             io._emit("connection", socket, upgradeReq);
         }
+
+        io._emit("online", socket, upgradeReq);
     });
 
     //-----------------]>
@@ -531,6 +539,7 @@ function main(app, options) {
 
             if(timeout) {
                 io._emit("unrestored", s, timeout);
+                io._emit("offline", s);
             }
         }
 

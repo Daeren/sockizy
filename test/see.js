@@ -91,6 +91,23 @@ describe("SEE", function() {
 
     //-----------------]>
 
+    it("once", function(done) {
+        const ee = new rSee();
+
+        ee.once("msg", function() {
+            for(let i = 0; i < arguments.length; i++) {
+                expect(arguments[i]).to.be.a("number").and.equal(i + 1);
+            }
+
+            done();
+        });
+
+        ee._emit("msg", 1, 2, 3, 4, 5, 6);
+        ee._emit("msg", 1, 2, 3, 4, 5, 6);
+    });
+
+    //-----------------]>
+
     it("off", function(done) {
         const ee = new rSee();
 

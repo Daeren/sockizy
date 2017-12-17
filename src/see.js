@@ -29,6 +29,13 @@ const SEE = (function() {
             return this;
         }
 
+        once(type, listener) {
+            return this.on(type, function ls() {
+                this.off(type, ls);
+                listener.apply(this, arguments);
+            });
+        }
+
         off(type, listener) {
             const argsLen = arguments.length;
 

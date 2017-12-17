@@ -346,6 +346,9 @@ io.on("connection", function(socket, request) {
 | on(name, listener)                     |                     | return this;                                |
 | off([name, listener])                  |                     | return this;                                |
 |                                        | **app.events**      |                                             |
+| online (socket)                        |                     |                                             |
+| offline (socket)                       |                     |                                             |
+|                                        | -                   |                                             |
 | restored (socket, request)             |                     |                                             |
 | unrestored (socket, timeout)           |                     |                                             |
 |                                        | -                   |                                             |
@@ -367,12 +370,13 @@ io.on("connection", function(socket, request) {
 | json (data, isBroadcast)               |                     |                                             |
 | send(data[, options])                  |                     | native                                      |
 |                                        | -                   |                                             |
-| disconnect([code, reason])             |                     |                                             |
+| disconnect([code, reason])             |                     | code: 4000–4999	 	                     |
 | terminate()                            |                     |                                             |
 |                                        | -                   |                                             |
 | ping([message])                        |                     |                                             |
 |                                        | -                   |                                             |
 | on(name, listener)                     |                     | return this;                                |
+| once(name, listener)                   |                     | return this;                                |
 | off([name, listener])                  |                     | return this;                                |
 |                                        | **socket.events**   |                                             |
 | close (code, reason, wasClean)         |                     |                                             |
@@ -418,11 +422,12 @@ io.on("connection", function(socket, request) {
 | json(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |
 |                                      | -                |                                             |
-| disconnect(code, reason)             |                  |                                             |
+| disconnect(code, reason)             |                  | code: 4000–4999                             |
 |                                      | -                |                                             |
 | packets([ns][, pack, unpack, shared])|                  | return this;                                |
 |                                      | -                |                                             |
 | on(name, listener)                   |                  | return this;                                |
+| once(name, listener)                 |                  | return this;                                |
 | off([name, listener])                |                  | return this;                                |
 |                                      | **app.events**   |                                             |
 | restoring (attempts)                 |                  |                                             |
