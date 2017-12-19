@@ -497,6 +497,7 @@ function main(app, options) {
         });
 
         ws.on("error", function(error) {
+            socket._emit("error", error);
             io._emit("error", error, socket);
         });
 
@@ -522,6 +523,14 @@ function main(app, options) {
         }
 
         io._emit("online", socket, upgradeReq);
+    });
+
+    app.wss.on("error", function(error) {
+        io._emit("error", error, null);
+    });
+
+    app.wss.on("listening", function() {
+        io._emit("listening");
     });
 
     //-----------------]>

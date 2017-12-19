@@ -355,7 +355,8 @@ io.on("connection", function(socket, request) {
 | connection (socket, request)           |                     |                                             |
 | close (socket, code, reason, wasClean) |                     |                                             |
 | packet (name, data, socket, accept)    |                     |                                             |
-| error (data, socket)                   |                     |                                             |
+| listening ()                           |                     |                                             |
+| error (data[, socket])                 |                     |                                             |
 |                                        | **socket.property** |                                             |
 | readyState                             |                     | number (read only)                          |
 | upgradeReq                             |                     | object (read only)                          |
@@ -382,6 +383,7 @@ io.on("connection", function(socket, request) {
 | close (code, reason, wasClean)         |                     |                                             |
 | disconnected (code, reason)            |                     |                                             |
 | terminated (code)                      |                     |                                             |
+| error (data)                           |                     |                                             |
 |                                        | -                   |                                             |
 | message (data)                         |                     |                                             |
 | text (data)                            |                     |                                             |

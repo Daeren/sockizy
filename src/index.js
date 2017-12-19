@@ -237,7 +237,7 @@ function main(port, options, isCluster) {
 
     //--------------------------------]>
 
-    const app = {
+    const appParams = {
         "cluster":  rCluster,
 
         isMaster,
@@ -250,15 +250,29 @@ function main(port, options, isCluster) {
         Promise
     };
 
+    const app = rApp(appParams, options);
+
     //-------------]>
 
     if(!options.port) {
-        app.listen = function() {
+        appParams.listen = function() {
             if(arguments.length) {
+                const func = arguments[2];
+
+                arguments[2] = function() {
+                    app._emit("listening");
+
+                    if(func) {
+                        func.apply(options.server.listen, arguments);
+                    }
+                };
+
                 options.server.listen.apply(options.server, arguments);
             }
             else {
-                options.server.listen(1337, "localhost");
+                options.server.listen(1337, "localhost", function() {
+                    app._emit("listening");
+                });
             }
 
             return this;
@@ -267,7 +281,7 @@ function main(port, options, isCluster) {
 
     //--------------------------------]>
 
-    return rApp(app, options);
+    return app;
 
     //--------------------------------]>
 

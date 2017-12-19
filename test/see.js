@@ -93,17 +93,29 @@ describe("SEE", function() {
 
     it("once", function(done) {
         const ee = new rSee();
+        let t = 0;
 
-        ee.once("msg", function() {
+        ee.on("on.msg", function() {
             for(let i = 0; i < arguments.length; i++) {
                 expect(arguments[i]).to.be.a("number").and.equal(i + 1);
             }
 
-            done();
+            if(t === 1) {
+                done();
+            }
         });
 
-        ee._emit("msg", 1, 2, 3, 4, 5, 6);
-        ee._emit("msg", 1, 2, 3, 4, 5, 6);
+        ee.once("once.msg", function() {
+            for(let i = 0; i < arguments.length; i++) {
+                expect(arguments[i]).to.be.a("number").and.equal(i + 1);
+            }
+
+            t++;
+        });
+
+        ee._emit("once.msg", 1, 2, 3, 4, 5, 6);
+        ee._emit("once.msg", 1, 2, 3, 4, 5, 6);
+        ee._emit("on.msg", 1, 2, 3, 4, 5, 6);
     });
 
     //-----------------]>
