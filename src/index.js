@@ -250,7 +250,7 @@ function main(port, options, isCluster) {
         Promise
     };
 
-    const app = rApp(appParams, options);
+    let app = null;
 
     //-------------]>
 
@@ -281,7 +281,7 @@ function main(port, options, isCluster) {
 
     //--------------------------------]>
 
-    return app;
+    return app = rApp(appParams, options);;
 
     //--------------------------------]>
 
