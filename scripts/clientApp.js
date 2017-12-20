@@ -390,7 +390,7 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
     //--------)>
 
     function genId() {
-        return crypto ? uuidv4() : guid();
+        return typeof(crypto) === "undefined" ? guid() : uuidv4();
 
         //----------]>
 

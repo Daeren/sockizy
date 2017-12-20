@@ -1446,7 +1446,7 @@ var io = function (module) {
         //--------)>
 
         function genId() {
-            return crypto ? uuidv4() : guid();
+            return typeof crypto === "undefined" ? guid() : uuidv4();
 
             //----------]>
 
