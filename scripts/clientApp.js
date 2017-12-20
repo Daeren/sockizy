@@ -9,7 +9,7 @@
 
 //-----------------------------------------------------
 
-const ws = (function(WSocket, toString = require("./../src/toString"), SEE = require("./../src/SEE"), packer = require("./../src/packer")) {
+const ws = (function(WSocket, toString = require("./../src/toString"), SEE = require("./../src/see"), packer = require("./../src/packer")) {
     class Io extends SEE {
         constructor(url, options) {
             super();

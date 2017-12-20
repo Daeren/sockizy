@@ -11,7 +11,7 @@
 
 const rUrl          = require("url");
 
-const rSEE          = require("./SEE"),
+const rSEE          = require("./see"),
       rPacker       = require("./packer"),
       rToString     = require("./toString"),
       rUserSession  = require("./../experimental/userSession");

@@ -1024,7 +1024,7 @@ var io = function (module) {
 
     var ws = function ws(WSocket) {
         var toString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : require("./../src/toString");
-        var SEE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : require("./../src/SEE");
+        var SEE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : require("./../src/see");
         var packer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : require("./../src/packer");
 
         var Io = function (_SEE) {
