@@ -1142,41 +1142,15 @@ var io = function (module) {
                 }
             }, {
                 key: "packets",
-                value: function packets() {
+                value: function packets(pack, unpack, shared) {
                     var _this2 = this;
 
-                    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                        args[_key2] = arguments[_key2];
-                    }
-
-                    var namespace = void 0,
-                        unpack = void 0,
-                        pack = void 0,
-                        shared = void 0;
-
-                    //----------]>
-
-                    if (typeof arguments[0] === "string") {
-                        namespace = args[0];
-                        pack = args[1];
-                        unpack = args[2];
-                        shared = args[3];
-                    } else {
-                        pack = args[0];
-                        unpack = args[1];
-                        shared = args[2];
-                    }
-
-                    namespace = namespace ? namespace + "." : "";
-
-                    //----------]>
-
                     forEach(unpack, function (name, srz) {
-                        _this2._unpackMapById.push([namespace + name, srz]);
+                        _this2._unpackMapById.push([name, srz]);
                     });
 
                     forEach(pack, function (name, srz) {
-                        _this2._packMapByName.set(namespace + name, [_this2._packMapByName.size, srz]);
+                        _this2._packMapByName.set(name, [_this2._packMapByName.size, srz]);
                     });
 
                     if (shared) {

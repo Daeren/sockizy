@@ -204,36 +204,39 @@ function main(port, options, isCluster) {
             forkWorker();
         }
     }
-    else if(isCluster) {
-        wss.__broadcast = wss.broadcast;
-        wss.broadcast = function(data, options) {
-            process.send([0, 1000, Buffer.from(data).toString("binary"), options]);
-        };
-
-        //-------]>
-
+    else {
         if(options.ping && options.ping.interval > 0 && wss.startAutoPing) {
             wss.startAutoPing(Math.max(options.ping.interval, parseInt(1000 / 30)), options.ping.message);
         }
 
-        //-------]>
-
-        process.on("message", function(data) {
-            if(!Array.isArray(data) || data[0] !== 0) { // 0 - sys
-                return;
-            }
-
-            //-------]>
-
-            const [/*type*/, id, message, params] = data;
+        if(isCluster) {
+            wss.__broadcast = wss.broadcast;
+            wss.broadcast = function(data, options) {
+                process.send([0, 1000, Buffer.from(data).toString("binary"), options]);
+            };
 
             //-------]>
 
-            if(id === 1000) {
-                wss.__broadcast(Buffer.from(message, "binary"), params);
-            }
-        });
+            process.on("message", function(data) {
+                if(!Array.isArray(data) || data[0] !== 0) { // 0 - sys
+                    return;
+                }
+
+                //-------]>
+
+                const [/*type*/, id, message, params] = data;
+
+                //-------]>
+
+                if(id === 1000) {
+                    wss.__broadcast(Buffer.from(message, "binary"), params);
+                }
+            });
+        }
     }
+
+
+
 
     //--------------------------------]>
 

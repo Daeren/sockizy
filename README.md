@@ -330,7 +330,7 @@ io.on("connection", function(socket, request) {
 | wss                                    |                     | uws                                         |
 | Promise                                |                     |                                             |
 |                                        | **app.method**      |                                             |
-| emit(name, data)                       |                     | data: hashTable or array; returns: bool     |
+| emit(name[, data])                     |                     | returns: bool                               |
 | bundle()                               |                     |                                             |
 | text(data)                             |                     |                                             |
 | json(data)                             |                     |                                             |
@@ -339,7 +339,7 @@ io.on("connection", function(socket, request) {
 | listen([port, host, callback])         |                     | default: "localhost:1337"                   |
 | close([callback])                      |                     |                                             |
 |                                        | -                   |                                             |
-| packets([ns][,unpack, pack, shared])   |                     | return this;                                |
+| packets([unpack, pack, shared])        |                     | return this;                                |
 | verifyClient(func(info[, callback]))   |                     | return this;                                |
 | session([store])                       |                     | default: memory; return this;               |
 |                                        | -                   |                                             |
@@ -365,10 +365,10 @@ io.on("connection", function(socket, request) {
 | remoteAddress                          |                     | (read only)                                 |
 | remoteFamily                           |                     | (read only)                                 |
 |                                        | **socket.method**   |                                             |
-| emit(name, data[, isBroadcast])        |                     | data: hashTable or array; returns: bool     |
+| emit(name, [data, isBroadcast])        |                     | returns: bool                               |
 | bundle([isBroadcast])                  |                     |                                             |
-| text (data, isBroadcast)               |                     |                                             |
-| json (data, isBroadcast)               |                     |                                             |
+| text (data[, isBroadcast])             |                     |                                             |
+| json (data[, isBroadcast])             |                     |                                             |
 | send(data[, options])                  |                     | native                                      |
 |                                        | -                   |                                             |
 | disconnect([code, reason])             |                     | code: 4000–4999	 	                     |
@@ -419,14 +419,14 @@ io.on("connection", function(socket, request) {
 | bufferedAmount                       |                  | number (read only)                          |
 | readyState                           |                  | number (read only)                          |
 |                                      | **app.method**   |                                             |
-| emit(name, data)                     |                  | data: hashTable or array; returns: bool     |
+| emit(name[, data])                   |                  | returns: bool                               |
 | text(data)                           |                  |                                             |
 | json(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |
 |                                      | -                |                                             |
 | disconnect(code, reason)             |                  | code: 4000–4999                             |
 |                                      | -                |                                             |
-| packets([ns][, pack, unpack, shared])|                  | return this;                                |
+| packets([pack, unpack, shared])      |                  | return this;                                |
 |                                      | -                |                                             |
 | on(name, listener)                   |                  | return this;                                |
 | once(name, listener)                 |                  | return this;                                |

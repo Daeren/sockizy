@@ -127,28 +127,13 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
         }
 
 
-        packets(...args) {
-            let namespace, unpack, pack, shared;
-
-            //----------]>
-
-            if(typeof(arguments[0]) === "string") {
-                [namespace, pack, unpack, shared] = args;
-            }
-            else {
-                [pack, unpack, shared] = args;
-            }
-
-            namespace = namespace ? (namespace + ".") : "";
-
-            //----------]>
-
+        packets(pack, unpack, shared) {
             forEach(unpack, (name, srz) => {
-                this._unpackMapById.push([namespace + name, srz]);
+                this._unpackMapById.push([name, srz]);
             });
 
             forEach(pack, (name, srz) => {
-                this._packMapByName.set(namespace + name, [this._packMapByName.size, srz]);
+                this._packMapByName.set(name, [this._packMapByName.size, srz]);
             });
 
             if(shared) {
