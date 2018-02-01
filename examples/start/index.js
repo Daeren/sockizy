@@ -13,20 +13,18 @@ const sockizy  = require("./../../index.js");
 
 //-----------------------------------------------------
 
-const io = sockizy().listen(); // default: localhost:1337
-
-//-----------------------------------------------------
-
-io.packets(
-    null,
-    null,
-    {
-        "chat.message": [
-            "uid:uint32",
-            "text:str8"
-        ]
-    }
-);
+const io = sockizy({
+    "packets": [
+        null, // srv.on
+        null, // srv.emit
+        {     // srv.on + srv.emit
+            "chat.message": [
+                "uid:uint32",
+                "text:str8"
+            ]
+        }
+    ]
+}).listen(); // default: localhost:1337
 
 //-----------------------------------------------------
 

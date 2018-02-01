@@ -282,29 +282,29 @@ io.on("connection", function(socket, request) {
 
 ##### Server options
 
-| Name              | Note                                 |
-|-------------------|--------------------------------------|
-|                   | -                                    |
-| port              | default: undefined                   |
-| host              | default: *                           |
-| server            | default: http.Server                 |
-| path              | default: "/"                         |
-|                   | -                                    |
-| cluster           | default: false                       |
-| forkTimeout       | default: 5 (sec); off: 0             |
-|                   | -                                    |
-| ssl               |                                      |
-| promise           | default: Promise                     |
-| numCPUs           | default: max(cpu - 1, 1)             |
-| maxSockets        | Infinity                             |
-|                   | -                                    |
-| maxPayload 		| default: 1024 * 32                   |
-| perMessageDeflate | default: false                       |
-| noDelay           | default: true                        |
-| restoreTimeout    | default: 10 (sec); off: 0            |
-|                   | -                                    |
-| ping              | default: {"interval": 1000}          |
-| clientJs          | default: true                        |
+| Name              | Note                                     |
+|-------------------|------------------------------------------|
+|                   | -                                        |
+| port              | default: undefined                       |
+| host              | default: *                               |
+| server            | default: http.Server                     |
+| path              | default: "/"                             |
+|                   | -                                        |
+| cluster           | default: false                           |
+| forkTimeout       | default: 5 (sec); off: 0                 |
+|                   | -                                        |
+| ssl               |                                          |
+| numCPUs           | default: max(cpu - 1, 1)                 |
+| maxSockets        | Infinity                                 |
+|                   | -                                        |
+| maxPayload        | default: 1024 * 32                       |
+| perMessageDeflate | default: false                           |
+| noDelay           | default: true                            |
+| restoreTimeout    | default: 0 (off)                         |
+|                   | -                                        |
+| ping              | default: {"interval": 10000} (ms)        |
+| clientJs          | default: true                            |
+| packets           | dependencies: clientJs(autointegration)  |
 
 
 ##### Bundle: app.bundle(), socket.bundle([isBroadcast])

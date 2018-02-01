@@ -227,11 +227,21 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
 
     //---------------]>
 
-    return WSocket ? function(url, options = {}) {
-        return new Io(url, options);
-    } : null;
+    return WSocket ? io : null;
 
     //---------------]>
+
+    function io(url, options = {}) {
+        const app = new Io(url, options);
+
+        if(Array.isArray(io.__staticPackets)) {
+            app.packets(...io.__staticPackets);
+        }
+
+        return app;
+    }
+
+    //--------)>
 
     function wsOnMessage(socket, event) {
         let data = event.data;

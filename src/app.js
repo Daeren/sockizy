@@ -473,7 +473,7 @@ function main(app, options) {
 
                 if(!_terminated && timeout && cidValid && code === 1006) {
                     ws.removeAllListeners();
-                    
+
                     socketsRestoringMap[cid] = socket;
                     socket._rtm = setTimeout(releaseSR, timeout, cid, timeout);
                 }

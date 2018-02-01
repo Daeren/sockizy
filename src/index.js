@@ -36,13 +36,14 @@ function main(port, options, isCluster) {
     options.port = port;
     options.path = options.path || "";
 
-    options.ping = typeof(options.ping) === "undefined" ? {"interval": 1000} : options.ping;
+    options.ping = typeof(options.ping) === "undefined" ? {"interval": 10000} : options.ping;
     options.clientJs = typeof(options.clientJs) === "undefined" ? true : !!options.clientJs;
 
     options.maxPayload = options.maxPayload || (1024 * 32);
     options.noDelay = typeof(options.noDelay) === "undefined" ? true : !!options.noDelay;
-    options.restoreTimeout = 1000 * (typeof(options.restoreTimeout) === "undefined" ? 10 : (parseInt(options.restoreTimeout, 10) || 0));
+    options.restoreTimeout = 1000 * (typeof(options.restoreTimeout) === "undefined" ? 0 : (parseInt(options.restoreTimeout, 10) || 0));
     options.binary = true;
+    options.packets = Array.isArray(options.packets) ? options.packets : [];
 
     options.cluster = !!options.cluster;
     options.forkTimeout = typeof(options.forkTimeout) === "undefined" ? 5 : (parseInt(options.forkTimeout) || 0);
@@ -96,8 +97,6 @@ function main(port, options, isCluster) {
                 "level": rZlib.Z_BEST_COMPRESSION
             };
 
-            const lib = rFs.readFileSync(__dirname + "/../public/sockizy.min.js");
-
             const objDeflate = {
                 "content-encoding": "deflate",
                 "content-type":     "text/javascript"
@@ -110,6 +109,8 @@ function main(port, options, isCluster) {
 
             const reDeflate = /\bdeflate\b/;
             const reGzip = /\bgzip\b/;
+
+            const lib = rFs.readFileSync(`${__dirname}/../public/sockizy.min.js`) + `\r\n(io.__staticPackets=${JSON.stringify(options.packets)});`;
 
             const libDeflate = rZlib.deflateSync(lib, zlibOptions);
             const libGzip = rZlib.gzipSync(lib, zlibOptions);
@@ -279,9 +280,15 @@ function main(port, options, isCluster) {
         };
     }
 
+    app = rApp(appParams, options);
+
+    if(Array.isArray(options.packets)) {
+        app.packets(...options.packets);
+    }
+
     //--------------------------------]>
 
-    return app = rApp(appParams, options);;
+    return app;
 
     //--------------------------------]>
 

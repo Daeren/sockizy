@@ -13,19 +13,6 @@
 
         //-----------------------------------------------------
 
-        socket.packets(
-            null,
-            null,
-            {
-                "chat.message": [
-                    "uid:uint32",
-                    "text:str8"
-                ]
-            }
-        );
-
-        //-----------------------------------------------------
-
         socket.on("open", function() {
             console.log("event: open");
 
