@@ -41,22 +41,25 @@ const sockizy = require("sockizy");
 
 //-----------------------------------------------------
 
-const io = sockizy(1337, {"maxPayload": 1024}, true);
-
-//-----------------------------------------------------
-
-if(io.isMaster) {
-    console.log(`Master ${process.pid} is running`);
-    return;
-}
-
-console.log(`Worker ${process.pid} started | id: ${io.workerId}`);
+const io = sockizy(1337, {
+    "packets": [
+        null, // srv.on
+        null, // srv.emit
+        {     // srv.on + srv.emit
+            "chat.message": [
+                "uid:uint32",
+                "text:str8"
+            ]
+        }
+    ]
+});
 
 //-----------------------------------------------------
 
 io.on("connection", function(socket, request) {
-    socket.on("message", console.log);
-    socket.send("cluster.srv#2easy");
+    socket.on("chat.message", function() {
+        this.emit("chat.message", [13, "Hello"]);
+    });
 });
 ```
 
@@ -67,9 +70,7 @@ Client:
 
 <script>
     const socket = io("localhost:1337");
-	
-    socket.on("message", console.log);
-    socket.send("cluster.cl#2easy");
+    socket.on("chat.message", console.log);
 </script>
 ```
 
@@ -290,12 +291,7 @@ io.on("connection", function(socket, request) {
 | server            | default: http.Server                     |
 | path              | default: "/"                             |
 |                   | -                                        |
-| cluster           | default: false                           |
-| forkTimeout       | default: 5 (sec); off: 0                 |
-|                   | -                                        |
 | ssl               |                                          |
-| numCPUs           | default: max(cpu - 1, 1)                 |
-| maxSockets        | Infinity                                 |
 |                   | -                                        |
 | maxPayload        | default: 1024 * 32                       |
 | perMessageDeflate | default: false                           |
@@ -316,19 +312,12 @@ io.on("connection", function(socket, request) {
 | end([name, data]) | returns: number of bytes sent        |
 
 
-##### Server: app([port, options, isCluster])
+##### Server: app([port, options])
 
 | Name                                   |                     | Note                                        |
 |----------------------------------------|---------------------|---------------------------------------------|
 |                                        | **app.property**    |                                             |
-| cluster                                |                     |                                             |
-| isMaster                               |                     |                                             |
-|                                        | -                   |                                             |
-| workers                                |                     |                                             |
-| workerId                               |                     |                                             |
-|                                        | -                   |                                             |
 | wss                                    |                     | uws                                         |
-| Promise                                |                     |                                             |
 |                                        | **app.method**      |                                             |
 | emit(name[, data])                     |                     | returns: bool                               |
 | bundle()                               |                     |                                             |
@@ -341,7 +330,6 @@ io.on("connection", function(socket, request) {
 |                                        | -                   |                                             |
 | packets([unpack, pack, shared])        |                     | return this;                                |
 | verifyClient(func(info[, callback]))   |                     | return this;                                |
-| session([store])                       |                     | default: memory; return this;               |
 |                                        | -                   |                                             |
 | on(name, listener)                     |                     | return this;                                |
 | off([name, listener])                  |                     | return this;                                |

@@ -13,8 +13,7 @@ const rUrl          = require("url");
 
 const rSEE          = require("./see"),
       rPacker       = require("./packer"),
-      rToString     = require("./toString"),
-      rUserSession  = require("./../experimental/userSession");
+      rToString     = require("./toString");
 
 //-----------------------------------------------------
 
@@ -290,11 +289,6 @@ class Io extends rSEE {
 
     verifyClient(callback) {
         this._verifyClient.func = callback;
-        return this;
-    }
-
-    session(store = rUserSession) {
-        store(this);
         return this;
     }
 
