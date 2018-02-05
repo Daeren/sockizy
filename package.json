@@ -33,7 +33,7 @@
         "url": "https://github.com/Daeren/sockizy/issues"
     },
     "dependencies": {
-        "2pack": "0.0.2",
+        "2pack": "^0.0.2",
         "uws": "^0"
     },
     "devDependencies": {
@@ -67,6 +67,7 @@
         "pixify": "^1.7.0",
         "rimraf": "^2.5.3",
         "time-grunt": "^1.4.0",
+        "2pack": "^0.0.2",
         "uws": "^0",
         "watch": "^0.19.1"
     }
