@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Sockizy: start</title>
+        <meta charset="utf-8">
+    </head>
+
+    <body></body>
+
+    <script src="http://localhost:1337"></script>
+    <script>
+        const socket = io("localhost:1337");
+
+        //-----------------------------------------------------
+
+        socket.on("open", function() {
+            console.log("event: open");
+
+            this.emit("chat.message", [6, "Hi"]);
+        });
+
+        socket.on("message", function() {
+            console.log("event: message");
+        });
+
+        socket.on("terminated", function() {
+            console.log("event: terminated");
+        });
+
+        socket.on("error", function() {
+            console.log("event: error");
+        });
+
+        //---------------)>
+
+        socket.on("chat.message", function() {
+            console.log("event: chat.message");
+        });
+
+        socket.on("packet", function(name, data, accept) {
+            console.log("socket.packet: " + name + " |---v");
+            console.log(JSON.stringify(data, null, "  "));
+
+            accept();
+        });
+    </script>
+</html>

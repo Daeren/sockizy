@@ -34,31 +34,6 @@
 
         //-----------------------------------------------------
 
-        socket.packets(
-            null,
-            null,
-            {
-                "upload.file.init": [
-                    "id:u8",
-                    "name:s256",
-                    "type:s128",
-                    "size:u32",
-                    "begin:u32"
-                ],
-
-                "upload.file.body": [
-                    "id:u8",
-                    "chunk:b16384"
-                ],
-
-                "upload.file.next": [
-                    "id:u8"
-                ]
-            }
-        );
-
-        //-----------------------------------------------------
-
         (function() {
             const elmFiles = document.getElementById("files");
             const elmFilesZone = document.getElementById("files_zone");
@@ -80,7 +55,9 @@
 
                 //----------]>
 
-                const files = evt.dataTransfer.files;
+                console.log(evt);
+
+                const files = (evt.dataTransfer || evt.target).files;
                 const output = [];
 
                 //----------]>

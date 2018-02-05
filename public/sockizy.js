@@ -232,25 +232,72 @@ var io = function (module) {
 
     //-----------------------------------------------------
 
-    var packer = function () {
+    var bPack = function () {
         var holyBuffer = typeof Buffer !== "undefined" ? Buffer : function () {
             var MAX_ARGUMENTS_LENGTH = 0x1000;
             var K_MAX_LENGTH = 0x7fffffff;
 
-            var Buffer = function Buffer() {};
-
             //---------------------]>
 
-            Buffer.alloc = alloc;
-            Buffer.byteLength = byteLength;
+            return function () {
+                var Buffer = function Buffer() {};
 
-            Buffer.prototype = Object.create(null);
-            Buffer.prototype.write = write;
-            Buffer.prototype.toString = toString;
+                //--------]>
 
-            //---------------------]>
+                Buffer.allocUnsafe = allocUnsafe;
+                Buffer.allocUnsafeSlow = allocUnsafe;
+                Buffer.byteLength = byteLength;
 
-            return Buffer;
+                Buffer.prototype = Object.create(null);
+                Buffer.prototype.write = write;
+                Buffer.prototype.toString = toString;
+
+                //--------]>
+
+                return Buffer;
+
+                //--------]>
+
+                function allocUnsafe(length) {
+                    if (length > K_MAX_LENGTH) {
+                        throw new RangeError("Invalid typed array length");
+                    }
+
+                    var buf = new Uint8Array(length);
+
+                    // buf.__proto__ = Buffer.prototype;
+                    buf.write = Buffer.prototype.write;
+                    buf.toString = Buffer.prototype.toString;
+
+                    return buf;
+                }
+
+                function byteLength(string) {
+                    return utf8ToBytes(string).length;
+                }
+
+                //----)>
+
+                function write(string, offset, length) {
+                    offset = offset || 0;
+                    length = length || this.length;
+
+                    var remaining = this.length - offset;
+
+                    if (!length || length > remaining) {
+                        length = remaining;
+                    }
+
+                    return blitBuffer(utf8ToBytes(string, this.length - offset), this, offset, length);
+                }
+
+                function toString(encoding, start, end) {
+                    start = start || 0;
+                    end = end || this.length;
+
+                    return end === 0 ? "" : utf8Slice(this, start, end);
+                }
+            }();
 
             //---------------------]>
 
@@ -434,52 +481,6 @@ var io = function (module) {
                 return decodeCodePointsArray(res);
             }
 
-            function createBuffer(length) {
-                if (length > K_MAX_LENGTH) {
-                    throw new RangeError("Invalid typed array length");
-                }
-
-                var buf = new Uint8Array(length);
-
-                // buf.__proto__ = Buffer.prototype;
-                buf.write = Buffer.prototype.write;
-                buf.toString = Buffer.prototype.toString;
-
-                return buf;
-            }
-
-            function byteLength(string) {
-                return utf8ToBytes(string).length;
-            }
-
-            //--------)>
-
-            function alloc(size) {
-                return createBuffer(size);
-            }
-
-            //--------)>
-
-            function write(string, offset, length) {
-                offset = offset || 0;
-                length = length || this.length;
-
-                var remaining = this.length - offset;
-
-                if (!length || length > remaining) {
-                    length = remaining;
-                }
-
-                return blitBuffer(utf8ToBytes(string, this.length - offset), this, offset, length);
-            }
-
-            function toString(encoding, start, end) {
-                start = start || 0;
-                end = end || this.length;
-
-                return end === 0 ? "" : utf8Slice(this, start, end);
-            }
-
             //--------)>
 
             function swap(b, n, m) {
@@ -517,18 +518,25 @@ var io = function (module) {
             return b[0] === 0x12;
         }();
 
-        var sysOffset = 2;
+        //-------------------------]>
 
-        var idUI16Buf = new Uint16Array(1);
-        var idUI8Buf = new Uint8Array(idUI16Buf.buffer);
+        create.isBE = isBigEndian;
+        create.isLE = !isBigEndian;
+
+        return create;
 
         //-------------------------]>
 
-        return { isBigEndian: isBigEndian, createPacket: createPacket, getId: getId };
+        function create(schema, dataHolderAsArray, holderRecreated) {
+            var TYPE_BIN = 1;
+            var TYPE_STR = 2;
+            var TYPE_INT = 4;
+            var TYPE_UINT = 8;
+            var TYPE_FLOAT = 16;
+            var TYPE_JSON = 32;
 
-        //-------------------------]>
+            //-----------------]>
 
-        function createPacket(schema, useHolderArray, holderNew) {
             if (!schema) {
                 schema = [];
             }
@@ -536,7 +544,6 @@ var io = function (module) {
             //-----------------]>
 
             var isPrimitive = typeof schema === "string";
-
             var schLen = isPrimitive ? 1 : schema.length;
 
             var fields = new Array(schLen);
@@ -544,20 +551,13 @@ var io = function (module) {
 
             var zeroUI16 = new Uint8Array(2);
 
-            var pktDataHolder = useHolderArray ? new Array() : Object.create(null),
+            var pktOffset = 0,
+                pktDataHolderArr = new Array(),
+                pktDataHolderObj = Object.create(null),
                 pktMinSize = 0,
                 pktDynamicSize = false,
                 pktBufStrict = null,
                 pktBufPack = null;
-
-            //-----------------]>
-
-            var TYPE_BIN = 1;
-            var TYPE_STR = 2;
-            var TYPE_INT = 4;
-            var TYPE_UINT = 8;
-            var TYPE_FLOAT = 16;
-            var TYPE_JSON = 32;
 
             //-----------------]>
 
@@ -592,24 +592,43 @@ var io = function (module) {
                 }
             }
 
-            pktMinSize += sysOffset;
+            offset(0);
 
-            if (!pktDynamicSize) {
-                pktBufStrict = new Uint8Array(pktMinSize);
+            //-----------------]>
+
+            return {
+                get offset() {
+                    return pktOffset;
+                },
+                set offset(value) {
+                    offset(value);
+                },
+
+                pack: pack,
+                unpack: unpack
+            };
+
+            //-----------------]>
+
+            function offset(value) {
+                value = parseInt(value, 10) || 0;
+
+                pktMinSize = pktMinSize - pktOffset + value;
+                pktOffset = value;
+
+                if (!pktDynamicSize) {
+                    pktBufStrict = new Uint8Array(pktMinSize);
+                }
             }
 
-            //-----------------]>
+            //------)>
 
-            return { pack: pack, unpack: unpack };
-
-            //-----------------]>
-
-            function pack(id, data) {
+            function pack(data, target) {
                 var isArray = Array.isArray(data);
 
                 var tIdx = void 0,
                     fieldIdx = schLen,
-                    pktSize = sysOffset;
+                    pktSize = pktOffset;
 
                 var field = void 0;
                 var name = void 0,
@@ -621,6 +640,10 @@ var io = function (module) {
                     bufABytes = void 0;
 
                 var input = void 0;
+
+                //--------]>
+
+                target = target || pktBufStrict;
 
                 //--------]>
 
@@ -684,7 +707,7 @@ var io = function (module) {
                         tIdx = 0;
 
                         while (bytes--) {
-                            pktBufStrict[pktSize++] = bufBytes[tIdx++];
+                            target[pktSize++] = bufBytes[tIdx++];
                         }
                     } else {
                         buffers[fieldIdx] = bufBytes;
@@ -694,52 +717,44 @@ var io = function (module) {
 
                 //--------]>
 
-                var result = pktBufStrict;
-
-                //--------]>
-
-                if (!result) {
-                    result = pktBufPack && pktBufPack.length === pktSize ? pktBufPack : pktBufPack = new Uint8Array(pktSize);
+                if (!pktBufStrict) {
+                    target = target || pktBufPack && pktBufPack.length === pktSize ? pktBufPack : pktBufPack = holyBuffer.allocUnsafe(pktSize);
 
                     fieldIdx = schLen;
-                    tIdx = sysOffset;
+                    tIdx = pktOffset;
 
                     //--------]>
 
                     while (fieldIdx--) {
                         for (var b = buffers[fieldIdx], _i = 0, l = b._blen || b.length; _i < l; ++_i) {
-                            result[tIdx++] = b[_i];
+                            target[tIdx++] = b[_i];
                         }
                     }
                 }
 
                 //--------]>
 
-                idUI16Buf[0] = id;
-
-                result[0] = idUI8Buf[0];
-                result[1] = idUI8Buf[1];
-
-                //--------]>
-
-                return result;
+                return target;
             }
 
             function unpack(bin, offset, length, cbEndInfo, target) {
+                var asArray = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : dataHolderAsArray;
+                var asCopy = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : !holderRecreated;
+
                 if (!schLen) {
                     if (cbEndInfo) {
-                        cbEndInfo(sysOffset);
+                        cbEndInfo(pktOffset);
                     }
 
                     return null;
                 }
 
-                if (!bin || (typeof bin === "undefined" ? "undefined" : _typeof(bin)) !== "object" || pktBufStrict && bin.byteLength !== pktMinSize || bin.byteLength < pktMinSize) {
+                if (!bin || (typeof bin === "undefined" ? "undefined" : _typeof(bin)) !== "object" || bin.byteLength < pktMinSize) {
                     return void 0;
                 }
 
                 if (!isPrimitive) {
-                    target = target || (holderNew ? useHolderArray ? new Array() : Object.create(null) : pktDataHolder);
+                    target = target || (asCopy ? asArray ? new Array() : Object.create(null) : asArray ? pktDataHolderArr : pktDataHolderObj);
                 }
 
                 //--------]>
@@ -754,9 +769,9 @@ var io = function (module) {
                     bufAType = void 0,
                     bufABytes = void 0;
 
-                var pktOffset = offset + sysOffset;
+                var curOffset = offset + pktOffset;
 
-                var pktOffsetStart = pktOffset;
+                var pktOffsetStart = curOffset;
 
                 //--------]>
 
@@ -774,14 +789,14 @@ var io = function (module) {
                     bufAType = _fields$fieldIdx[5];
                     bufABytes = _fields$fieldIdx[6];
                     for (var _i2 = 0; _i2 < bytes; ++_i2) {
-                        if (pktOffset >= length) {
+                        if (curOffset >= length) {
                             return void 0;
                         }
 
                         if (bufAType) {
-                            bufABytes[_i2] = bin[pktOffset++];
+                            bufABytes[_i2] = bin[curOffset++];
                         } else {
-                            bufBytes[_i2] = bin[pktOffset++];
+                            bufBytes[_i2] = bin[curOffset++];
                         }
                     }
 
@@ -802,12 +817,12 @@ var io = function (module) {
                             field = type & (TYPE_BIN | TYPE_JSON) ? null : "";
                         } else {
                             var needMem = Math.min(bufType.length - bytes, length, byteLen);
-                            var buf = type & TYPE_BIN ? holyBuffer.alloc(needMem) : bufType;
+                            var buf = type & TYPE_BIN ? holyBuffer.allocUnsafe(needMem) : bufType;
 
                             //-------]>
 
-                            for (var _i3 = 0; _i3 < needMem; ++_i3, ++pktOffset) {
-                                buf[_i3] = bin[pktOffset];
+                            for (var _i3 = 0; _i3 < needMem; ++_i3, ++curOffset) {
+                                buf[_i3] = bin[curOffset];
                             }
 
                             //-------]>
@@ -835,7 +850,7 @@ var io = function (module) {
                     if (isPrimitive) {
                         target = field;
                     } else {
-                        if (useHolderArray) {
+                        if (asArray) {
                             name = fieldIdx;
                         }
 
@@ -844,7 +859,7 @@ var io = function (module) {
                 }
 
                 if (cbEndInfo) {
-                    cbEndInfo(sysOffset + pktOffset - pktOffsetStart);
+                    cbEndInfo(pktOffset + curOffset - pktOffsetStart);
                 }
 
                 //--------]>
@@ -856,15 +871,15 @@ var io = function (module) {
 
             function buildTypedBuf(type, size) {
                 if (type & TYPE_BIN) {
-                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 1024) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
+                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.allocUnsafeSlow((size || 1024) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
                 }
 
                 if (type & TYPE_JSON) {
-                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 8192) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
+                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.allocUnsafeSlow((size || 8192) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
                 }
 
                 if (type & TYPE_STR) {
-                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.alloc((size || 256) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
+                    return [Uint16Array.BYTES_PER_ELEMENT, holyBuffer.allocUnsafeSlow((size || 256) + Uint16Array.BYTES_PER_ELEMENT), new Uint16Array(1)];
                 }
 
                 switch (type) {
@@ -942,31 +957,32 @@ var io = function (module) {
             }
         }
 
-        //-----------)>
-
-        function getId(data) {
-            idUI8Buf[0] = data[0];
-            idUI8Buf[1] = data[1];
-
-            if (isBigEndian) {
-                idUI8Buf.reverse();
+        function blitBuffer(src, dst, offset, length) {
+            if (!length) {
+                return 0;
             }
 
-            return idUI16Buf[0];
-        }
+            //-------]>
 
-        //-----------)>
+            var dstLen = dst.length;
+            var srcLen = src.length;
 
-        function blitBuffer(src, dst, offset, length) {
-            var i = void 0;
+            var i = void 0,
+                t = void 0;
+
+            //-------]>
 
             for (i = 0; i < length; ++i) {
-                if (i + offset >= dst.length || i >= src.length) {
+                t = i + offset;
+
+                if (t >= dstLen || i >= srcLen) {
                     break;
                 }
 
-                dst[i + offset] = src[i];
+                dst[t] = src[i];
             }
+
+            //-------]>
 
             return i;
         }
@@ -974,7 +990,7 @@ var io = function (module) {
 
     //-----------------------------------------------------
 
-    module.exports = packer;
+    module.exports = bPack;
 
     //-----------------------------------------------------
     //
@@ -1027,7 +1043,12 @@ var io = function (module) {
     var ws = function ws(WSocket) {
         var toString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : require("./../src/toString");
         var SEE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : require("./../src/see");
-        var packer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : require("./../src/packer");
+        var bPack = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : require("2pack");
+
+        var sysInfoPacker = bPack("uint16"); // packetId.bytes.uint16
+        var sysInfoSize = 2;
+
+        //---------------]>
 
         var Io = function (_SEE) {
             _inherits(Io, _SEE);
@@ -1173,23 +1194,21 @@ var io = function (module) {
                         Object.keys(data).forEach(function (field) {
                             var t = field.split(/\(([\[\{]?)(\@?)([\}\]]?)\)$/);
 
-                            var name = void 0,
-                                useHolderArray = void 0,
-                                holderNew = void 0,
-                                schema = void 0;
+                            var name = t.shift().trim();
+                            var useHolderArray = t.shift() === "[";
+                            var holderNew = t.shift() === "@";
+
+                            var schema = data[field];
+                            var packet = bPack(schema, useHolderArray, holderNew
 
                             //-------]>
 
-                            name = t.shift().trim();
-                            useHolderArray = t.shift() === "[";
-                            holderNew = t.shift() === "@";
-
-                            schema = data[field];
+                            );packet.offset = sysInfoSize;
 
                             //-------]>
 
                             testName(name);
-                            callback(name, packer.createPacket(schema, useHolderArray, holderNew));
+                            callback(name, packet);
                         });
                     }
 
@@ -1225,23 +1244,17 @@ var io = function (module) {
             }, {
                 key: "_pack",
                 value: function _pack(name, data) {
-                    var t = this._packMapByName.get(name);
+                    var pk = this._packMapByName.get(name);
 
-                    //---------]>
+                    if (pk) {
+                        var _pk = _slicedToArray(pk, 2),
+                            id = _pk[0],
+                            srz = _pk[1];
 
-                    if (!t) {
-                        return null;
+                        return sysInfoPacker.pack(id, srz.pack(data));
                     }
 
-                    //---------]>
-
-                    var _t = _slicedToArray(t, 2),
-                        id = _t[0],
-                        srz = _t[1];
-
-                    //---------]>
-
-                    return srz.pack(id, data);
+                    return null;
                 }
             }, {
                 key: "bufferedAmount",
@@ -1324,7 +1337,8 @@ var io = function (module) {
             //-----------]>
 
             var _loop = function _loop() {
-                var pktSchema = socket._unpackMapById[packer.getId(pkt)];
+                var pktId = sysInfoPacker.unpack(pkt, offset, dataByteLength);
+                var pktSchema = socket._unpackMapById[pktId];
 
                 //-----------]>
 
@@ -1344,10 +1358,6 @@ var io = function (module) {
 
                 if (typeof message === "undefined") {
                     return "break";
-                }
-
-                if (dataByteLength > offset) {
-                    pkt = data.slice(offset);
                 }
 
                 //-----------]>
@@ -1456,6 +1466,6 @@ var io = function (module) {
 
     module.exports = ws;
 
-    return ws(window.WebSocket || window.MozWebSocket, toString, SEE, packer);
+    //# sourceMappingURL=sockizy.min.js.map
+    return ws(window.WebSocket || window.MozWebSocket, toString, SEE, bPack);
 }({});
-//# sourceMappingURL=sockizy.js.map

@@ -9,7 +9,12 @@
 
 //-----------------------------------------------------
 
-const ws = (function(WSocket, toString = require("./../src/toString"), SEE = require("./../src/see"), packer = require("./../src/packer")) {
+const ws = (function(WSocket, toString = require("./../src/toString"), SEE = require("./../src/see"), bPack = require("2pack")) {
+    const sysInfoPacker = bPack("uint16"); // packetId.bytes.uint16
+    const sysInfoSize = 2;
+
+    //---------------]>
+
     class Io extends SEE {
         constructor(url, options) {
             super();
@@ -154,23 +159,21 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
                 Object.keys(data).forEach(function(field) {
                     const t = field.split(/\(([\[\{]?)(\@?)([\}\]]?)\)$/);
 
-                    let name,
-                        useHolderArray,
-                        holderNew,
-                        schema;
+                    const name = t.shift().trim();
+                    const useHolderArray = t.shift() === "[";
+                    const holderNew = t.shift() === "@";
+
+                    const schema = data[field];
+                    const packet = bPack(schema, useHolderArray, holderNew)
 
                     //-------]>
 
-                    name = t.shift().trim();
-                    useHolderArray = t.shift() === "[";
-                    holderNew = t.shift() === "@";
-
-                    schema = data[field];
+                    packet.offset = sysInfoSize;
 
                     //-------]>
 
                     testName(name);
-                    callback(name, packer.createPacket(schema, useHolderArray, holderNew));
+                    callback(name, packet);
                 });
             }
 
@@ -207,21 +210,15 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
         }
 
         _pack(name, data) {
-            const t = this._packMapByName.get(name);
+            const pk = this._packMapByName.get(name);
 
-            //---------]>
+            if(pk) {
+                const [id, srz] = pk;
+                return sysInfoPacker.pack(id, srz.pack(data));
 
-            if(!t) {
-                return null;
             }
 
-            //---------]>
-
-            const [id, srz] = t;
-
-            //---------]>
-
-            return srz.pack(id, data);
+            return null;
         }
     }
 
@@ -286,7 +283,8 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
         //-----------]>
 
         while(offset < dataByteLength) {
-            const pktSchema = socket._unpackMapById[packer.getId(pkt)];
+            const pktId = sysInfoPacker.unpack(pkt, offset, dataByteLength);
+            const pktSchema = socket._unpackMapById[pktId];
 
             //-----------]>
 
@@ -303,10 +301,6 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
 
             if(typeof(message) === "undefined") {
                 break;
-            }
-
-            if(dataByteLength > offset) {
-                pkt = data.slice(offset);
             }
 
             //-----------]>

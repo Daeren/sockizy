@@ -16,9 +16,13 @@ module.exports = function(grunt) {
     grunt.initConfig({
         concat: {
             dist: {
+                options: {
+                    sourceMap: true,
+                    sourceMapName: "public/sockizy.min.js.map"
+                },
                 src: [
                     "src/see.js",
-                    "src/packer.js",
+                    "node_modules/2pack/index.js",
                     "src/toString.js",
                     "scripts/clientApp.js"
                 ],
@@ -41,7 +45,7 @@ module.exports = function(grunt) {
                             });
                         }`,
 
-                        "return ws(window.WebSocket || window.MozWebSocket, toString, SEE, packer); })({});"
+                        "return ws(window.WebSocket || window.MozWebSocket, toString, SEE, bPack); })({});"
                     ]
                 }
             }
@@ -49,7 +53,6 @@ module.exports = function(grunt) {
 
         babel: {
             options: {
-                sourceMap: true,
                 presets: ["es2015", "es2016", "es2017"]
             },
             dist: {

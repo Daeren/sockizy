@@ -1,6 +1,6 @@
 {
     "name": "sockizy",
-    "version": "0.4.3",
+    "version": "0.5.0",
     "description": "The best choice for your games",
     "homepage": "https://666.io",
     "keywords": [
@@ -33,6 +33,7 @@
         "url": "https://github.com/Daeren/sockizy/issues"
     },
     "dependencies": {
+        "2pack": "0.0.2",
         "uws": "^0"
     },
     "devDependencies": {

@@ -15,32 +15,30 @@ const sockizy   = require("./../../index.js");
 
 //-----------------------------------------------------
 
-const io = sockizy().listen();
+const io = sockizy({
+    "packets": [
+        null,
+        null,
+        {
+            "upload.file.init": [
+                "id:u8",
+                "name:s256",
+                "type:s128",
+                "size:u32",
+                "begin:u32"
+            ],
 
-//-----------------------------------------------------
+            "upload.file.body": [
+                "id:u8",
+                "chunk:b16384"
+            ],
 
-io.packets(
-    null,
-    null,
-    {
-        "upload.file.init": [
-            "id:u8",
-            "name:s256",
-            "type:s128",
-            "size:u32",
-            "begin:u32"
-        ],
-
-        "upload.file.body": [
-            "id:u8",
-            "chunk:b16384"
-        ],
-
-        "upload.file.next": [
-            "id:u8"
-        ]
-    }
-);
+            "upload.file.next": [
+                "id:u8"
+            ]
+        }
+    ]
+}).listen();
 
 //-----------------------------------------------------
 
@@ -57,7 +55,7 @@ io.on("connection", function(socket) {
         }
 
         upload[id] = {
-            "stream":   fs.createWriteStream("./store/" + (Date.now() + Math.random()).toString(32) + ".jpg"),
+            "stream":   fs.createWriteStream(__dirname + "/store/" + (Date.now() + Math.random()).toString(32) + ".jpg"),
             "size":     size,
             "bytes":    0
         };

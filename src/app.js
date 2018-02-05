@@ -11,9 +11,15 @@
 
 const rUrl          = require("url");
 
+const rPacker       = require("2pack")
+
 const rSEE          = require("./see"),
-      rPacker       = require("./packer"),
       rToString     = require("./toString");
+
+//-----------------------------------------------------
+
+const sysInfoPacker = rPacker("uint16"); // packetId.bytes.uint16
+const sysInfoSize = 2;
 
 //-----------------------------------------------------
 
@@ -253,23 +259,21 @@ class Io extends rSEE {
             Object.keys(data).forEach(function(field) {
                 const t = field.split(/\(([\[\{]?)(\@?)([\}\]]?)\)$/);
 
-                let name,
-                    useHolderArray,
-                    holderNew,
-                    schema;
+                const name = t.shift().trim();
+                const useHolderArray = t.shift() === "[";
+                const holderNew = t.shift() === "@";
+
+                const schema = data[field];
+                const packet = rPacker(schema, useHolderArray, holderNew)
 
                 //-------]>
 
-                name = t.shift().trim();
-                useHolderArray = t.shift() === "[";
-                holderNew = t.shift() === "@";
-
-                schema = data[field];
+                packet.offset = sysInfoSize;
 
                 //-------]>
 
                 testName(name);
-                callback(name, rPacker.createPacket(schema, useHolderArray, holderNew));
+                callback(name, packet);
             });
         }
 
@@ -306,16 +310,16 @@ class Io extends rSEE {
 
                 if(this._buffer) {
                     const offset = this._buffer.byteLength;
-                    const t = new Uint8Array(offset + pkt.byteLength);
+                    const t = Buffer.allocUnsafe(offset + pkt.byteLength);
 
-                    t.set(this._buffer);
-                    t.set(pkt, offset);
+                    this._buffer.copy(t);
+                    pkt.copy(t, offset);
 
                     this._buffer = t;
                 }
-            else {
-                    this._buffer = new Uint8Array(pkt.byteLength);
-                    this._buffer.set(pkt);
+                else {
+                    this._buffer = Buffer.allocUnsafe(pkt.byteLength);
+                    pkt.copy(this._buffer);
                 }
 
                 return pkt.byteLength;
@@ -326,27 +330,21 @@ class Io extends rSEE {
                     this.write(name, data);
                 }
 
-                return this._buffer && this._buffer.byteLength;
+                return this._buffer ? this._buffer.byteLength : 0;
             }
         };
     }
 
     _pack(name, data) {
-        const pkt = this._packMapByName.get(name);
+        const pk = this._packMapByName.get(name);
 
-        //---------]>
+        if(pk) {
+            const [id, srz] = pk;
+            return sysInfoPacker.pack(id, srz.pack(data));
 
-        if(!pkt) {
-            return null;
         }
 
-        //---------]>
-
-        const [id, srz] = pkt;
-
-        //---------]>
-
-        return srz.pack(id, data);
+        return null;
     }
 }
 
@@ -417,7 +415,8 @@ function main(app, options) {
 
             //-----------]>
 
-            const pktSchema = io._unpackMapById[rPacker.getId(tBufData)];
+            const pktId = sysInfoPacker.unpack(tBufData, 0, dataByteLength);
+            const pktSchema = io._unpackMapById[pktId];
 
             //-----------]>
 
