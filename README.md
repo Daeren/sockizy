@@ -21,7 +21,6 @@ git clone https://github.com/Daeren/sockizy.git
 
 #### Index
 
-* [Start](#refStart)
 * [SSL](#refSSL)
 * [Verify](#refVerifyClient)
 * [Packets](#refPackets)
@@ -29,10 +28,6 @@ git clone https://github.com/Daeren/sockizy.git
 * [Server API](#refAPIServer)
 * [Client API](#refAPIClient)
 
-
-
-<a name="refStart"></a>
-#### Start
 
 Server:
 
