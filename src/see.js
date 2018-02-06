@@ -39,8 +39,6 @@ const SEE = (function() {
         off(type, listener) {
             const argsLen = arguments.length;
 
-            //--------------]>
-
             if(!argsLen) {
                 this._events = Object.create(null);
                 return this;
@@ -50,9 +48,14 @@ const SEE = (function() {
 
             const ev = this._events[type];
 
+            if(argsLen === 1) {
+                delete this._events[type];
+                return this;
+            }
+
             if(typeof(ev) === "function") {
-                if(argsLen === 1 || ev === listener) {
-                    this._events[type] = null;
+                if(ev === listener) {
+                    delete this._events[type];
                 }
 
                 return this;
@@ -62,29 +65,24 @@ const SEE = (function() {
 
             const evLen = ev && ev.length;
 
-            //--------------]>
-
             if(!evLen) {
                 return this;
             }
 
             //--------------]>
 
-            if(argsLen === 1) {
-                if(evLen === 1) {
-                    ev.pop();
-                }
-                else {
-                    this._events[type] = new Array();
-                }
-            }
-            else if(evLen === 1) {
+            if(evLen === 1) {
                 if(ev[0] === listener) {
-                    ev.pop();
+                    delete this._events[type];
                 }
             }
             else if(ev.indexOf(listener) >= 0) {
-                this._events[type] = this._arrayCloneWithout(ev, evLen, listener);
+                if(evLen - 1) {
+                    this._events[type] = this._arrayCloneWithout(ev, evLen, listener);
+                }
+                else {
+                    delete this._events[type];
+                }
             }
 
             //--------------]>
