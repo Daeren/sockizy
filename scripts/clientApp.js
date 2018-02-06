@@ -9,14 +9,18 @@
 
 //-----------------------------------------------------
 
-const ws = (function(WSocket, toString = require("./../src/toString"), SEE = require("./../src/see"), bPack = require("2pack")) {
+const ws = (function(WSocket, toString = require("./../src/toString"), XEE = require("xee"), bPack = require("2pack")) {
     const sysInfoPacker = bPack("uint16");
 
     //---------------]>
 
-    class Io extends SEE {
+    class Io extends XEE {
         constructor(url, options) {
             super();
+
+            //-------]>
+
+            this._emit = super.emit;
 
             //-------]>
 

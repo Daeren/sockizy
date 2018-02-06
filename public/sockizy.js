@@ -1,5 +1,7 @@
 "use strict";
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
@@ -33,15 +35,15 @@ var io = function (module) {
 
     //-----------------------------------------------------
 
-    var SEE = function () {
-        var EE = function () {
-            function EE() {
-                _classCallCheck(this, EE);
+    var EE = function () {
+        var EventEmitter = function () {
+            function EventEmitter() {
+                _classCallCheck(this, EventEmitter);
 
                 this._events = Object.create(null);
             }
 
-            _createClass(EE, [{
+            _createClass(EventEmitter, [{
                 key: "on",
                 value: function on(type, listener) {
                     var ev = this._events[type];
@@ -107,12 +109,14 @@ var io = function (module) {
                         if (ev[0] === listener) {
                             delete this._events[type];
                         }
-                    } else if (ev.indexOf(listener) >= 0) {
-                        if (evLen === 2) {
-                            this._events[type] = ev[0] === listener ? ev[1] : ev[0];
-                        } else {
-                            this._events[type] = this._arrayCloneWithout(ev, evLen, listener);
+                    } else if (evLen === 2) {
+                        if (ev[0] === listener) {
+                            this._events[type] = ev[1];
+                        } else if (ev[1] === listener) {
+                            this._events[type] = ev[0];
                         }
+                    } else if (ev.indexOf(listener) >= 0) {
+                        this._events[type] = this._arrayCloneWithout(ev, evLen, listener);
                     }
 
                     //--------------]>
@@ -120,25 +124,8 @@ var io = function (module) {
                     return this;
                 }
             }, {
-                key: "listenerCount",
-                value: function listenerCount(eventName) {
-                    var events = this._events;
-
-                    if (events) {
-                        var ev = events[eventName];
-
-                        if (typeof ev === "function") {
-                            return 1;
-                        } else if (ev) {
-                            return ev.length;
-                        }
-                    }
-
-                    return 0;
-                }
-            }, {
-                key: "_emit",
-                value: function _emit(type) {
+                key: "emit",
+                value: function emit(type) {
                     for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
                         args[_key - 1] = arguments[_key];
                     }
@@ -179,6 +166,23 @@ var io = function (module) {
                     return true;
                 }
             }, {
+                key: "listenerCount",
+                value: function listenerCount(type) {
+                    var events = this._events;
+
+                    if (events) {
+                        var ev = events[type];
+
+                        if (typeof ev === "function") {
+                            return 1;
+                        } else if (ev) {
+                            return ev.length;
+                        }
+                    }
+
+                    return 0;
+                }
+            }, {
                 key: "_arrayCloneWithout",
                 value: function _arrayCloneWithout(arr, n, listener) {
                     var copy = new Array(n - 1);
@@ -215,17 +219,17 @@ var io = function (module) {
                 }
             }]);
 
-            return EE;
+            return EventEmitter;
         }();
 
         //-----------------------]>
 
-        return EE;
+        return EventEmitter;
     }();
 
     //-----------------------------------------------------
 
-    module.exports = SEE;
+    module.exports = EE;
 
     //-----------------------------------------------------
     //
@@ -1088,15 +1092,15 @@ var io = function (module) {
 
     var ws = function ws(WSocket) {
         var toString = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : require("./../src/toString");
-        var SEE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : require("./../src/see");
+        var XEE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : require("xee");
         var bPack = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : require("2pack");
 
         var sysInfoPacker = bPack("uint16");
 
         //---------------]>
 
-        var Io = function (_SEE) {
-            _inherits(Io, _SEE);
+        var Io = function (_XEE) {
+            _inherits(Io, _XEE);
 
             function Io(url, options) {
                 _classCallCheck(this, Io);
@@ -1104,6 +1108,10 @@ var io = function (module) {
                 //-------]>
 
                 var _this = _possibleConstructorReturn(this, (Io.__proto__ || Object.getPrototypeOf(Io)).call(this));
+
+                _this._emit = _get(Io.prototype.__proto__ || Object.getPrototypeOf(Io.prototype), "emit", _this);
+
+                //-------]>
 
                 _this._reconnectionDelay = 1000 * Math.max(1, options.reconnectionDelay || 0);
                 _this._reconnectionAttempts = options.reconnectionAttempts || Infinity;
@@ -1328,7 +1336,7 @@ var io = function (module) {
             }]);
 
             return Io;
-        }(SEE);
+        }(XEE);
 
         //---------------]>
 
@@ -1524,5 +1532,5 @@ var io = function (module) {
     module.exports = ws;
 
     //# sourceMappingURL=sockizy.min.js.map
-    return ws(window.WebSocket || window.MozWebSocket, toString, SEE, bPack);
+    return ws(window.WebSocket || window.MozWebSocket, toString, EE, bPack);
 }({});

@@ -21,7 +21,7 @@ module.exports = function(grunt) {
                     sourceMapName: "public/sockizy.min.js.map"
                 },
                 src: [
-                    "src/see.js",
+                    "node_modules/xee/index.js",
                     "node_modules/2pack/index.js",
                     "src/toString.js",
                     "scripts/clientApp.js"
@@ -45,7 +45,7 @@ module.exports = function(grunt) {
                             });
                         }`,
 
-                        "return ws(window.WebSocket || window.MozWebSocket, toString, SEE, bPack); })({});"
+                        "return ws(window.WebSocket || window.MozWebSocket, toString, EE, bPack); })({});"
                     ]
                 }
             }

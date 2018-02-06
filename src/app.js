@@ -12,9 +12,9 @@
 const rUrl          = require("url");
 
 const rPacker       = require("2pack");
+const rXEE          = require("xee");
 
-const rSEE          = require("./see"),
-      rToString     = require("./toString");
+const rToString     = require("./toString");
 
 //-----------------------------------------------------
 
@@ -22,11 +22,13 @@ const sysInfoPacker = rPacker("uint16");
 
 //-----------------------------------------------------
 
-class Socket extends rSEE {
+class Socket extends rXEE {
     constructor(io, ws) {
         super();
 
         //-------]>
+
+        this._emit = super.emit;
 
         this._io = io;
         this._bind(ws);
@@ -153,11 +155,15 @@ class Socket extends rSEE {
     }
 }
 
-class Io extends rSEE {
+class Io extends rXEE {
     constructor(app, options) {
         super();
 
         Object.assign(this, app);
+
+        //----------]>
+
+        this._emit = super.emit;
 
         //----------]>
 

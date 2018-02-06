@@ -1,6 +1,6 @@
 {
     "name": "sockizy",
-    "version": "0.5.3",
+    "version": "0.5.4",
     "description": "The best choice for your games",
     "homepage": "https://666.io",
     "keywords": [
@@ -34,10 +34,12 @@
     },
     "dependencies": {
         "2pack": "^0.0.3",
+        "xee": "^0.0.1",
         "uws": "^0"
     },
     "devDependencies": {
         "2pack": "^0.0.3",
+        "xee": "^0.0.1",
         "babel-cli": "^6.18.0",
         "babel-plugin-static-fs": "^1.1.0",
         "babel-plugin-version-inline": "^1.0.0",
