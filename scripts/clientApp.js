@@ -10,8 +10,7 @@
 //-----------------------------------------------------
 
 const ws = (function(WSocket, toString = require("./../src/toString"), SEE = require("./../src/see"), bPack = require("2pack")) {
-    const sysInfoPacker = bPack("uint16"); // packetId.bytes.uint16
-    const sysInfoSize = 2;
+    const sysInfoPacker = bPack("uint16");
 
     //---------------]>
 
@@ -164,11 +163,11 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
                     const holderNew = t.shift() === "@";
 
                     const schema = data[field];
-                    const packet = bPack(schema, useHolderArray, holderNew);
+                    const packet = bPack(schema, holderNew, useHolderArray);
 
                     //-------]>
 
-                    packet.offset = sysInfoSize;
+                    packet.offset = sysInfoPacker.maxSize;
 
                     //-------]>
 

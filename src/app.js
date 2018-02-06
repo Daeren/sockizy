@@ -18,8 +18,7 @@ const rSEE          = require("./see"),
 
 //-----------------------------------------------------
 
-const sysInfoPacker = rPacker("uint16"); // packetId.bytes.uint16
-const sysInfoSize = 2;
+const sysInfoPacker = rPacker("uint16");
 
 //-----------------------------------------------------
 
@@ -264,11 +263,11 @@ class Io extends rSEE {
                 const holderNew = t.shift() === "@";
 
                 const schema = data[field];
-                const packet = rPacker(schema, useHolderArray, holderNew);
+                const packet = rPacker(schema, holderNew, useHolderArray);
 
                 //-------]>
 
-                packet.offset = sysInfoSize;
+                packet.offset = sysInfoPacker.maxSize;
 
                 //-------]>
 

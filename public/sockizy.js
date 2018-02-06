@@ -527,7 +527,7 @@ var io = function (module) {
 
         //-------------------------]>
 
-        function create(schema, dataHolderAsArray, holderRecreated) {
+        function create(schema, holderRecreated, dataHolderAsArray) {
             var TYPE_BIN = 1;
             var TYPE_STR = 2;
             var TYPE_INT = 4;
@@ -543,6 +543,25 @@ var io = function (module) {
 
             //-----------------]>
 
+            var schemaContNames = Array.isArray(schema) ? schema.some(function (e) {
+                return e.split(":").length >= 2;
+            }) : false;
+            var schemaDontContNames = Array.isArray(schema) ? schema.some(function (e) {
+                return e.split(":").length < 2;
+            }) : true;
+
+            //-----------------]>
+
+            if (schemaContNames && schemaDontContNames) {
+                throw new Error("A schema has mixed names/types");
+            }
+
+            if (schemaDontContNames) {
+                dataHolderAsArray = true;
+            }
+
+            //-----------------]>
+
             var isPrimitive = typeof schema === "string";
             var schLen = isPrimitive ? 1 : schema.length;
 
@@ -554,10 +573,12 @@ var io = function (module) {
             var pktOffset = 0,
                 pktDataHolderArr = new Array(),
                 pktDataHolderObj = Object.create(null),
-                pktMinSize = 0,
                 pktDynamicSize = false,
                 pktBufStrict = null,
-                pktBufPack = null;
+                pktBufPack = null,
+                pktBufPackLen = 0,
+                pktMinSize = 0,
+                pktMaxSize = 0;
 
             //-----------------]>
 
@@ -566,7 +587,7 @@ var io = function (module) {
 
                 //---------]>
 
-                var name = e.shift();
+                var name = e.length < 2 ? null : e.shift();
                 var subType = e.shift();
 
                 var type = getTypeId(subType.replace(/[\d\[\]]/g, ""));
@@ -586,6 +607,7 @@ var io = function (module) {
                 fields[i] = [name, type, bytes, bufType, bufBytes, bufAType, bufABytes];
 
                 pktMinSize += bytes;
+                pktMaxSize += bufType.byteLength;
 
                 if (!pktDynamicSize && type & (TYPE_BIN | TYPE_STR)) {
                     pktDynamicSize = true;
@@ -597,6 +619,13 @@ var io = function (module) {
             //-----------------]>
 
             return {
+                get minSize() {
+                    return pktMinSize;
+                },
+                get maxSize() {
+                    return pktMaxSize;
+                },
+
                 get offset() {
                     return pktOffset;
                 },
@@ -639,7 +668,7 @@ var io = function (module) {
                     bufAType = void 0,
                     bufABytes = void 0;
 
-                var input = void 0;
+                var input = data;
 
                 //--------]>
 
@@ -662,11 +691,13 @@ var io = function (module) {
                     bufABytes = _field2[6];
 
 
-                    input = isPrimitive ? data : data[isArray ? fieldIdx : name];
+                    if (!isPrimitive && data) {
+                        input = data[isArray ? fieldIdx : name];
+                    }
 
                     //------]>
 
-                    if (type & (TYPE_BIN | TYPE_STR)) {
+                    if (type & TYPE_STR || type & TYPE_BIN) {
                         if (type & TYPE_JSON) {
                             input = JSON.stringify(input);
                         }
@@ -675,7 +706,7 @@ var io = function (module) {
                             bytes += bufAType[0] = type & TYPE_BIN ? blitBuffer(input, bufType, bytes, input.byteLength) : bufType.write(input, bytes);
 
                             bufBytes = bufType;
-                            bufType._blen = bytes;
+                            bufBytes._bw = bytes;
 
                             //-----]>
 
@@ -718,16 +749,26 @@ var io = function (module) {
                 //--------]>
 
                 if (!pktBufStrict) {
-                    target = target || pktBufPack && pktBufPack.length === pktSize ? pktBufPack : pktBufPack = holyBuffer.allocUnsafe(pktSize);
+                    target = target || (pktBufPackLen === pktSize ? pktBufPack : (pktBufPack = holyBuffer.allocUnsafe(pktSize), pktBufPackLen = pktBufPack.length, pktBufPack));
 
                     fieldIdx = schLen;
                     tIdx = pktOffset;
 
                     //--------]>
 
+                    var b = void 0,
+                        _i = void 0,
+                        l = void 0;
+
                     while (fieldIdx--) {
-                        for (var b = buffers[fieldIdx], _i = 0, l = b._blen || b.length; _i < l; ++_i) {
-                            target[tIdx++] = b[_i];
+                        b = buffers[fieldIdx];
+                        _i = 0;
+                        l = b._bw || b.length;
+
+                        while (_i < l) {
+                            target[tIdx] = b[_i];
+                            ++tIdx;
+                            ++_i;
                         }
                     }
                 }
@@ -738,8 +779,8 @@ var io = function (module) {
             }
 
             function unpack(bin, offset, length, cbEndInfo, target) {
-                var asArray = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : dataHolderAsArray;
-                var asCopy = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : !holderRecreated;
+                var asCopy = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : !holderRecreated;
+                var asArray = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : dataHolderAsArray;
 
                 if (!schLen) {
                     if (cbEndInfo) {
@@ -761,6 +802,7 @@ var io = function (module) {
 
                 var field = void 0,
                     fieldIdx = schLen,
+                    curOffset = offset + pktOffset,
                     name = void 0,
                     type = void 0,
                     bytes = void 0,
@@ -768,8 +810,6 @@ var io = function (module) {
                     bufBytes = void 0,
                     bufAType = void 0,
                     bufABytes = void 0;
-
-                var curOffset = offset + pktOffset;
 
                 var pktOffsetStart = curOffset;
 
@@ -802,7 +842,7 @@ var io = function (module) {
 
                     //------]>
 
-                    if (type & (TYPE_BIN | TYPE_STR)) {
+                    if (type & TYPE_STR || type & TYPE_BIN) {
                         if (isBigEndian) {
                             bufABytes.reverse();
                         }
@@ -814,7 +854,7 @@ var io = function (module) {
                         //--------]>
 
                         if (!byteLen || byteLen >= length) {
-                            field = type & (TYPE_BIN | TYPE_JSON) ? null : "";
+                            field = type & TYPE_BIN || type & TYPE_JSON ? null : "";
                         } else {
                             var needMem = Math.min(bufType.length - bytes, length, byteLen);
                             var buf = type & TYPE_BIN ? holyBuffer.allocUnsafe(needMem) : bufType;
@@ -1045,8 +1085,7 @@ var io = function (module) {
         var SEE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : require("./../src/see");
         var bPack = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : require("2pack");
 
-        var sysInfoPacker = bPack("uint16"); // packetId.bytes.uint16
-        var sysInfoSize = 2;
+        var sysInfoPacker = bPack("uint16");
 
         //---------------]>
 
@@ -1199,11 +1238,11 @@ var io = function (module) {
                             var holderNew = t.shift() === "@";
 
                             var schema = data[field];
-                            var packet = bPack(schema, useHolderArray, holderNew);
+                            var packet = bPack(schema, holderNew, useHolderArray);
 
                             //-------]>
 
-                            packet.offset = sysInfoSize;
+                            packet.offset = sysInfoPacker.maxSize;
 
                             //-------]>
 
