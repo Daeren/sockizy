@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Sockizy: verifyClient</title>
+        <meta charset="utf-8">
+    </head>
+
+    <body></body>
+
+    <script src="http://localhost:1337"></script>
+    <script>
+        const socket = io("localhost:1337");
+
+        //-----------------------------------------------------
+
+        /*
+         https://www.w3.org/TR/websockets/#concept-websocket-close-fail
+
+         ~
+         User agents must not convey any failure information to scripts in a way that would allow a script to distinguish the following situations:
+
+         A server whose host name could not be resolved.
+         A server to which packets could not successfully be routed.
+         A server that refused the connection on the specified port.
+         A server that failed to correctly perform a TLS handshake (e.g., the server certificate can't be verified).
+         A server that did not complete the opening handshake (e.g. because it was not a WebSocket server).
+         A WebSocket server that sent a correct opening handshake, but that specified options that caused the client to drop the connection (e.g. the server specified a subprotocol that the client did not offer).
+         A WebSocket server that abruptly closed the connection after successfully completing the opening handshake.
+         In all of these cases, the the WebSocket connection close code would be 1006, as required by the WebSocket Protocol specification. [WSP]
+
+         Allowing a script to distinguish these cases would allow a script to probe the user's local network in preparation for an attack.
+        */
+
+        //-----------------------------------------------------
+
+        socket.on("close", function(code, reason, event) {
+            console.log("event: close |", code, reason, event);
+        });
+
+        socket.on("terminated", function(code) {
+            console.log("event: terminated |", code);
+        });
+
+        socket.on("error", function(error) {
+            console.log("event: error", error, error.event);
+        });
+    </script>
+</html>

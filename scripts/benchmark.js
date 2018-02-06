@@ -9,15 +9,14 @@
 
 //-----------------------------------------------------
 
-const rSee = require("./../src/see");
-
-const rEE = require("events");
+const SEE = require("./../src/see");
+const EE = require("events");
 
 //-----------------------------------------------------
 
-testEE(rEE);
+testEE(EE);
 console.log("------------------");
-testEE(rSee, true);
+testEE(SEE, true);
 console.log("------------------");
 
 //-----------------------------------------------------

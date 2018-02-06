@@ -164,7 +164,7 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
                     const holderNew = t.shift() === "@";
 
                     const schema = data[field];
-                    const packet = bPack(schema, useHolderArray, holderNew)
+                    const packet = bPack(schema, useHolderArray, holderNew);
 
                     //-------]>
 
@@ -193,7 +193,17 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
 
 
         _connect(url) {
-            const w = this._ws = new WSocket(url);
+            try {
+                this._ws = new WSocket(url);
+            }
+            catch(e) {
+                this._emit("error", e);
+                return;
+            }
+
+            //------------]>
+
+            const w = this._ws;
 
             //------------]>
 
@@ -372,7 +382,10 @@ const ws = (function(WSocket, toString = require("./../src/toString"), SEE = req
         }
     }
 
-    function wsOnError(socket, error) {
+    function wsOnError(socket, event) {
+        const error = new Error(event.message || event.data || "");
+        error.event = event;
+
         socket._emit("error", error);
     }
 

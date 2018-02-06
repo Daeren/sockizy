@@ -140,7 +140,7 @@ io.packets(
     {
         "rtt": null,
 
-        "monster": [
+        "game.monster": [
             "lvl:uint8",
             "hp:uint8"
         ]
@@ -153,7 +153,7 @@ io.packets(
             "uid:uint32",
             "text:str"
         ],
-        "hero": [
+        "game.hero": [
             "name:str32",
             "lvl:int8",
             "hp:uint8",
@@ -166,7 +166,7 @@ io.packets(
 
 // Client
 
-io.packets(
+socket.packets(
     // Pack | server.socket.on
     {
         "rtt": null
@@ -175,7 +175,7 @@ io.packets(
     // Unpack | server.socket.emit
     {
         "rtt": null,
-        "monster": [
+        "game.monster": [
             "lvl:uint8",
             "hp:uint8"
         ]
@@ -188,7 +188,7 @@ io.packets(
             "uid:uint32",
             "text:str"
         ],
-        "hero": [
+        "game.hero": [
             "name:str32",
             "lvl:int8",
             "hp:uint8",
@@ -202,21 +202,21 @@ io.packets(
 // Server
 
 io.emit("user.gold", 20);
-io.emit("monster", {lvl: 13, hp: 69});
+io.emit("game.monster", {lvl: 13, hp: 69});
 
 
 // Client
 
-io.on("monster", console.log);
+socket.on("game.monster", console.log);
 
 
 // Server or Client
 
-io.emit("rtt");
-io.emit("chat.message", [0, "Helword"]);
+socket.emit("rtt");
+socket.emit("chat.message", [0, "Helword"]);
 
-io.emit("hero", {name: "D", lvl: 13, hp: 69, x: -8, y: -8});
-io.emit("hero", ["D", 13, 69, -8, -8]);
+socket.emit("game.hero", {name: "D", lvl: 13, hp: 69, x: -8, y: -8});
+socket.emit("game.hero", ["D", 13, 69, -8, -8]);
 ```
 
 
@@ -229,32 +229,32 @@ io.packets(
     null,
     null,
     {
-        "onEv.arg.asArray.zCopy ([])": [
+        "on.arg.asArray.zCopy ([])": [
             "text:str"
         ],
-        "onEv.arg.asArray.new ([@])": [
+        "on.arg.asArray.new ([@])": [
             "text:str"
         ],
-		
-        "onEv.arg.asHashTable.zCopy.default": [
+
+        "on.arg.asHashTable.zCopy.default": [
             "text:str"
         ],
-        "onEv.arg.asHashTable.new ({@})": [
+        "on.arg.asHashTable.new ({@})": [
             "text:str"
         ]
     }
 );
 
 io.on("connection", function(socket, request) {
-    socket.on("onEv.arg.asHashTable.new", function(data) {
+    socket.on("on.arg.asHashTable.new", function(data) {
         const bd = this.bundle(true);
 
         for(let i = 0; i < 10; ++i) { 
-            bd.write("onEv.arg.asArray.zCopy", {text: `Helword: ${i}`});
+            bd.write("on.arg.asArray.zCopy", {text: `Helword: ${i}`});
         }
 
-        bd.write("onEv.arg.asArray.zCopy");
-        bd.end("onEv.arg.asArray.zCopy", ["Helword: end"]);
+        bd.write("on.arg.asArray.zCopy");
+        bd.end("on.arg.asArray.zCopy", ["Helword: end"]);
     });
 });
 ```
@@ -295,7 +295,7 @@ io.on("connection", function(socket, request) {
 |                   | -                                        |
 | ping              | default: {"interval": 10000} (ms)        |
 | clientJs          | default: true                            |
-| packets           | dependencies: clientJs(autointegration)  |
+| packets           | dependencies: clientJs;(autointegration) |
 
 
 ##### Bundle: app.bundle(), socket.bundle([isBroadcast])
@@ -339,7 +339,7 @@ io.on("connection", function(socket, request) {
 | close (socket, code, reason, wasClean) |                     |                                             |
 | packet (name, data, socket, accept)    |                     |                                             |
 | listening ()                           |                     |                                             |
-| error (data[, socket])                 |                     |                                             |
+| error (e[, socket])                    |                     |                                             |
 |                                        | **socket.property** |                                             |
 | readyState                             |                     | number (read only)                          |
 | upgradeReq                             |                     | object (read only)                          |
@@ -354,7 +354,7 @@ io.on("connection", function(socket, request) {
 | json (data[, isBroadcast])             |                     |                                             |
 | send(data[, options])                  |                     | native                                      |
 |                                        | -                   |                                             |
-| disconnect([code, reason])             |                     | code: 4000–4999	 	                     |
+| disconnect([code, reason])             |                     | code: 4000–4999                             |
 | terminate()                            |                     |                                             |
 |                                        | -                   |                                             |
 | ping([message])                        |                     |                                             |
@@ -366,7 +366,7 @@ io.on("connection", function(socket, request) {
 | close (code, reason, wasClean)         |                     |                                             |
 | disconnected (code, reason)            |                     |                                             |
 | terminated (code)                      |                     |                                             |
-| error (data)                           |                     |                                             |
+| error (e)                              |                     |                                             |
 |                                        | -                   |                                             |
 | message (data)                         |                     |                                             |
 | text (data)                            |                     |                                             |
@@ -429,7 +429,7 @@ io.on("connection", function(socket, request) {
 | json (data, event)                   |                  |                                             |
 | arraybuffer (data, event)            |                  | intercepts and blocks unpacking of packets  |
 | packet (name, data, accept)          |                  |                                             |
-| error (data)                         |                  |                                             |
+| error (e)                            |                  |                                             |
 |                                      | -                |                                             |
 | *myEvent* (data)                     |                  |                                             |
 

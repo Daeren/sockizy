@@ -11,7 +11,7 @@
 
 const rUrl          = require("url");
 
-const rPacker       = require("2pack")
+const rPacker       = require("2pack");
 
 const rSEE          = require("./see"),
       rToString     = require("./toString");
@@ -264,7 +264,7 @@ class Io extends rSEE {
                 const holderNew = t.shift() === "@";
 
                 const schema = data[field];
-                const packet = rPacker(schema, useHolderArray, holderNew)
+                const packet = rPacker(schema, useHolderArray, holderNew);
 
                 //-------]>
 

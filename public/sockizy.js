@@ -1199,11 +1199,11 @@ var io = function (module) {
                             var holderNew = t.shift() === "@";
 
                             var schema = data[field];
-                            var packet = bPack(schema, useHolderArray, holderNew
+                            var packet = bPack(schema, useHolderArray, holderNew);
 
                             //-------]>
 
-                            );packet.offset = sysInfoSize;
+                            packet.offset = sysInfoSize;
 
                             //-------]>
 
@@ -1225,7 +1225,16 @@ var io = function (module) {
             }, {
                 key: "_connect",
                 value: function _connect(url) {
-                    var w = this._ws = new WSocket(url);
+                    try {
+                        this._ws = new WSocket(url);
+                    } catch (e) {
+                        this._emit("error", e);
+                        return;
+                    }
+
+                    //------------]>
+
+                    var w = this._ws;
 
                     //------------]>
 
@@ -1435,7 +1444,10 @@ var io = function (module) {
             }
         }
 
-        function wsOnError(socket, error) {
+        function wsOnError(socket, event) {
+            var error = new Error(event.message || event.data || "");
+            error.event = event;
+
             socket._emit("error", error);
         }
 
