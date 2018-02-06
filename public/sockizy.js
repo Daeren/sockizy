@@ -58,8 +58,12 @@ var io = function (module) {
                 key: "once",
                 value: function once(type, listener) {
                     return this.on(type, function ls() {
-                        this.off(type, ls);
-                        listener.apply(this, arguments);
+                        if (!ls.fired) {
+                            this.off(type, ls);
+                            ls.fired = true;
+
+                            listener.apply(this, arguments);
+                        }
                     });
                 }
             }, {
@@ -104,10 +108,10 @@ var io = function (module) {
                             delete this._events[type];
                         }
                     } else if (ev.indexOf(listener) >= 0) {
-                        if (evLen - 1) {
-                            this._events[type] = this._arrayCloneWithout(ev, evLen, listener);
+                        if (evLen === 2) {
+                            this._events[type] = ev[0] === listener ? ev[1] : ev[0];
                         } else {
-                            delete this._events[type];
+                            this._events[type] = this._arrayCloneWithout(ev, evLen, listener);
                         }
                     }
 
@@ -180,12 +184,15 @@ var io = function (module) {
                     var copy = new Array(n - 1);
 
                     var t = void 0,
-                        i = 0;
+                        i = 0,
+                        r = false;
 
                     while (n--) {
                         t = arr[n];
 
-                        if (listener !== t) {
+                        if (!r && listener === t) {
+                            r = true;
+                        } else {
                             copy[i] = t;
                             ++i;
                         }

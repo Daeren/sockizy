@@ -35,6 +35,57 @@ describe("SEE", function() {
 
     //-----------------]>
 
+    it("listenerCount", function() {
+        const ee = new rSee();
+
+
+        function fNope() {}
+        function fNope2() {}
+
+
+        ee.on("msg", fNope);
+        ee.off("msg", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(0);
+
+
+        ee.on("msg", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(1);
+
+
+        ee.on("msg", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
+
+
+        ee.on("msg", fNope2);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(3);
+
+
+        ee.off("msg", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
+
+
+        ee.off("msg", fNope2);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(1);
+
+
+        ee.on("msg", fNope);
+        ee.on("msg", fNope);
+        ee.on("msg", fNope2);
+        ee.on("msg", fNope2);
+
+        ee.on("msgX", fNope);
+
+        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(5);
+    });
+
+    //-----------------]>
+
     it("on: x1", function(done) {
         const ee = new rSee();
 
@@ -100,9 +151,7 @@ describe("SEE", function() {
                 expect(arguments[i]).to.be.a("number").and.equal(i + 1);
             }
 
-            if(t === 1) {
-                done();
-            }
+            expect(t).to.be.a("number").and.equal(1);
         });
 
         ee.once("once.msg", function() {
@@ -116,6 +165,38 @@ describe("SEE", function() {
         ee._emit("once.msg", 1, 2, 3, 4, 5, 6);
         ee._emit("once.msg", 1, 2, 3, 4, 5, 6);
         ee._emit("on.msg", 1, 2, 3, 4, 5, 6);
+
+        //------]>
+
+        ee.once("x", nope);
+        ee.once("x", nope);
+        ee.once("x", nope);
+        ee.once("x", nope);
+
+        let countL = ee.listenerCount("x");
+
+        expect(countL).to.be.a("number").and.equal(4);
+
+        expect(ee._emit("x", 1)).to.be.a("boolean").and.equal(true);
+        expect(ee.listenerCount("x")).to.be.a("number").and.equal(0);
+
+        //------]>
+
+        done();
+
+        //------]>
+
+        function nope(v) {
+            countL--;
+            expect(countL).to.be.a("number").and.equal(ee.listenerCount("x"));
+
+            if(v !== 2) {
+                expect(ee._emit("x", v + 1)).to.be.a("boolean").and.equal(true);
+            }
+            else {
+                expect(v).to.be.a("number").and.equal(2);
+            }
+        }
     });
 
     //-----------------]>
@@ -165,55 +246,6 @@ describe("SEE", function() {
             });
         });
         ee._emit("msg");
-    });
-
-    it("listenerCount", function() {
-        const ee = new rSee();
-
-
-        function fNope() {}
-        function fNope2() {}
-
-
-        ee.on("msg", fNope);
-        ee.off("msg", fNope);
-
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(0);
-
-
-        ee.on("msg", fNope);
-
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(1);
-
-
-        ee.on("msg", fNope);
-
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
-
-
-        ee.on("msg", fNope2);
-
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(3);
-
-
-        ee.off("msg", fNope);
-
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(2);
-
-
-        ee.off("msg", fNope2);
-
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(1);
-
-
-        ee.on("msg", fNope);
-        ee.on("msg", fNope);
-        ee.on("msg", fNope2);
-        ee.on("msg", fNope2);
-
-        ee.on("msgX", fNope);
-
-        expect(ee.listenerCount("msg")).to.be.a("number").and.equal(5);
     });
 
 });
