@@ -414,8 +414,8 @@ function main(app, options) {
 
             //-----------]>
 
-            if(!tBufData || tBufData.buffer.byteLength !== dataByteLength) {
-                tBufData = new Uint8Array(data);
+            if(!tBufData || tBufData.byteLength !== dataByteLength) {
+                tBufData = Buffer.from(data);
             }
 
             //-----------]>

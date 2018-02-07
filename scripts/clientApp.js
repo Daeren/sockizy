@@ -290,13 +290,12 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
 
         const dataByteLength = data.byteLength;
 
-        let offset  = 0,
-            pkt     = data;
+        let offset = 0;
 
         //-----------]>
 
         while(offset < dataByteLength) {
-            const pktId = sysInfoPacker.unpack(pkt, offset, dataByteLength);
+            const pktId = sysInfoPacker.unpack(data, offset, dataByteLength);
             const pktSchema = socket._unpackMapById[pktId];
 
             //-----------]>
@@ -308,7 +307,7 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
             //-----------]>
 
             const [name, srz] = pktSchema;
-            const message = srz.unpack(pkt, offset, dataByteLength, cbMoveOffset);
+            const message = srz.unpack(data, offset, dataByteLength, cbMoveOffset);
 
             //-----------]>
 

@@ -420,7 +420,7 @@ io.on("connection", function(socket, request) {
 | unrestored (attempts)                |                  |                                             |
 |                                      | -                |                                             |
 | open ()                              |                  |                                             |
-| close (code, reason, event)          |                  |                                             |
+| close (code, reason, event)          |                  | code: 1003 - invalid packet                 |
 | disconnected (code, reason, event)   |                  |                                             |
 | terminated (code, event)             |                  |                                             |
 |                                      | -                |                                             |

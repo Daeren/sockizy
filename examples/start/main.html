@@ -27,8 +27,12 @@
             console.log("event: terminated");
         });
 
-        socket.on("error", function() {
-            console.log("event: error");
+        socket.on("close", function(code, reason) {
+            console.log("event: close", code, reason);
+        });
+
+        socket.on("error", function(e) {
+            console.log("event: error", e);
         });
 
         //---------------)>
