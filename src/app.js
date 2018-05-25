@@ -114,6 +114,7 @@ class Socket extends rXEE {
     send(data, options = this._io._msgOptions) {
         this._ws.send(data, options, (e) => {
             if(e) {
+                this._emit("error", e);
                 this._io._emit("error", e, this);
             }
         });
@@ -145,13 +146,13 @@ class Socket extends rXEE {
 
         //-----------]>
 
-        const _s = ws._socket;
+        const {remotePort, remoteAddress, remoteFamily} = ws._socket;
 
         //-----------]>
 
-        this.remotePort = _s.remotePort;
-        this.remoteAddress = _s.remoteAddress;
-        this.remoteFamily = _s.remoteFamily;
+        this.remotePort = remotePort;
+        this.remoteAddress = remoteAddress;
+        this.remoteFamily = remoteFamily;
     }
 }
 
@@ -361,10 +362,6 @@ function main(app, options) {
 
     //-----------------]>
 
-    if(io.isMaster) {
-        return io;
-    }
-
     app.wss.on("connection", function(ws) {
         const {upgradeReq} = ws;
         const {query} = rUrl.parse(upgradeReq.url, true);
@@ -374,8 +371,8 @@ function main(app, options) {
 
         //-----------------]>
 
-        let socket = cidValid ? releaseSR(cid) : null,
-            tBufData;
+        let socket = cidValid ? releaseSR(cid) : null;
+        let tBufData;
 
         //-----------------]>
 

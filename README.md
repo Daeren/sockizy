@@ -354,7 +354,7 @@ io.on("connection", function(socket, request) {
 | json (data[, isBroadcast])             |                     |                                             |
 | send(data[, options])                  |                     | native                                      |
 |                                        | -                   |                                             |
-| disconnect([code, reason])             |                     | code: 4000–4999                             |
+| disconnect([code, reason])             |                     | code: 4000-4999                             |
 | terminate()                            |                     |                                             |
 |                                        | -                   |                                             |
 | ping([message])                        |                     |                                             |
@@ -407,7 +407,7 @@ io.on("connection", function(socket, request) {
 | json(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |
 |                                      | -                |                                             |
-| disconnect(code, reason)             |                  | code: 4000–4999                             |
+| disconnect(code, reason)             |                  | code: 4000-4999                             |
 |                                      | -                |                                             |
 | packets([pack, unpack, shared])      |                  | return this;                                |
 |                                      | -                |                                             |
