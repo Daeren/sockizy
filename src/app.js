@@ -372,7 +372,6 @@ function main(app, options) {
         //-----------------]>
 
         let socket = cidValid ? releaseSR(cid) : null;
-        let tBufData;
 
         //-----------------]>
 
@@ -408,16 +407,11 @@ function main(app, options) {
             //-----------]>
 
             const dataByteLength = data.byteLength;
+            data = Buffer.from(data);
 
             //-----------]>
 
-            if(!tBufData || tBufData.byteLength !== dataByteLength) {
-                tBufData = Buffer.from(data);
-            }
-
-            //-----------]>
-
-            const pktId = sysInfoPacker.unpack(tBufData, 0, dataByteLength);
+            const pktId = sysInfoPacker.unpack(data, 0, dataByteLength);
             const pktSchema = io._unpackMapById[pktId];
 
             //-----------]>
@@ -425,7 +419,7 @@ function main(app, options) {
             if(pktSchema) {
                 const [name, srz] = pktSchema;
 
-                data = srz.unpack(tBufData, 0, dataByteLength);
+                data = srz.unpack(data, 0, dataByteLength);
 
                 if(typeof(data) !== "undefined") {
                     if(io.listenerCount("packet")) {
