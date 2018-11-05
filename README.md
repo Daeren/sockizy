@@ -14,6 +14,9 @@ git clone https://github.com/Daeren/sockizy.git
 
 
 #### Goals:
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3307552f95d34748bf5a7b573f5815d8)](https://app.codacy.com/app/daeren/sockizy?utm_source=github.com&utm_medium=referral&utm_content=Daeren/sockizy&utm_campaign=Badge_Grade_Dashboard)
+
 1. Low memory usage;
 2. Maximum performance;
 3. Flexibility;
