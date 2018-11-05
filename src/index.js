@@ -18,7 +18,7 @@ const https = require("https");
 
 const uws = require("uws");
 
-const IoApp = require("./app");
+const ioApp = require("./app");
 
 //-----------------------------------------------------
 
@@ -176,7 +176,7 @@ function main(port, options) {
 
     //--------------------------------]>
 
-    const app = IoApp({
+    const app = ioApp({
         wss,
         "listen": !options.port && ((...a) => (options.server.listen(...(a.length ? a : [1337, "localhost"])), app))
     }, options);
