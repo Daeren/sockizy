@@ -9,20 +9,18 @@
 
 //-----------------------------------------------------
 
-const rUrl          = require("url");
+const bPack = require("2pack");
+const XEE = require("xee");
 
-const rPacker       = require("2pack");
-const rXEE          = require("xee");
-
-const rToString     = require("./toString");
+const toString = require("./toString");
 
 //-----------------------------------------------------
 
-const sysInfoPacker = rPacker("uint16");
+const sysInfoHeader = bPack("uint16");
 
 //-----------------------------------------------------
 
-class Socket extends rXEE {
+class Socket extends XEE {
     constructor(io, ws) {
         super();
 
@@ -98,7 +96,7 @@ class Socket extends rXEE {
             this._io.text(data);
         }
             else {
-            this.send(rToString(data), null);
+            this.send(toString(data), null);
         }
     }
 
@@ -115,7 +113,6 @@ class Socket extends rXEE {
         this._ws.send(data, options, (e) => {
             if(e) {
                 this._emit("error", e);
-                this._io._emit("error", e, this);
             }
         });
     }
@@ -156,7 +153,7 @@ class Socket extends rXEE {
     }
 }
 
-class Io extends rXEE {
+class Io extends XEE {
     constructor(app, options) {
         super();
 
@@ -175,7 +172,6 @@ class Io extends rXEE {
         this._srv = options.server;
         this._isNtSrv = options.isNtSrv;
 
-        this._restoreTimeout = options.restoreTimeout;
         this._verifyClient = options.verifyClient;
 
         this._packMapByName = new Map();
@@ -217,7 +213,7 @@ class Io extends rXEE {
     }
 
     text(data) {
-        this.broadcast(rToString(data), null);
+        this.broadcast(toString(data), null);
     }
 
     json(data) {
@@ -270,11 +266,11 @@ class Io extends rXEE {
                 const holderNew = t.shift() === "@";
 
                 const schema = data[field];
-                const packet = rPacker(schema, holderNew, useHolderArray);
+                const packet = bPack(schema, holderNew, useHolderArray);
 
                 //-------]>
 
-                packet.offset = sysInfoPacker.maxSize;
+                packet.offset = sysInfoHeader.maxSize;
 
                 //-------]>
 
@@ -346,7 +342,7 @@ class Io extends rXEE {
 
         if(pk) {
             const [id, srz] = pk;
-            return sysInfoPacker.pack(id, srz.pack(data));
+            return sysInfoHeader.pack(id, srz.pack(data));
 
         }
 
@@ -358,20 +354,12 @@ class Io extends rXEE {
 
 function main(app, options) {
     const io = new Io(app, options);
-    const socketsRestoringMap = Object.create(null);
 
     //-----------------]>
 
     app.wss.on("connection", function(ws) {
         const {upgradeReq} = ws;
-        const {query} = rUrl.parse(upgradeReq.url, true);
-
-        const cid = query.id;
-        const cidValid = typeof(cid) === "string" && cid.length === 36;
-
-        //-----------------]>
-
-        let socket = cidValid ? releaseSR(cid) : null;
+        const socket = new Socket(io, ws);
 
         //-----------------]>
 
@@ -411,7 +399,7 @@ function main(app, options) {
 
             //-----------]>
 
-            const pktId = sysInfoPacker.unpack(data, 0, dataByteLength);
+            const pktId = sysInfoHeader.unpack(data, 0, dataByteLength);
             const pktSchema = io._unpackMapById[pktId];
 
             //-----------]>
@@ -451,30 +439,14 @@ function main(app, options) {
 
             if(wasClean) {
                 socket._emit("disconnected", code, reason);
-                io._emit("offline", socket);
             }
             else {
                 socket._emit("terminated", code);
-
-                //-----]>
-
-                const timeout = io._restoreTimeout;
-
-                if(!_terminated && timeout && cidValid && code === 1006) {
-                    ws.removeAllListeners();
-
-                    socketsRestoringMap[cid] = socket;
-                    socket._rtm = setTimeout(releaseSR, timeout, cid, timeout);
-                }
-                else {
-                    io._emit("offline", socket);
-                }
             }
         });
 
         ws.on("error", function(error) {
             socket._emit("error", error);
-            io._emit("error", error, socket);
         });
 
         ws.on("ping", function(data) {
@@ -487,22 +459,11 @@ function main(app, options) {
 
         //-----------------]>
 
-        if(socket) {
-            socket._bind(ws);
-
-            io._emit("restored", socket, upgradeReq);
-        }
-        else {
-            socket = new Socket(io, ws);
-
-            io._emit("connection", socket, upgradeReq);
-        }
-
-        io._emit("online", socket, upgradeReq);
+        io._emit("connection", socket, upgradeReq);
     });
 
     app.wss.on("error", function(error) {
-        io._emit("error", error, null);
+        io._emit("error", error);
     });
 
     app.wss.on("listening", function() {
@@ -512,24 +473,6 @@ function main(app, options) {
     //-----------------]>
 
     return io;
-
-    //-----------------]>
-
-    function releaseSR(cid, timeout) {
-        const s = socketsRestoringMap[cid];
-
-        if(s) {
-            delete socketsRestoringMap[cid];
-            clearTimeout(s._rtm);
-
-            if(timeout) {
-                io._emit("unrestored", s, timeout);
-                io._emit("offline", s);
-            }
-        }
-
-        return s;
-    }
 }
 
 //-----------------------------------------------------

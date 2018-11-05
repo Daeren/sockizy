@@ -29,10 +29,12 @@ const io = sockizy({
 //-----------------------------------------------------
 
 io.on("connection", function(socket, request) {
+    console.log("event: connection");
+		
     socket.on("chat.message", function(data) {
-        console.log("event: chat.message");
+        const exist = this.emit("chat.message", [13, "Hello"]);
 
-        this.emit("chat.message", [13, "Hello"]);
+        console.log("event: chat.message | ", true);
     });
 });
 

@@ -10,7 +10,7 @@
 //-----------------------------------------------------
 
 const ws = (function(WSocket, toString = require("./../src/toString"), XEE = require("xee"), bPack = require("2pack")) {
-    const sysInfoPacker = bPack("uint16");
+    const sysInfoHeader = bPack("uint16");
 
     //---------------]>
 
@@ -30,7 +30,6 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
 
             this._packMapByName = new Map();
             this._unpackMapById = new Array();
-            this._id = genId();
 
             //-------]>
 
@@ -62,7 +61,7 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
 
                 //------------]>
 
-                this._connect((secure ? "wss" : "ws") + "://" + wsUrl + "/?id=" + this._id);
+                this._connect((secure ? "wss" : "ws") + "://" + wsUrl);
             }
         }
 
@@ -72,7 +71,7 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
         }
 
         get readyState() {
-            return this._ws && this._ws.readyState || this.CLOSED;
+            return this._ws ? this._ws.readyState : this.CLOSED;
         }
 
         get url() {
@@ -101,8 +100,6 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
         send(data) {
             const st = this.readyState;
 
-            let error;
-
             //------------]>
 
             try {
@@ -110,14 +107,10 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
                     this._ws.send(data);
                 }
                 else {
-                    error = new Error("WebSocket is already in CLOSING or CLOSED state.");
+                    throw new Error("WebSocket is already in CLOSING or CLOSED state.");
                 }
             } catch(e) {
-                error = e;
-            }
-
-            if(error) {
-                this._emit("error", error);
+                this._emit("error", e);
             }
         }
 
@@ -171,7 +164,7 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
 
                     //-------]>
 
-                    packet.offset = sysInfoPacker.maxSize;
+                    packet.offset = sysInfoHeader.maxSize;
 
                     //-------]>
 
@@ -227,7 +220,7 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
 
             if(pk) {
                 const [id, srz] = pk;
-                return sysInfoPacker.pack(id, srz.pack(data));
+                return sysInfoHeader.pack(id, srz.pack(data));
 
             }
 
@@ -295,7 +288,7 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
         //-----------]>
 
         while(offset < dataByteLength) {
-            const pktId = sysInfoPacker.unpack(data, offset, dataByteLength);
+            const pktId = sysInfoHeader.unpack(data, offset, dataByteLength);
             const pktSchema = socket._unpackMapById[pktId];
 
             //-----------]>
@@ -389,26 +382,6 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
         error.event = event;
 
         socket._emit("error", error);
-    }
-
-    //--------)>
-
-    function genId() {
-        return typeof(crypto) === "undefined" ? guid() : uuidv4();
-
-        //----------]>
-
-        function guid() {
-            return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
-
-            function s4() {
-                return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-            }
-        }
-
-        function uuidv4() {
-            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c) => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
-        }
     }
 });
 

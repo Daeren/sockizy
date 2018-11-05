@@ -10,6 +10,7 @@ git clone https://github.com/Daeren/sockizy.git
 * Relative and absolute zero-copy operations wherever possible
 * [Throttle][4]
 * [FileUpload][3]
+* IE11
 
 
 #### Goals:
@@ -268,12 +269,12 @@ io.on("connection", function(socket, request) {
 | Name                | Alias   | Note                                                             |
 |---------------------|---------|------------------------------------------------------------------|
 |                     | -       |                                                                  |
-| bin<size (byte)>    | b       | default: max 1024 (0-65535); server: Buffer; client: Uint8Array; |
-| str<size (byte)>    | s       | default: max 256 (0-65535)                                       |
+| bin<size (byte)>    | b       | default: 1024 (0-65535); server: Buffer; client: Uint8Array;     |
+| str<size (byte)>    | s       | default: 256 (0-65535)                                           |
 | int<size (bit)>     | i       | size: 8, 16, 32                                                  |
 | uint<size (bit)>    | u       | size: 8, 16, 32                                                  |
 | float<size (bit)>   | f       | size: 32, 64                                                     |
-| json<size (byte)>   | j       | default: max 8192 (0-65535)                                      |
+| json<size (byte)>   | j       | default: 8192 (0-65535)                                          |
 
 
 ##### Server options
@@ -291,7 +292,6 @@ io.on("connection", function(socket, request) {
 | maxPayload        | default: 1024 * 32                       |
 | perMessageDeflate | default: false                           |
 | noDelay           | default: true                            |
-| restoreTimeout    | default: 0 (off)                         |
 |                   | -                                        |
 | ping              | default: {"interval": 10000} (ms)        |
 | clientJs          | default: true                            |
@@ -329,17 +329,11 @@ io.on("connection", function(socket, request) {
 | on(name, listener)                     |                     | return this;                                |
 | off([name, listener])                  |                     | return this;                                |
 |                                        | **app.events**      |                                             |
-| online (socket)                        |                     |                                             |
-| offline (socket)                       |                     |                                             |
-|                                        | -                   |                                             |
-| restored (socket, request)             |                     |                                             |
-| unrestored (socket, timeout)           |                     |                                             |
-|                                        | -                   |                                             |
 | connection (socket, request)           |                     |                                             |
 | close (socket, code, reason, wasClean) |                     |                                             |
 | packet (name, data, socket, accept)    |                     |                                             |
 | listening ()                           |                     |                                             |
-| error (e[, socket])                    |                     |                                             |
+| error (e)                              |                     |                                             |
 |                                        | **socket.property** |                                             |
 | readyState                             |                     | number (read only)                          |
 | upgradeReq                             |                     | object (read only)                          |

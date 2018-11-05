@@ -21,7 +21,58 @@ var io = function (module) {
 
     if (!Uint8Array.prototype.slice) {
         Object.defineProperty(Uint8Array.prototype, "slice", {
-            "value": Array.prototype.slice
+            "value": function value(begin, end) {
+                //If 'begin' is unspecified, Chrome assumes 0, so we do the same
+                if (begin === void 0) {
+                    begin = 0;
+                }
+
+                //If 'end' is unspecified, the new ArrayBuffer contains all
+                //bytes from 'begin' to the end of this ArrayBuffer.
+                if (end === void 0) {
+                    end = this.byteLength;
+                }
+
+                //Chrome converts the values to integers via flooring
+                begin = Math.floor(begin);
+                end = Math.floor(end);
+
+                //If either 'begin' or 'end' is negative, it refers to an
+                //index from the end of the array, as opposed to from the beginning.
+                if (begin < 0) {
+                    begin += this.byteLength;
+                }
+                if (end < 0) {
+                    end += this.byteLength;
+                }
+
+                //The range specified by the 'begin' and 'end' values is clamped to the 
+                //valid index range for the current array.
+                begin = Math.min(Math.max(0, begin), this.byteLength);
+                end = Math.min(Math.max(0, end), this.byteLength);
+
+                //If the computed length of the new ArrayBuffer would be negative, it 
+                //is clamped to zero.
+                if (end - begin <= 0) {
+                    return new ArrayBuffer(0);
+                }
+
+                var len = end - begin;
+
+                var result = new ArrayBuffer(len);
+                var resultBytes = new Uint8Array(result);
+                var sourceBytes = new Uint8Array(this, begin, len);
+
+                while (len--) {
+                    resultBytes[len] = sourceBytes[len];
+                }
+
+                // some problems with IE11
+                //resultBytes.set(sourceBytes);
+
+                return resultBytes;
+            }
+
         });
     }
     //-----------------------------------------------------
@@ -1043,7 +1094,7 @@ var io = function (module) {
             case "boolean":
                 return data ? "true" : "false";
             case "number":
-                return isNaN(data) ? "" : data + "";
+                return isNaN(data) ? "" : data.toString();
             case "symbol":
                 return data.toString();
 
@@ -1067,7 +1118,7 @@ var io = function (module) {
         var XEE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : require("xee");
         var bPack = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : require("2pack");
 
-        var sysInfoPacker = bPack("uint16");
+        var sysInfoHeader = bPack("uint16");
 
         //---------------]>
 
@@ -1091,7 +1142,6 @@ var io = function (module) {
 
                 _this._packMapByName = new Map();
                 _this._unpackMapById = new Array();
-                _this._id = genId();
 
                 //-------]>
 
@@ -1123,7 +1173,7 @@ var io = function (module) {
 
                     //------------]>
 
-                    _this._connect((secure ? "wss" : "ws") + "://" + wsUrl + "/?id=" + _this._id);
+                    _this._connect((secure ? "wss" : "ws") + "://" + wsUrl);
                 }
                 return _this;
             }
@@ -1154,22 +1204,16 @@ var io = function (module) {
                 value: function send(data) {
                     var st = this.readyState;
 
-                    var error = void 0;
-
                     //------------]>
 
                     try {
                         if (st !== this.CLOSING && st !== this.CLOSED) {
                             this._ws.send(data);
                         } else {
-                            error = new Error("WebSocket is already in CLOSING or CLOSED state.");
+                            throw new Error("WebSocket is already in CLOSING or CLOSED state.");
                         }
                     } catch (e) {
-                        error = e;
-                    }
-
-                    if (error) {
-                        this._emit("error", error);
+                        this._emit("error", e);
                     }
                 }
             }, {
@@ -1228,7 +1272,7 @@ var io = function (module) {
 
                             //-------]>
 
-                            packet.offset = sysInfoPacker.maxSize;
+                            packet.offset = sysInfoHeader.maxSize;
 
                             //-------]>
 
@@ -1285,7 +1329,7 @@ var io = function (module) {
                             id = _pk[0],
                             srz = _pk[1];
 
-                        return sysInfoPacker.pack(id, srz.pack(data));
+                        return sysInfoHeader.pack(id, srz.pack(data));
                     }
 
                     return null;
@@ -1298,7 +1342,7 @@ var io = function (module) {
             }, {
                 key: "readyState",
                 get: function get() {
-                    return this._ws && this._ws.readyState || this.CLOSED;
+                    return this._ws ? this._ws.readyState : this.CLOSED;
                 }
             }, {
                 key: "url",
@@ -1370,7 +1414,7 @@ var io = function (module) {
             //-----------]>
 
             var _loop = function _loop() {
-                var pktId = sysInfoPacker.unpack(data, offset, dataByteLength);
+                var pktId = sysInfoHeader.unpack(data, offset, dataByteLength);
                 var pktSchema = socket._unpackMapById[pktId];
 
                 //-----------]>
@@ -1473,28 +1517,6 @@ var io = function (module) {
             error.event = event;
 
             socket._emit("error", error);
-        }
-
-        //--------)>
-
-        function genId() {
-            return typeof crypto === "undefined" ? guid() : uuidv4();
-
-            //----------]>
-
-            function guid() {
-                return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
-
-                function s4() {
-                    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-                }
-            }
-
-            function uuidv4() {
-                return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (c) {
-                    return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
-                });
-            }
         }
     };
 

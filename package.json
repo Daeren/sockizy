@@ -1,6 +1,6 @@
 {
     "name": "sockizy",
-    "version": "0.5.7",
+    "version": "1.0.0",
     "description": "The best choice for your games",
     "homepage": "https://666.io",
     "keywords": [
@@ -34,7 +34,7 @@
     },
     "dependencies": {
         "2pack": "^0.0.4",
-        "uws": "^10.148.0",
+        "uws": "10.148.1",
         "xee": "^0.0.1"
     },
     "devDependencies": {

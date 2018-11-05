@@ -9,16 +9,16 @@
 
 //-----------------------------------------------------
 
-const rOs       = require("os"),
-      rFs       = require("fs"),
-      rPath     = require("path"),
-      rZlib     = require("zlib"),
-      rHttp     = require("http"),
-      rHttps    = require("https");
+const fs = require("fs");
+const path = require("path");
+const zlib = require("zlib");
 
-const rUws      = require("uws");
+const http = require("http");
+const https = require("https");
 
-const rApp      = require("./app");
+const uws = require("uws");
+
+const IoApp = require("./app");
 
 //-----------------------------------------------------
 
@@ -30,7 +30,9 @@ function main(port, options) {
 
     //-------------]>
 
-    options = Object.assign({}, options || {});
+    options = {
+        ...(options || {})
+    };
 
     options.port = port;
     options.path = options.path || "";
@@ -40,9 +42,8 @@ function main(port, options) {
 
     options.maxPayload = options.maxPayload || (1024 * 32);
     options.noDelay = typeof(options.noDelay) === "undefined" ? true : !!options.noDelay;
-    options.restoreTimeout = 1000 * (typeof(options.restoreTimeout) === "undefined" ? 0 : (parseInt(options.restoreTimeout, 10) || 0));
     options.binary = true;
-    options.packets = Array.isArray(options.packets) ? options.packets : [];
+    options.packets = [...(Array.isArray(options.packets) ? options.packets : [])];
 
     options.verifyClient = (function verifyClient(info, callback) {
         const func = verifyClient.func;
@@ -66,15 +67,13 @@ function main(port, options) {
 
     const sendClientLib = (function() {
         if(!options.clientJs) {
-            return function(request, response) {
-                response.end();
-            };
+            return (request, response) => response.end();
         }
 
         //--------------------]>
 
         const zlibOptions = {
-            "level": rZlib.Z_BEST_COMPRESSION
+            "level": zlib.Z_BEST_COMPRESSION
         };
 
         const objDeflate = {
@@ -90,10 +89,10 @@ function main(port, options) {
         const reDeflate = /\bdeflate\b/;
         const reGzip = /\bgzip\b/;
 
-        const lib = rFs.readFileSync(`${__dirname}/../public/sockizy.min.js`) + `\r\n(io.__staticPackets=${JSON.stringify(options.packets)});`;
+        const lib = fs.readFileSync(`${__dirname}/../public/sockizy.min.js`) + `\r\n(io.__staticPackets=${JSON.stringify(options.packets)});`;
 
-        const libDeflate = rZlib.deflateSync(lib, zlibOptions);
-        const libGzip = rZlib.gzipSync(lib, zlibOptions);
+        const libDeflate = zlib.deflateSync(lib, zlibOptions);
+        const libGzip = zlib.gzipSync(lib, zlibOptions);
 
         let data, acceptEncoding;
 
@@ -122,29 +121,31 @@ function main(port, options) {
 
     if(!options.server) {
         if(options.ssl) {
-            const ssl = Object.assign({
+            const ssl = {
                 "honorCipherOrder":     true,
                 "requestCert":          true,
-                "rejectUnauthorized":   false
-            }, options.ssl);
+                "rejectUnauthorized":   false,
+
+                ...options.ssl
+            };
 
             //---------]>
 
             const certDir = ssl.dir || "";
 
-            const optKey  = ssl.key && rFs.readFileSync(rPath.join(certDir, ssl.key));
-            const optCert = ssl.cert && rFs.readFileSync(rPath.join(certDir, ssl.cert));
+            const optKey  = ssl.key && fs.readFileSync(path.join(certDir, ssl.key));
+            const optCert = ssl.cert && fs.readFileSync(path.join(certDir, ssl.cert));
 
-            let optCa     = ssl.ca;
+            let optCa = ssl.ca;
 
             //---------]>
 
             if(optCa) {
                 if(Array.isArray(optCa)) {
-                    optCa = optCa.map((e) => rFs.readFileSync(rPath.join(certDir, e)));
+                    optCa = optCa.map((e) => fs.readFileSync(path.join(certDir, e)));
                 }
                 else if(typeof(optCa) === "string") {
-                    optCa = rPath.join(certDir, optCa);
+                    optCa = path.join(certDir, optCa);
                 }
             }
 
@@ -154,20 +155,20 @@ function main(port, options) {
 
             //---------]>
 
-            options.server = rHttps.createServer(ssl, sendClientLib);
+            options.server = https.createServer(ssl, sendClientLib);
         }
         else {
-            options.server = rHttp.createServer(sendClientLib);
+            options.server = http.createServer(sendClientLib);
         }
     }
 
-    options.isNtSrv = options.server instanceof(rHttp.Server) || options.server instanceof(rHttps.Server);
+    options.isNtSrv = options.server instanceof(http.Server) || options.server instanceof(https.Server);
 
     //-------------]>
 
-    const wss = new rUws.Server(options);
+    const wss = new uws.Server(options);
 
-    //--------------------------------]>
+    //-------------]>
 
     if(options.ping && options.ping.interval > 0 && wss.startAutoPing) {
         wss.startAutoPing(Math.max(options.ping.interval, parseInt(1000 / 30)), options.ping.message);
@@ -175,46 +176,14 @@ function main(port, options) {
 
     //--------------------------------]>
 
-    const appParams = {wss};
-
-    let app = null;
-
-    //-------------]>
-
-    if(!options.port) {
-        appParams.listen = function() {
-            if(arguments.length) {
-                const func = arguments[2];
-
-                arguments[2] = function() {
-                    app._emit("listening");
-
-                    if(func) {
-                        func.apply(options.server.listen, arguments);
-                    }
-                };
-
-                options.server.listen.apply(options.server, arguments);
-            }
-            else {
-                options.server.listen(1337, "localhost", function() {
-                    app._emit("listening");
-                });
-            }
-
-            return this;
-        };
-    }
-
-    app = rApp(appParams, options);
-
-    if(Array.isArray(options.packets)) {
-        app.packets(...options.packets);
-    }
+    const app = IoApp({
+        wss,
+        "listen": !options.port && ((...a) => (options.server.listen(...(a.length ? a : [1337, "localhost"])), app))
+    }, options);
 
     //--------------------------------]>
 
-    return app;
+    return app.packets(...options.packets);
 }
 
 //-----------------------------------------------------
