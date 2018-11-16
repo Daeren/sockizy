@@ -84,9 +84,10 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
 
             if(data) {
                 this.send(data);
+                return data.byteLength;
             }
 
-            return !!data;
+            return 0;
         }
 
         text(data) {

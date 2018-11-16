@@ -9,15 +9,18 @@
 
     <script src="http://localhost:1337"></script>
     <script>
-        const socket = io("localhost:1337/");
+        const socket = io("localhost:1337");
 
         //-----------------------------------------------------
 
         socket.packets(
-            null,
-            null,
             {
-                "ok": ["key:u8"],
+                "ok": ["key:u8"]
+            },
+            {
+                "ok": null
+            },
+            {
                 "bad": null
             }
         );
@@ -27,8 +30,8 @@
         socket.on("open", function() {
             console.log("event: open");
 
-            socket.emit("bad");
-            socket.emit("ok", [13]);
+            console.log("Number of bytes sent:", socket.emit("bad"), "| Event: bad");
+            console.log("Number of bytes sent:", socket.emit("ok", [13]), "| Event: ok");
         });
 
         socket.on("close", function(code, reason) {

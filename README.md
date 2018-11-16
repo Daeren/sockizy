@@ -54,7 +54,8 @@ const io = sockizy(1337, {
 
 io.on("connection", function(socket, request) {
     socket.on("chat.message", function() {
-        this.emit("chat.message", [13, "Hello"]);
+        const bytes = this.emit("chat.message", {uid: 13, text: "Hello"});
+        console.log("Number of bytes sent:", bytes);
     });
 });
 ```
@@ -255,7 +256,7 @@ io.on("connection", function(socket, request) {
         }
 
         bd.write("on.arg.asArray.zCopy");
-        bd.end("on.arg.asArray.zCopy", ["Helword: end"]);
+        bd.end("on.arg.asArray.zCopy");
     });
 });
 ```
@@ -314,7 +315,7 @@ io.on("connection", function(socket, request) {
 |                                        | **app.property**    |                                             |
 | wss                                    |                     | uws                                         |
 |                                        | **app.method**      |                                             |
-| emit(name[, data])                     |                     | returns: bool                               |
+| emit(name[, data])                     |                     | returns: number of bytes sent               |
 | bundle()                               |                     |                                             |
 | text(data)                             |                     |                                             |
 | json(data)                             |                     |                                             |
@@ -342,7 +343,7 @@ io.on("connection", function(socket, request) {
 | remoteAddress                          |                     | (read only)                                 |
 | remoteFamily                           |                     | (read only)                                 |
 |                                        | **socket.method**   |                                             |
-| emit(name, [data, isBroadcast])        |                     | returns: bool                               |
+| emit(name, [data, isBroadcast])        |                     | returns: number of bytes sent               |
 | bundle([isBroadcast])                  |                     |                                             |
 | text (data[, isBroadcast])             |                     |                                             |
 | json (data[, isBroadcast])             |                     |                                             |
@@ -396,7 +397,7 @@ io.on("connection", function(socket, request) {
 | bufferedAmount                       |                  | number (read only)                          |
 | readyState                           |                  | number (read only)                          |
 |                                      | **app.method**   |                                             |
-| emit(name[, data])                   |                  | returns: bool                               |
+| emit(name[, data])                   |                  | returns: number of bytes sent               |
 | text(data)                           |                  |                                             |
 | json(data)                           |                  |                                             |
 | send(data)                           |                  | native                                      |

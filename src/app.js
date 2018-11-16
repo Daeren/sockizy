@@ -57,9 +57,11 @@ class Socket extends XEE {
             else {
                 this.send(data);
             }
+
+            return data.byteLength;
         }
 
-        return !!data;
+        return 0;
     }
 
     bundle(isBroadcast) {
@@ -184,9 +186,10 @@ class Io extends XEE {
 
         if(data) {
             this.wss.broadcast(data, this._msgOptions);
+            return data.byteLength;
         }
 
-        return !!data;
+        return 0;
     }
 
     bundle() {

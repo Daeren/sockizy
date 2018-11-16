@@ -1185,9 +1185,10 @@ var io = function (module) {
 
                     if (data) {
                         this.send(data);
+                        return data.byteLength;
                     }
 
-                    return !!data;
+                    return 0;
                 }
             }, {
                 key: "text",

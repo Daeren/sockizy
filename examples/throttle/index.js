@@ -34,6 +34,7 @@ io.on("connection", function(socket, request) {
 
     socket.on("ok", function(data) {
         console.log("event: ok |", data);
+        console.log("Number of bytes sent:", socket.emit("ok"), "| Event: ok");
     });
 
     socket.on("bad", function(data) {
