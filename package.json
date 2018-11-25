@@ -1,12 +1,13 @@
 {
     "name": "sockizy",
-    "version": "1.0.1",
-    "description": "The best choice for your games",
+    "version": "1.1.0",
+    "description": "Fast and low overhead WebSocket lib for your Games",
     "homepage": "https://666.io",
     "keywords": [
         "websocket",
-        "games",
+        "socket",
         "sockizy",
+        "games",
         "2easy"
     ],
     "author": {
@@ -25,7 +26,7 @@
     },
     "license": "MIT",
     "engines": {
-        "node": ">=5.10.0"
+        "node": ">=6.0.0"
     },
     "readme": "",
     "readmeFilename": "readme.md",
@@ -33,11 +34,12 @@
         "url": "https://github.com/Daeren/sockizy/issues"
     },
     "dependencies": {
-        "2pack": "^0.0.4",
+        "2pack": "^0.1.0",
         "uws": "10.148.1",
         "xee": "^0.0.1"
     },
     "devDependencies": {
+        "pako": "^1.0.6",
         "babel-cli": "*",
         "babel-core": "^6.26.0",
         "babel-plugin-static-fs": "*",

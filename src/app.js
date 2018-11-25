@@ -302,6 +302,17 @@ class Io extends XEE {
     }
 
 
+    sendPacketTransform(callback) {
+        this._sendPacketTransform = callback;
+        return this;
+    }
+
+    recvPacketTransform(callback) {
+        this._recvPacketTransform = callback;
+        return this;
+    }
+
+
     _bundle() {
         const self = this;
 
@@ -345,7 +356,11 @@ class Io extends XEE {
 
         if(pk) {
             const [id, srz] = pk;
-            return sysInfoHeader.pack(id, srz.pack(data));
+            const deflateCb = this._sendPacketTransform;
+
+            data = sysInfoHeader.pack(id, srz.pack(data));
+
+            return deflateCb ? deflateCb(name, data) : data;
 
         }
 
@@ -397,10 +412,22 @@ function main(app, options) {
 
             //-----------]>
 
-            const dataByteLength = data.byteLength;
-            data = Buffer.from(data);
+            const inflateCb = io._recvPacketTransform;
+
+            if(inflateCb) {
+                data = inflateCb(data);
+
+                if(!data) {
+                    return;
+                }
+            }
+            else {
+                data = Buffer.from(data);
+            }
 
             //-----------]>
+
+            const dataByteLength = data.byteLength;
 
             const pktId = sysInfoHeader.unpack(data, 0, dataByteLength);
             const pktSchema = io._unpackMapById[pktId];

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Sockizy: compression</title>
+        <meta charset="utf-8">
+    </head>
+
+    <body></body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.6/pako.min.js"></script>
+    <script src="http://localhost:1337"></script>
+    <script>
+        const socket = io("localhost:1337");
+
+        const data = {
+            id: 10,
+            name: "1337Potato",
+
+            expBase: 13243,
+            expJob: 23424,
+
+            hp: 500,
+            mp: 100,
+
+            str: 12,
+            agi: 23,
+            vit: 34,
+            int: 46,
+            dex: 58,
+            luk: 69,
+
+            weaponLH: 1,
+            weaponRH: 2,
+
+            x: 5,
+            y: 8
+        };
+
+        const deflateParams = {
+            "strategy": pako.Z_DEFAULT_STRATEGY,
+            "level": 9,
+            "memLevel": 9,
+            "windowBits": 15
+        };
+
+        //-----------------------------------------------------
+
+        socket.sendPacketTransform(function(type, data) {
+            return type === "game.hero.deflate" ? pako.deflate(data, deflateParams) : data;
+        });
+
+        socket.recvPacketTransform(function(data) {
+            try {
+                return pako.inflate(data);
+            }
+            catch(e) {
+                //console.log(e); // game.hero
+            }
+
+            return data;
+        });
+
+        //-----------------------------------------------------
+
+        socket.on("open", function() {
+            console.log("event: open");
+
+            console.log("Number of bytes sent:", this.emit("game.hero", data));
+            console.log("Number of bytes sent (deflate):", this.emit("game.hero.deflate", data));
+        });
+
+        socket.on("close", function(code, reason) {
+            console.log("event: close", code, reason);
+        });
+
+        socket.on("error", function(e) {
+            console.log("event: error", e);
+        });
+
+        //---------------)>
+
+        socket.on("packet", function(name, data, accept) {
+            console.log("socket.packet: " + name + " |---v");
+            console.log(JSON.stringify(data, null, "  "));
+
+            accept();
+        });
+    </script>
+</html>

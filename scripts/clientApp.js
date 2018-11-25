@@ -189,6 +189,17 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
         }
 
 
+        sendPacketTransform(callback) {
+            this._sendPacketTransform = callback;
+            return this;
+        }
+
+        recvPacketTransform(callback) {
+            this._recvPacketTransform = callback;
+            return this;
+        }
+
+
         _connect(url) {
             try {
                 this._ws = new WSocket(url);
@@ -221,7 +232,11 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
 
             if(pk) {
                 const [id, srz] = pk;
-                return sysInfoHeader.pack(id, srz.pack(data));
+                const deflateCb = this._sendPacketTransform;
+
+                data = sysInfoHeader.pack(id, srz.pack(data));
+
+                return deflateCb ? deflateCb(name, data) : data;
 
             }
 
@@ -279,6 +294,18 @@ const ws = (function(WSocket, toString = require("./../src/toString"), XEE = req
         //-----------]>
 
         data = new Uint8Array(data);
+
+        //-----------]>
+
+        const inflateCb = socket._recvPacketTransform;
+
+        if(inflateCb) {
+            data = inflateCb(data);
+
+            if(!data) {
+                return;
+            }
+        }
 
         //-----------]>
 

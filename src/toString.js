@@ -24,6 +24,7 @@ function toString(data) {
         case "undefined":   return "";
         case "boolean":     return data ? "true" : "false";
         case "number":      return isNaN(data) ? "" : data.toString();
+        case "bigint":      return data.toString();
         case "symbol":      return data.toString();
 
         default:            return JSON.stringify(data);

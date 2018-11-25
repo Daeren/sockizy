@@ -1,4 +1,4 @@
-[![Codacy][cod_b]][cod_l]
+[![Codacy](https://api.codacy.com/project/badge/Grade/3307552f95d34748bf5a7b573f5815d8)](https://www.codacy.com/app/daeren/sockizy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Daeren/sockizy&amp;utm_campaign=Badge_Grade)
 
 ```
 npm -g install sockizy
@@ -8,6 +8,7 @@ git clone https://github.com/Daeren/sockizy.git
 
 * Binary (Little/Big - Endian)
 * Relative and absolute zero-copy operations wherever possible
+* [Compression][5]
 * [Throttle][4]
 * [FileUpload][3]
 * IE11
@@ -272,8 +273,8 @@ io.on("connection", function(socket, request) {
 |                     | -       |                                                                  |
 | bin<size (byte)>    | b       | default: 1024 (0-65535); server: Buffer; client: Uint8Array;     |
 | str<size (byte)>    | s       | default: 256 (0-65535)                                           |
-| int<size (bit)>     | i       | size: 8, 16, 32                                                  |
-| uint<size (bit)>    | u       | size: 8, 16, 32                                                  |
+| int<size (bit)>     | i       | size: 8, 16, 32, 64 (BigInt64Array)                              |
+| uint<size (bit)>    | u       | size: 8, 16, 32, 64 (BigUint64Array)                             |
 | float<size (bit)>   | f       | size: 32, 64                                                     |
 | json<size (byte)>   | j       | default: 8192 (0-65535)                                          |
 
@@ -310,68 +311,70 @@ io.on("connection", function(socket, request) {
 
 ##### Server: app([port, options])
 
-| Name                                   |                     | Note                                        |
-|----------------------------------------|---------------------|---------------------------------------------|
-|                                        | **app.property**    |                                             |
-| wss                                    |                     | uws                                         |
-|                                        | **app.method**      |                                             |
-| emit(name[, data])                     |                     | returns: number of bytes sent               |
-| bundle()                               |                     |                                             |
-| text(data)                             |                     |                                             |
-| json(data)                             |                     |                                             |
-| broadcast(data[, options])             |                     | native                                      |
-|                                        | -                   |                                             |
-| listen([port, host, callback])         |                     | default: "localhost:1337"                   |
-| close([callback])                      |                     |                                             |
-|                                        | -                   |                                             |
-| packets([unpack, pack, shared])        |                     | return this;                                |
-| verifyClient(func(info[, callback]))   |                     | return this;                                |
-|                                        | -                   |                                             |
-| on(name, listener)                     |                     | return this;                                |
-| off([name, listener])                  |                     | return this;                                |
-|                                        | **app.events**      |                                             |
-| connection (socket, request)           |                     |                                             |
-| close (socket, code, reason, wasClean) |                     |                                             |
-| packet (name, data, socket, accept)    |                     |                                             |
-| listening ()                           |                     |                                             |
-| error (e)                              |                     |                                             |
-|                                        | **socket.property** |                                             |
-| readyState                             |                     | number (read only)                          |
-| upgradeReq                             |                     | object (read only)                          |
-|                                        | -                   |                                             |
-| remotePort                             |                     | (read only)                                 |
-| remoteAddress                          |                     | (read only)                                 |
-| remoteFamily                           |                     | (read only)                                 |
-|                                        | **socket.method**   |                                             |
-| emit(name, [data, isBroadcast])        |                     | returns: number of bytes sent               |
-| bundle([isBroadcast])                  |                     |                                             |
-| text (data[, isBroadcast])             |                     |                                             |
-| json (data[, isBroadcast])             |                     |                                             |
-| send(data[, options])                  |                     | native                                      |
-|                                        | -                   |                                             |
-| disconnect([code, reason])             |                     | code: 4000-4999                             |
-| terminate()                            |                     |                                             |
-|                                        | -                   |                                             |
-| ping([message])                        |                     |                                             |
-|                                        | -                   |                                             |
-| on(name, listener)                     |                     | return this;                                |
-| once(name, listener)                   |                     | return this;                                |
-| off([name, listener])                  |                     | return this;                                |
-|                                        | **socket.events**   |                                             |
-| close (code, reason, wasClean)         |                     |                                             |
-| disconnected (code, reason)            |                     |                                             |
-| terminated (code)                      |                     |                                             |
-| error (e)                              |                     |                                             |
-|                                        | -                   |                                             |
-| message (data)                         |                     |                                             |
-| text (data)                            |                     |                                             |
-| json (data)                            |                     |                                             |
-| arraybuffer (data)                     |                     | intercepts and blocks unpacking of packets  |
-|                                        | -                   |                                             |
-| ping (message)                         |                     |                                             |
-| pong (message)                         |                     |                                             |
-|                                        | -                   |                                             |
-| *myEvent* (data)                       |                     |                                             |
+| Name                                          |                     | Note                                        |
+|-----------------------------------------------|---------------------|---------------------------------------------|
+|                                               | **app.property**    |                                             |
+| wss                                           |                     | uws                                         |
+|                                               | **app.method**      |                                             |
+| emit(name[, data])                            |                     | returns: number of bytes sent               |
+| bundle()                                      |                     |                                             |
+| text(data)                                    |                     |                                             |
+| json(data)                                    |                     |                                             |
+| broadcast(data[, options])                    |                     | native                                      |
+|                                               | -                   |                                             |
+| listen([port, host, callback])                |                     | default: "localhost:1337"                   |
+| close([callback])                             |                     |                                             |
+|                                               | -                   |                                             |
+| packets([unpack, pack, shared])               |                     | return this;                                |
+| verifyClient(func(info[, callback]))          |                     | return this;                                |
+| sendPacketTransform(func(type, data))         |                     | return this;                                |
+| recvPacketTransform(func(data))               |                     | return this;                                |
+|                                               | -                   |                                             |
+| on(name, listener)                            |                     | return this;                                |
+| off([name, listener])                         |                     | return this;                                |
+|                                               | **app.events**      |                                             |
+| connection (socket, request)                  |                     |                                             |
+| close (socket, code, reason, wasClean)        |                     |                                             |
+| packet (name, data, socket, accept)           |                     |                                             |
+| listening ()                                  |                     |                                             |
+| error (e)                                     |                     |                                             |
+|                                               | **socket.property** |                                             |
+| readyState                                    |                     | number (read only)                          |
+| upgradeReq                                    |                     | object (read only)                          |
+|                                               | -                   |                                             |
+| remotePort                                    |                     | (read only)                                 |
+| remoteAddress                                 |                     | (read only)                                 |
+| remoteFamily                                  |                     | (read only)                                 |
+|                                               | **socket.method**   |                                             |
+| emit(name, [data, isBroadcast])               |                     | returns: number of bytes sent               |
+| bundle([isBroadcast])                         |                     |                                             |
+| text (data[, isBroadcast])                    |                     |                                             |
+| json (data[, isBroadcast])                    |                     |                                             |
+| send(data[, options])                         |                     | native                                      |
+|                                               | -                   |                                             |
+| disconnect([code, reason])                    |                     | code: 4000-4999                             |
+| terminate()                                   |                     |                                             |
+|                                               | -                   |                                             |
+| ping([message])                               |                     |                                             |
+|                                               | -                   |                                             |
+| on(name, listener)                            |                     | return this;                                |
+| once(name, listener)                          |                     | return this;                                |
+| off([name, listener])                         |                     | return this;                                |
+|                                               | **socket.events**   |                                             |
+| close (code, reason, wasClean)                |                     |                                             |
+| disconnected (code, reason)                   |                     |                                             |
+| terminated (code)                             |                     |                                             |
+| error (e)                                     |                     |                                             |
+|                                               | -                   |                                             |
+| message (data)                                |                     |                                             |
+| text (data)                                   |                     |                                             |
+| json (data)                                   |                     |                                             |
+| arraybuffer (data)                            |                     | intercepts and blocks unpacking of packets  |
+|                                               | -                   |                                             |
+| ping (message)                                |                     |                                             |
+| pong (message)                                |                     |                                             |
+|                                               | -                   |                                             |
+| *myEvent* (data)                              |                     |                                             |
 
 
 
@@ -405,6 +408,8 @@ io.on("connection", function(socket, request) {
 | disconnect(code, reason)             |                  | code: 4000-4999                             |
 |                                      | -                |                                             |
 | packets([pack, unpack, shared])      |                  | return this;                                |
+| sendPacketTransform(func(type, data))|                  | return this;                                |
+| recvPacketTransform(func(data))      |                  | return this;                                |
 |                                      | -                |                                             |
 | on(name, listener)                   |                  | return this;                                |
 | once(name, listener)                 |                  | return this;                                |
@@ -443,6 +448,4 @@ MIT
 [2]: https://telegram.me/io666
 [3]: https://github.com/Daeren/sockizy/tree/master/examples/fileUpload
 [4]: https://github.com/Daeren/sockizy/tree/master/examples/throttle
-
-[cod_b]: https://img.shields.io/codacy/3307552f95d34748bf5a7b573f5815d8.svg
-[cod_l]: https://www.codacy.com/app/daeren/sockizy/dashboard
+[5]: https://github.com/Daeren/sockizy/tree/master/examples/compression
