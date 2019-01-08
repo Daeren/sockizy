@@ -585,6 +585,10 @@ var io = function (module) {
 
             //-----------------]>
 
+            if (schema === null) {
+                schema = [];
+            }
+
             if (!schema || !Array.isArray(schema) && typeof schema !== "string") {
                 throw new Error("Invalid schema");
             }
