@@ -614,6 +614,8 @@ var io = function (module) {
 
             //-----------------]>
 
+            var int64size = typeof BigInt64Array !== "undefined" ? BigInt64Array.BYTES_PER_ELEMENT : 0;
+
             var isPrimitive = typeof schema === "string";
             var schLen = isPrimitive ? 1 : schema.length;
 
@@ -769,8 +771,14 @@ var io = function (module) {
                             pktSize += 2;
                         }
                     } else {
+                        var zeroValue = 0;
+
+                        if (bytes === int64size) {
+                            zeroValue = BigInt("0");
+                        }
+
                         if (input == null || typeof input !== "bigint" && (isNaN(input) || !isFinite(input))) {
-                            bufType[0] = 0;
+                            bufType[0] = zeroValue;
                         } else {
                             bufType[0] = input;
 
@@ -956,7 +964,7 @@ var io = function (module) {
                                 return [BigInt64Array.BYTES_PER_ELEMENT, new BigInt64Array(1)];
 
                             default:
-                                throw new Error("Unknown size: " + size);
+                                throw new Error("Unknown size: " + size + " | " + type);
                         }
 
                     case TYPE_UINT:
@@ -971,7 +979,7 @@ var io = function (module) {
                                 return [BigUint64Array.BYTES_PER_ELEMENT, new BigUint64Array(1)];
 
                             default:
-                                throw new Error("Unknown size: " + size);
+                                throw new Error("Unknown size: " + size + " | " + type);
                         }
 
                     case TYPE_FLOAT:
@@ -982,11 +990,11 @@ var io = function (module) {
                                 return [Float64Array.BYTES_PER_ELEMENT, new Float64Array(1)];
 
                             default:
-                                throw new Error("Unknown size: " + size);
+                                throw new Error("Unknown size: " + size + " | " + type);
                         }
 
                     default:
-                        throw new Error("Unknown type: " + type);
+                        throw new Error("Unknown type: " + type + " | " + type);
                 }
             }
 
